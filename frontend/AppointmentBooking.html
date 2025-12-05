@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareConnect - Book Appointment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .main-header {
+            background: white;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #388e3c;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #1b5e20;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #4caf50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: 2.8rem;
+            color: #2e7d32;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .page-subtitle {
+            font-size: 1.3rem;
+            color: #666;
+        }
+
+        /* Main Layout */
+        .booking-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2.5rem;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: #2e7d32;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid #4caf50;
+            font-weight: 600;
+        }
+
+        /* Doctor Selection */
+        .doctor-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .doctor-card {
+            background: #f8fff8;
+            border: 3px solid #e8f5e8;
+            border-radius: 12px;
+            padding: 1.8rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .doctor-card:hover {
+            border-color: #4caf50;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .doctor-card.selected {
+            border-color: #2e7d32;
+            background: #e8f5e8;
+            box-shadow: 0 8px 20px rgba(46, 125, 50, 0.15);
+        }
+
+        .doctor-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .doctor-avatar {
+            width: 70px;
+            height: 70px;
+            background: #4caf50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.8rem;
+            margin-right: 1.5rem;
+        }
+
+        .doctor-info h3 {
+            color: #2e7d32;
+            font-size: 1.4rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .doctor-specialty {
+            color: #666;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .doctor-rating {
+            color: #ffa502;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .doctor-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.2rem;
+        }
+
+        .view-profile-btn {
+            flex: 1;
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 0.9rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .view-profile-btn:hover {
+            background: #388e3c;
+        }
+
+        .change-doctor-btn {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+            padding: 0.9rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .change-doctor-btn:hover {
+            background: #4caf50;
+            color: white;
+        }
+
+        /* Date Selection */
+        .date-selection {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .calendar-container, .timeslots-container {
+            background: #f8fff8;
+            border-radius: 12px;
+            padding: 1.8rem;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .month-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2e7d32;
+        }
+
+        .nav-btn {
+            background: #e8f5e8;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: background 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #4caf50;
+            color: white;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.6rem;
+        }
+
+        .calendar-day {
+            text-align: center;
+            padding: 1rem 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            border: 2px solid transparent;
+        }
+
+        .calendar-day:hover {
+            background: #e8f5e8;
+        }
+
+        .calendar-day.selected {
+            background: #2e7d32;
+            color: white;
+            border-color: #2e7d32;
+        }
+
+        .calendar-day.other-month {
+            color: #ccc;
+        }
+
+        .calendar-day.unavailable {
+            color: #ccc;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+
+        .day-header {
+            text-align: center;
+            font-weight: 600;
+            color: #666;
+            padding: 0.8rem 0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        /* Time Slots */
+        .timeslots-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .timeslots-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2e7d32;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeslots-date {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .timeslots-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+            max-height: 350px;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .time-slot {
+            padding: 1.2rem 0.5rem;
+            text-align: center;
+            background: white;
+            border: 2px solid #e8f5e8;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .time-slot:hover {
+            border-color: #4caf50;
+            background: #f8fff8;
+        }
+
+        .time-slot.selected {
+            background: #2e7d32;
+            color: white;
+            border-color: #2e7d32;
+        }
+
+        .time-slot.unavailable {
+            background: #f5f5f5;
+            color: #ccc;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+
+        /* Doctor Profile */
+        .doctor-profile {
+            background: #f8fff8;
+            border-radius: 12px;
+            padding: 2.2rem;
+            border-left: 5px solid #4caf50;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: #4caf50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 2.5rem;
+            margin-right: 2rem;
+        }
+
+        .profile-info h2 {
+            color: #2e7d32;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-specialty {
+            color: #666;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .profile-rating {
+            color: #ffa502;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .profile-description {
+            color: #555;
+            line-height: 1.7;
+            margin-bottom: 1.8rem;
+            font-size: 1.05rem;
+        }
+
+        .experience-section {
+            background: white;
+            padding: 1.8rem;
+            border-radius: 10px;
+            border-left: 4px solid #4caf50;
+        }
+
+        .experience-section h4 {
+            color: #2e7d32;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .experience-section p {
+            color: #555;
+            line-height: 1.7;
+        }
+
+        /* Booking Summary */
+        .booking-summary {
+            position: sticky;
+            top: 2rem;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2.2rem;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .summary-title {
+            font-size: 1.5rem;
+            color: #2e7d32;
+            margin-bottom: 1.8rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid #4caf50;
+            font-weight: 600;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.2rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 1px solid #e8f5e8;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .summary-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .summary-value {
+            color: #2e7d32;
+            font-weight: 600;
+            text-align: right;
+            max-width: 200px;
+        }
+
+        .book-appointment-btn {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 1.5rem 2.5rem;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+
+        .book-appointment-btn:hover {
+            background: #1b5e20;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .book-appointment-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .confirmation-note {
+            text-align: center;
+            color: #666;
+            font-size: 0.95rem;
+            margin-top: 1rem;
+            padding: 0 1rem;
+        }
+
+        /* Navigation Tabs */
+        .navigation-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-top: 2rem;
+            overflow: hidden;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 1.2rem;
+            text-align: center;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: #2e7d32;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .booking-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .booking-summary {
+                position: static;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .date-selection {
+                grid-template-columns: 1fr;
+            }
+            
+            .doctor-selection {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .page-title {
+                font-size: 2.2rem;
+            }
+            
+            .timeslots-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-avatar {
+                margin-right: 0;
+                margin-bottom: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .timeslots-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .doctor-actions {
+                flex-direction: column;
+            }
+            
+            .navigation-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .nav-tab {
+                min-width: 50%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">CareConnect</div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="medical-dashboard.html">Dashboard</a></li>
+                    <li><a href="#" style="color: #1b5e20; font-weight: 600;">Appointments</a></li>
+                    <li><a href="student-profile.html">Student Profile</a></li>
+                    <li><a href="emergency-request.html">Emergency</a></li>
+                </ul>
+            </nav>
+            <div class="user-info">
+                <div class="user-avatar">AM</div>
+                <span>Alexandra Miller</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Appointment Booking</h1>
+            <p class="page-subtitle">Doctor's Availability & Scheduling System</p>
+        </div>
+
+        <div class="booking-layout">
+            <!-- Left Column - Booking Interface -->
+            <main class="booking-main">
+                <!-- Doctor Selection -->
+                <div class="card">
+                    <h2 class="card-title">Select Your Doctor</h2>
+                    <div class="doctor-selection">
+                        <div class="doctor-card selected">
+                            <div class="doctor-header">
+                                <div class="doctor-avatar">SC</div>
+                                <div class="doctor-info">
+                                    <h3>Dr. Sarah Chen</h3>
+                                    <p class="doctor-specialty">General Practitioner, Pediatrics</p>
+                                    <div class="doctor-rating">★ 4.8 (127 reviews)</div>
+                                </div>
+                            </div>
+                            <div class="doctor-actions">
+                                <button class="view-profile-btn">View Profile</button>
+                            </div>
+                        </div>
+
+                        <div class="doctor-card">
+                            <div class="doctor-header">
+                                <div class="doctor-avatar">EC</div>
+                                <div class="doctor-info">
+                                    <h3>Dr. Emily Carter</h3>
+                                    <p class="doctor-specialty">Pediatrician</p>
+                                    <div class="doctor-rating">★ 4.9 (89 reviews)</div>
+                                </div>
+                            </div>
+                            <div class="doctor-actions">
+                                <button class="view-profile-btn">View Profile</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="change-doctor-btn">Change Doctor / View More Doctors</button>
+                </div>
+
+                <!-- Date & Time Selection -->
+                <div class="card">
+                    <h2 class="card-title">Select Date & Time</h2>
+                    <div class="date-selection">
+                        <!-- Calendar -->
+                        <div class="calendar-container">
+                            <div class="calendar-header">
+                                <div class="month-title">October 2024</div>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button class="nav-btn">‹</button>
+                                    <button class="nav-btn">›</button>
+                                </div>
+                            </div>
+                            <div class="calendar">
+                                <div class="day-header">Mon</div>
+                                <div class="day-header">Tue</div>
+                                <div class="day-header">Wed</div>
+                                <div class="day-header">Thu</div>
+                                <div class="day-header">Fri</div>
+                                <div class="day-header">Sat</div>
+                                <div class="day-header">Sun</div>
+                                
+                                <!-- Calendar Days -->
+                                <div class="calendar-day other-month">30</div>
+                                <div class="calendar-day">1</div>
+                                <div class="calendar-day">2</div>
+                                <div class="calendar-day">3</div>
+                                <div class="calendar-day">4</div>
+                                <div class="calendar-day">5</div>
+                                <div class="calendar-day">6</div>
+                                <div class="calendar-day">7</div>
+                                <div class="calendar-day selected">8</div>
+                                <div class="calendar-day">9</div>
+                                <div class="calendar-day">10</div>
+                                <div class="calendar-day">11</div>
+                                <div class="calendar-day">12</div>
+                                <div class="calendar-day">13</div>
+                                <div class="calendar-day">14</div>
+                                <div class="calendar-day">15</div>
+                                <div class="calendar-day">16</div>
+                                <div class="calendar-day">17</div>
+                                <div class="calendar-day">18</div>
+                                <div class="calendar-day">19</div>
+                                <div class="calendar-day">20</div>
+                                <div class="calendar-day">21</div>
+                                <div class="calendar-day">22</div>
+                                <div class="calendar-day">23</div>
+                                <div class="calendar-day">24</div>
+                                <div class="calendar-day">25</div>
+                                <div class="calendar-day">26</div>
+                                <div class="calendar-day">27</div>
+                                <div class="calendar-day">28</div>
+                                <div class="calendar-day">29</div>
+                                <div class="calendar-day">30</div>
+                                <div class="calendar-day">31</div>
+                            </div>
+                        </div>
+
+                        <!-- Time Slots -->
+                        <div class="timeslots-container">
+                            <div class="timeslots-header">
+                                <div class="timeslots-title">Available Time Slots</div>
+                                <div class="timeslots-date">October 8, 2024</div>
+                            </div>
+                            <div class="timeslots-grid">
+                                <div class="time-slot">09:00 AM</div>
+                                <div class="time-slot">09:30 AM</div>
+                                <div class="time-slot">10:00 AM</div>
+                                <div class="time-slot">10:30 AM</div>
+                                <div class="time-slot">11:00 AM</div>
+                                <div class="time-slot">11:30 AM</div>
+                                <div class="time-slot">12:00 PM</div>
+                                <div class="time-slot">12:30 PM</div>
+                                <div class="time-slot selected">03:00 PM</div>
+                                <div class="time-slot">03:30 PM</div>
+                                <div class="time-slot">04:00 PM</div>
+                                <div class="time-slot">04:30 PM</div>
+                                <div class="time-slot">05:00 PM</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doctor Profile -->
+                <div class="card">
+                    <h2 class="card-title">Doctor Profile</h2>
+                    <div class="doctor-profile">
+                        <div class="profile-header">
+                            <div class="profile-avatar">SC</div>
+                            <div class="profile-info">
+                                <h2>Dr. Sarah Chen</h2>
+                                <p class="profile-specialty">General Practitioner, Pediatrics</p>
+                                <div class="profile-rating">★ 4.8 (127 reviews)</div>
+                            </div>
+                        </div>
+                        
+                        <p class="profile-description">
+                            Dr. Sarah Chen is a dedicated General Practitioner with special interest in pediatric care. 
+                            With over 8 years of experience, she provides comprehensive healthcare services for patients 
+                            of all ages, with a gentle approach that makes children feel comfortable during visits.
+                        </p>
+
+                        <div class="experience-section">
+                            <h4>Professional Experience</h4>
+                            <p>
+                                Prior to joining CareConnect, Dr. Chen worked at City General Hospital's family medicine 
+                                department. She holds certifications in Advanced Pediatric Life Support and Preventive 
+                                Medicine. Dr. Chen is passionate about patient education and believes in empowering 
+                                patients to take an active role in their healthcare journey.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <div class="navigation-tabs">
+                    <div class="nav-tab active">Appointment</div>
+                    <div class="nav-tab">Availability</div>
+                    <div class="nav-tab">Output</div>
+                    <div class="nav-tab">Profile</div>
+                </div>
+            </main>
+
+            <!-- Right Column - Booking Summary -->
+            <aside class="booking-summary">
+                <div class="summary-card">
+                    <h2 class="summary-title">Appointment Summary</h2>
+                    
+                    <div class="summary-item">
+                        <span class="summary-label">Doctor:</span>
+                        <span class="summary-value">Dr. Sarah Chen</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span class="summary-label">Specialty:</span>
+                        <span class="summary-value">General Practitioner</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span class="summary-label">Date:</span>
+                        <span class="summary-value">October 8, 2024</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span class="summary-label">Time:</span>
+                        <span class="summary-value">03:00 PM</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span class="summary-label">Duration:</span>
+                        <span class="summary-value">30 minutes</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span class="summary-label">Location:</span>
+                        <span class="summary-value">Campus Health Center, Room 204</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span class="summary-label">Appointment Type:</span>
+                        <span class="summary-value">General Consultation</span>
+                    </div>
+
+                    <button class="book-appointment-btn">
+                        Confirm Appointment
+                    </button>
+
+                    <p class="confirmation-note">
+                        You will receive a confirmation email and SMS reminder 24 hours before your appointment.
+                    </p>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        // Doctor Selection
+        document.querySelectorAll('.doctor-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.doctor-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                updateBookingSummary();
+            });
+        });
+
+        // Calendar Day Selection
+        document.querySelectorAll('.calendar-day:not(.other-month):not(.unavailable)').forEach(day => {
+            day.addEventListener('click', function() {
+                document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected'));
+                this.classList.add('selected');
+                updateBookingSummary();
+            });
+        });
+
+        // Time Slot Selection
+        document.querySelectorAll('.time-slot:not(.unavailable)').forEach(slot => {
+            slot.addEventListener('click', function() {
+                document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+                this.classList.add('selected');
+                updateBookingSummary();
+            });
+        });
+
+        // View Profile Buttons
+        document.querySelectorAll('.view-profile-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const doctorCard = this.closest('.doctor-card');
+                const doctorName = doctorCard.querySelector('h3').textContent;
+                const doctorSpecialty = doctorCard.querySelector('.doctor-specialty').textContent;
+                
+                alert(`Viewing profile for ${doctorName}\n\nSpecialty: ${doctorSpecialty}\n\nFull profile details are displayed below.`);
+            });
+        });
+
+        // Change Doctor Button
+        document.querySelector('.change-doctor-btn').addEventListener('click', function() {
+            alert('Opening doctor directory...\n\nYou can browse all available doctors and specialists.');
+        });
+
+        // Calendar Navigation Buttons
+        document.querySelectorAll('.nav-btn').forEach((btn, index) => {
+            btn.addEventListener('click', function() {
+                if (index === 0) {
+                    alert('Navigating to previous month...');
+                } else {
+                    alert('Navigating to next month...');
+                }
+            });
+        });
+
+        // Navigation Tabs
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                const tabName = this.textContent;
+                alert(`Switching to ${tabName} view...`);
+            });
+        });
+
+        // Book Appointment Button
+        document.querySelector('.book-appointment-btn').addEventListener('click', function() {
+            const doctor = document.querySelector('.summary-item .summary-value').textContent;
+            const date = document.querySelectorAll('.summary-item .summary-value')[2].textContent;
+            const time = document.querySelectorAll('.summary-item .summary-value')[3].textContent;
+            
+            const confirmAppointment = confirm(`Confirm Appointment Details:\n\nDoctor: ${doctor}\nDate: ${date}\nTime: ${time}\n\nLocation: Campus Health Center, Room 204\n\nClick OK to confirm.`);
+            
+            if (confirmAppointment) {
+                alert(`✅ Appointment Confirmed!\n\nYou have successfully booked an appointment with ${doctor} on ${date} at ${time}.\n\nA confirmation email has been sent to your registered email address.\n\nYou will receive a reminder 24 hours before your appointment.`);
+            }
+        });
+
+        // Update Booking Summary
+        function updateBookingSummary() {
+            const selectedDoctor = document.querySelector('.doctor-card.selected h3').textContent;
+            const selectedDate = document.querySelector('.calendar-day.selected').textContent + ' Oct 2024';
+            const selectedTime = document.querySelector('.time-slot.selected').textContent;
+            
+            // In a real application, you would update the summary elements here
+            console.log('Updated booking:', { selectedDoctor, selectedDate, selectedTime });
+        }
+    </script>
+</body>
+</html>

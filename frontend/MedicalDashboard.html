@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareConnect - Medical Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .main-header {
+            background: white;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #388e3c;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #1b5e20;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #4caf50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .dashboard-title {
+            text-align: center;
+            color: #2e7d32;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+        }
+
+        /* Dashboard Layout */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 2rem;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: #2e7d32;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid #4caf50;
+            font-weight: 600;
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+            color: white;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 2rem;
+            margin-right: 1.5rem;
+        }
+
+        .profile-info h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .profile-info p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .profile-details {
+            margin-top: 1.5rem;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            opacity: 0.8;
+        }
+
+        .edit-profile-btn {
+            background: white;
+            color: #2e7d32;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+
+        .edit-profile-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Medical Records */
+        .medical-summary {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: #f8fff8;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 2px solid #e8f5e8;
+        }
+
+        .summary-card h3 {
+            color: #2e7d32;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #388e3c;
+        }
+
+        .add-entry-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+        }
+
+        .add-entry-btn:hover {
+            background: #388e3c;
+        }
+
+        /* Quick Actions */
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.2rem;
+        }
+
+        .action-card {
+            background: #f8fff8;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e8f5e8;
+        }
+
+        .action-card:hover {
+            background: #4caf50;
+            border-color: #4caf50;
+            transform: translateY(-3px);
+        }
+
+        .action-card:hover .action-icon,
+        .action-card:hover .action-title {
+            color: white;
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #4caf50;
+        }
+
+        .action-title {
+            color: #2e7d32;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* Recent Visits */
+        .visits-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .visits-table th {
+            text-align: left;
+            padding: 1rem;
+            background: #f8fff8;
+            color: #2e7d32;
+            font-weight: 600;
+            border-bottom: 2px solid #4caf50;
+        }
+
+        .visits-table td {
+            padding: 1.2rem 1rem;
+            border-bottom: 1px solid #e8f5e8;
+        }
+
+        .visit-date {
+            color: #2e7d32;
+            font-weight: 600;
+        }
+
+        .visit-doctor {
+            color: #666;
+        }
+
+        .visit-status {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-completed {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .status-upcoming {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        /* Appointments */
+        .appointment-card {
+            background: #e8f5e8;
+            border-radius: 12px;
+            padding: 1.8rem;
+            border-left: 5px solid #388e3c;
+            margin-bottom: 1.5rem;
+        }
+
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .appointment-date {
+            color: #2e7d32;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .appointment-time {
+            background: #2e7d32;
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .appointment-details h3 {
+            color: #2e7d32;
+            margin-bottom: 0.5rem;
+        }
+
+        .appointment-details p {
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .appointment-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.2rem;
+        }
+
+        .appointment-btn {
+            flex: 1;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .reschedule-btn {
+            background: white;
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+        }
+
+        .cancel-btn {
+            background: #ffebee;
+            color: #d32f2f;
+            border: 2px solid #ffcdd2;
+        }
+
+        .appointment-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .medical-summary {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .medical-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .quick-actions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .medical-summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .appointment-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">CareConnect</div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#" style="color: #1b5e20; font-weight: 600;">Dashboard</a></li>
+                    <li><a href="appointment-booking.html">Appointments</a></li>
+                    <li><a href="student-profile.html">Student Profile</a></li>
+                    <li><a href="emergency-request.html">Emergency</a></li>
+                </ul>
+            </nav>
+            <div class="user-info">
+                <div class="user-avatar">AM</div>
+                <span>Alexandra Miller</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <h1 class="dashboard-title">Medical Dashboard</h1>
+        <p class="dashboard-subtitle">Your Complete Medical Records & Health Overview</p>
+
+        <div class="dashboard-layout">
+            <!-- Left Column - Profile -->
+            <div class="left-column">
+                <div class="card profile-card">
+                    <h2 class="card-title" style="color: white; border-color: white;">Student Profile</h2>
+                    <div class="profile-header">
+                        <div class="profile-avatar">AM</div>
+                        <div class="profile-info">
+                            <h2>Alexandra Miller</h2>
+                            <p>S2023001</p>
+                        </div>
+                    </div>
+                    <div class="profile-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Institution:</span>
+                            <span>Greenwood High School</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Program:</span>
+                            <span>Biology</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Student ID:</span>
+                            <span>S2023001</span>
+                        </div>
+                    </div>
+                    <button class="edit-profile-btn">Edit Profile</button>
+                </div>
+
+                <!-- Medical Summary -->
+                <div class="card">
+                    <h2 class="card-title">Medical Information</h2>
+                    <div class="medical-summary">
+                        <div class="summary-card">
+                            <h3>Allergies</h3>
+                            <div class="summary-value">2</div>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Medications</h3>
+                            <div class="summary-value">1</div>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Conditions</h3>
+                            <div class="summary-value">2</div>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Visits (2024)</h3>
+                            <div class="summary-value">3</div>
+                        </div>
+                    </div>
+                    <button class="add-entry-btn">
+                        <span>+</span> Add Medical Entry
+                    </button>
+                </div>
+            </div>
+
+            <!-- Middle Column - Recent Visits -->
+            <div class="middle-column">
+                <div class="card">
+                    <h2 class="card-title">Recent Medical Visits</h2>
+                    <table class="visits-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Diagnosis</th>
+                                <th>Doctor</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="visit-date">2023-11-15</td>
+                                <td>Seasonal Allergies</td>
+                                <td class="visit-doctor">Dr. Bob Johnston</td>
+                                <td><span class="visit-status status-completed">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td class="visit-date">2024-01-20</td>
+                                <td>Minor Sprain (Active)</td>
+                                <td class="visit-doctor">Dr. Alice Smith</td>
+                                <td><span class="visit-status status-completed">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td class="visit-date">2024-03-01</td>
+                                <td>Routine Check-up</td>
+                                <td class="visit-doctor">Dr. Elena Rodriguez</td>
+                                <td><span class="visit-status status-completed">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td class="visit-date">Ruocco Oradeug</td>
+                                <td>Vistacalini Treatment</td>
+                                <td class="visit-doctor">Pulymyromi Casadatani</td>
+                                <td><span class="visit-status status-completed">Completed</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <h2 class="card-title">Quick Actions</h2>
+                    <div class="quick-actions-grid">
+                        <div class="action-card">
+                            <div class="action-icon">📅</div>
+                            <div class="action-title">Book Appointment</div>
+                        </div>
+                        <div class="action-card">
+                            <div class="action-icon">📋</div>
+                            <div class="action-title">Medical Records</div>
+                        </div>
+                        <div class="action-card">
+                            <div class="action-icon">💬</div>
+                            <div class="action-title">Contact Support</div>
+                        </div>
+                        <div class="action-card">
+                            <div class="action-icon">💊</div>
+                            <div class="action-title">Prescription Refill</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Upcoming Appointments -->
+            <div class="right-column">
+                <div class="card">
+                    <h2 class="card-title">Upcoming Appointment</h2>
+                    <div class="appointment-card">
+                        <div class="appointment-header">
+                            <div class="appointment-date">Wednesday, Oct 26</div>
+                            <div class="appointment-time">10:00 AM</div>
+                        </div>
+                        <div class="appointment-details">
+                            <h3>Dr. Alice Smith</h3>
+                            <p>General Practitioner</p>
+                            <p>Campus Health Center, Room 101</p>
+                        </div>
+                        <div class="appointment-actions">
+                            <button class="appointment-btn reschedule-btn">Reschedule</button>
+                            <button class="appointment-btn cancel-btn">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health Status -->
+                <div class="card">
+                    <h2 class="card-title">Current Health Status</h2>
+                    <div style="text-align: center; padding: 2rem;">
+                        <div style="font-size: 4rem; color: #4caf50; margin-bottom: 1rem;">✓</div>
+                        <h3 style="color: #2e7d32; margin-bottom: 0.5rem;">Good Health</h3>
+                        <p style="color: #666;">All medical indicators are within normal ranges</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Quick Actions
+        document.querySelectorAll('.action-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const action = this.querySelector('.action-title').textContent;
+                alert(`Opening ${action} interface...`);
+            });
+        });
+
+        // Edit Profile Button
+        document.querySelector('.edit-profile-btn').addEventListener('click', function() {
+            alert('Opening profile editor...\n\nYou can update your personal and medical information here.');
+        });
+
+        // Add Medical Entry Button
+        document.querySelector('.add-entry-btn').addEventListener('click', function() {
+            alert('Opening medical entry form...\n\nYou can add new allergies, medications, or medical conditions.');
+        });
+
+        // Appointment Buttons
+        document.querySelector('.reschedule-btn').addEventListener('click', function() {
+            alert('Opening appointment rescheduler...\n\nYou can select a new date and time for your appointment.');
+        });
+
+        document.querySelector('.cancel-btn').addEventListener('click', function() {
+            const confirmCancel = confirm('Are you sure you want to cancel your appointment with Dr. Alice Smith?\n\nDate: October 26, 2024\nTime: 10:00 AM');
+            if (confirmCancel) {
+                alert('Appointment cancelled successfully.\n\nYou will receive a confirmation email shortly.');
+            }
+        });
+    </script>
+</body>
+</html>

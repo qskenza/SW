@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareConnect - Student Profile</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .main-header {
+            background: white;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #388e3c;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #1b5e20;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #4caf50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: 2.8rem;
+            color: #2e7d32;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .page-subtitle {
+            font-size: 1.3rem;
+            color: #666;
+        }
+
+        /* Main Layout */
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr 350px;
+            gap: 2.5rem;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: #2e7d32;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid #4caf50;
+            font-weight: 600;
+        }
+
+        /* Student Profile Card */
+        .student-profile-card {
+            background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+            color: white;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.8rem;
+        }
+
+        .profile-avatar {
+            width: 90px;
+            height: 90px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 2.2rem;
+            margin-right: 1.8rem;
+        }
+
+        .profile-info h2 {
+            font-size: 1.6rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .profile-info p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .profile-details {
+            margin-top: 1.8rem;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            opacity: 0.8;
+        }
+
+        .edit-profile-btn {
+            background: white;
+            color: #2e7d32;
+            border: none;
+            padding: 1.2rem 2rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1.8rem;
+        }
+
+        .edit-profile-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Medical Information */
+        .medical-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .medical-card {
+            background: #f8fff8;
+            border-radius: 12px;
+            padding: 1.8rem;
+            text-align: center;
+            border: 2px solid #e8f5e8;
+            transition: all 0.3s ease;
+        }
+
+        .medical-card:hover {
+            transform: translateY(-3px);
+            border-color: #4caf50;
+        }
+
+        .medical-card h3 {
+            color: #2e7d32;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .medical-list {
+            list-style: none;
+        }
+
+        .medical-list li {
+            padding: 0.6rem 0;
+            color: #555;
+            border-bottom: 1px solid #e8f5e8;
+        }
+
+        .medical-list li:last-child {
+            border-bottom: none;
+        }
+
+        .add-entry-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 1.2rem 2rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .add-entry-btn:hover {
+            background: #388e3c;
+        }
+
+        /* Doctor's View - Middle Column */
+        .doctor-portal {
+            background: #f8fff8;
+            border-radius: 12px;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-bar {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1.2rem 1.5rem 1.2rem 3.5rem;
+            border: 2px solid #e8f5e8;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4caf50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        /* Student Medical Overview */
+        .student-overview {
+            display: flex;
+            flex-direction: column;
+            gap: 1.8rem;
+        }
+
+        .student-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.8rem;
+            border-left: 5px solid #4caf50;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .student-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .student-name {
+            color: #2e7d32;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .last-visit {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .student-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-box {
+            background: #f8fff8;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .detail-label-small {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .detail-value {
+            color: #2e7d32;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .view-details-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+        }
+
+        .view-details-btn:hover {
+            background: #388e3c;
+        }
+
+        /* Student Information - Right Column */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-item {
+            background: #f8fff8;
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+
+        .info-label {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-value {
+            color: #2e7d32;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* Visit History */
+        .visits-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+
+        .visits-table th {
+            text-align: left;
+            padding: 1.2rem 1rem;
+            background: #f8fff8;
+            color: #2e7d32;
+            font-weight: 600;
+            border-bottom: 2px solid #4caf50;
+        }
+
+        .visits-table td {
+            padding: 1.2rem 1rem;
+            border-bottom: 1px solid #e8f5e8;
+        }
+
+        .visit-date {
+            color: #2e7d32;
+            font-weight: 600;
+        }
+
+        .visit-diagnosis {
+            color: #555;
+        }
+
+        .visit-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-resolved {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .profile-layout {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .student-overview {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .profile-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .student-overview {
+                grid-column: span 1;
+            }
+            
+            .medical-info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .student-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .page-title {
+                font-size: 2.2rem;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-avatar {
+                margin-right: 0;
+                margin-bottom: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">CareConnect</div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="medical-dashboard.html">Dashboard</a></li>
+                    <li><a href="appointment-booking.html">Appointments</a></li>
+                    <li><a href="#" style="color: #1b5e20; font-weight: 600;">Student Profile</a></li>
+                    <li><a href="emergency-request.html">Emergency</a></li>
+                </ul>
+            </nav>
+            <div class="user-info">
+                <div class="user-avatar">AM</div>
+                <span>Alexandra Miller</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Student Profile</h1>
+            <p class="page-subtitle">Medical Records & Health Information Management</p>
+        </div>
+
+        <div class="profile-layout">
+            <!-- Left Column - Student Profile -->
+            <div class="left-column">
+                <div class="card student-profile-card">
+                    <h2 class="card-title" style="color: white; border-color: white;">Student Profile</h2>
+                    <div class="profile-header">
+                        <div class="profile-avatar">AM</div>
+                        <div class="profile-info">
+                            <h2>Alexandra Miller</h2>
+                            <p>S2023001</p>
+                        </div>
+                    </div>
+                    <div class="profile-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Institution:</span>
+                            <span>Greenwood High School</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Program:</span>
+                            <span>Biology</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Student ID:</span>
+                            <span>S2023001</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Academic Year:</span>
+                            <span>2023-2024</span>
+                        </div>
+                    </div>
+                    <button class="edit-profile-btn">Edit Profile</button>
+                </div>
+
+                <!-- Medical Information -->
+                <div class="card">
+                    <h2 class="card-title">Medical Information</h2>
+                    <div class="medical-info-grid">
+                        <div class="medical-card">
+                            <h3>Allergies (2)</h3>
+                            <ul class="medical-list">
+                                <li>Peanuts</li>
+                                <li>Penicillin</li>
+                            </ul>
+                        </div>
+                        <div class="medical-card">
+                            <h3>Permanent Medical Issues (2)</h3>
+                            <ul class="medical-list">
+                                <li>Asthma</li>
+                                <li>Seasonal Allergies</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <button class="add-entry-btn">
+                        <span>+</span> Add Medical Entry
+                    </button>
+                </div>
+            </div>
+
+            <!-- Middle Column - Doctor's View -->
+            <div class="middle-column">
+                <div class="card">
+                    <h2 class="card-title">Doctor's Portal</h2>
+                    
+                    <div class="doctor-portal">
+                        <div class="search-bar">
+                            <div class="search-icon">🔍</div>
+                            <input type="text" class="search-input" placeholder="Search student records...">
+                        </div>
+
+                        <h3 style="color: #2e7d32; margin-bottom: 1.5rem; font-size: 1.2rem;">Student Medical Overview</h3>
+                        
+                        <div class="student-overview">
+                            <div class="student-card">
+                                <div class="student-header">
+                                    <div class="student-name">Alice Johnson</div>
+                                    <div class="last-visit">Last Visit: 2023-11-15</div>
+                                </div>
+                                <div class="student-details">
+                                    <div class="detail-box">
+                                        <div class="detail-label-small">Diagnostic</div>
+                                        <div class="detail-value">Seasonal Allergies</div>
+                                    </div>
+                                    <div class="detail-box">
+                                        <div class="detail-label-small">Current Status</div>
+                                        <div class="detail-value" style="color: #2e7d32;">Stable</div>
+                                    </div>
+                                </div>
+                                <button class="view-details-btn">View Details</button>
+                            </div>
+
+                            <div class="student-card">
+                                <div class="student-header">
+                                    <div class="student-name">Bob Williams</div>
+                                    <div class="last-visit">Last Visit: 2024-01-20</div>
+                                </div>
+                                <div class="student-details">
+                                    <div class="detail-box">
+                                        <div class="detail-label-small">Diagnostic</div>
+                                        <div class="detail-value">Minor Sprain (Active)</div>
+                                    </div>
+                                    <div class="detail-box">
+                                        <div class="detail-label-small">Current Status</div>
+                                        <div class="detail-value" style="color: #f57c00;">Active Treatment</div>
+                                    </div>
+                                </div>
+                                <button class="view-details-btn">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Student Information & Visit History -->
+            <div class="right-column">
+                <div class="card">
+                    <h2 class="card-title">Student Information</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Student ID</div>
+                            <div class="info-value">52021001</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Date of Birth</div>
+                            <div class="info-value">2002-05-10</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Gender</div>
+                            <div class="info-value">Female</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">alice.johnson@example.ca</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f8fff8; padding: 1.8rem; border-radius: 12px; margin-top: 1.5rem;">
+                        <h3 style="color: #2e7d32; margin-bottom: 1rem; font-size: 1.2rem;">Emergency Contact</h3>
+                        <div style="font-size: 1.1rem; color: #555; line-height: 1.6;">
+                            <strong>Jane Johnson (Mother)</strong><br>
+                            Phone: 555-123-4567<br>
+                            Relationship: Parent
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Visit History</h2>
+                    <table class="visits-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Diagnosis</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="visit-date">2023-11-15</td>
+                                <td class="visit-diagnosis">Seasonal Allergies</td>
+                                <td><span class="visit-status status-resolved">Resolved</span></td>
+                            </tr>
+                            <tr>
+                                <td class="visit-date">2024-01-20</td>
+                                <td class="visit-diagnosis">Ankle Sprain</td>
+                                <td><span class="visit-status status-active">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td class="visit-date">2024-03-01</td>
+                                <td class="visit-diagnosis">Routine Check-up</td>
+                                <td><span class="visit-status status-resolved">Completed</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Edit Profile Button
+        document.querySelector('.edit-profile-btn').addEventListener('click', function() {
+            alert('Opening profile editor...\n\nYou can update personal information, contact details, and emergency contacts.');
+        });
+
+        // Add Medical Entry Button
+        document.querySelector('.add-entry-btn').addEventListener('click', function() {
+            alert('Opening medical entry form...\n\nYou can add:\n• New allergies\n• Medical conditions\n• Medications\n• Immunization records');
+        });
+
+        // Search Functionality
+        document.querySelector('.search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const searchQuery = this.value.trim();
+                if (searchQuery) {
+                    alert(`Searching for student records containing: "${searchQuery}"\n\nResults will be displayed below.`);
+                }
+            }
+        });
+
+        // View Details Buttons
+        document.querySelectorAll('.view-details-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const studentName = this.closest('.student-card').querySelector('.student-name').textContent;
+                const lastVisit = this.closest('.student-card').querySelector('.last-visit').textContent;
+                const diagnosis = this.closest('.student-card').querySelector('.detail-value').textContent;
+                
+                alert(`Student Details:\n\nName: ${studentName}\n${lastVisit}\nDiagnosis: ${diagnosis}\n\nFull medical history and treatment details will be displayed.`);
+            });
+        });
+
+        // Table Row Click (for visit history)
+        document.querySelectorAll('.visits-table tbody tr').forEach(row => {
+            row.addEventListener('click', function() {
+                const date = this.querySelector('.visit-date').textContent;
+                const diagnosis = this.querySelector('.visit-diagnosis').textContent;
+                const status = this.querySelector('.visit-status').textContent;
+                
+                alert(`Visit Details:\n\nDate: ${date}\nDiagnosis: ${diagnosis}\nStatus: ${status}\n\nClick "View Full Report" for detailed information.`);
+            });
+        });
+    </script>
+</body>
+</html>

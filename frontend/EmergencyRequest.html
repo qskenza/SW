@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareConnect - Emergency Request</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .main-header {
+            background: white;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #388e3c;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #1b5e20;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #4caf50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Emergency Header */
+        .emergency-header {
+            background: #d32f2f;
+            color: white;
+            padding: 2.5rem;
+            text-align: center;
+        }
+
+        .emergency-title {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .emergency-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Content */
+        .content {
+            padding: 2.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #2e7d32;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid #4caf50;
+            font-weight: 600;
+        }
+
+        /* Emergency Hub */
+        .emergency-hub {
+            background: #ffebee;
+            border-radius: 15px;
+            padding: 2rem;
+            border: 2px solid #d32f2f;
+        }
+
+        .critical-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            margin: 2rem 0;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .call-emergency {
+            background: #d32f2f;
+            color: white;
+        }
+
+        .send-location {
+            background: #388e3c;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Emergency Contacts */
+        .contacts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .contact-card {
+            background: #f8fff8;
+            border-radius: 12px;
+            padding: 1.8rem;
+            border-left: 5px solid #4caf50;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .contact-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .contact-avatar {
+            width: 60px;
+            height: 60px;
+            background: #4caf50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin-right: 1.5rem;
+        }
+
+        .contact-details h3 {
+            color: #2e7d32;
+            font-size: 1.3rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .contact-details p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .contact-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .contact-btn {
+            flex: 1;
+            padding: 0.9rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .call-contact {
+            background: #4caf50;
+            color: white;
+        }
+
+        .message-contact {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+        }
+
+        .contact-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Important Information */
+        .info-box {
+            background: #e8f5e8;
+            border-radius: 12px;
+            padding: 2rem;
+            border-left: 5px solid #388e3c;
+            grid-column: span 2;
+        }
+
+        .info-title {
+            color: #2e7d32;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .info-text {
+            color: #555;
+            line-height: 1.7;
+            font-size: 1.05rem;
+        }
+
+        /* Emergency Footer */
+        .emergency-footer {
+            background: #2e7d32;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .emergency-hotline {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .emergency-hotline i {
+            color: #ff5252;
+            margin-right: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-box {
+                grid-column: span 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .emergency-title {
+                font-size: 2rem;
+            }
+            
+            .contact-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .contact-avatar {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">CareConnect</div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="medical-dashboard.html">Dashboard</a></li>
+                    <li><a href="appointment-booking.html">Appointments</a></li>
+                    <li><a href="student-profile.html">Student Profile</a></li>
+                    <li><a href="#" style="color: #d32f2f; font-weight: 600;">Emergency</a></li>
+                </ul>
+            </nav>
+            <div class="user-info">
+                <div class="user-avatar">AM</div>
+                <span>Alexandra Miller</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Emergency Header -->
+        <div class="emergency-header">
+            <h1 class="emergency-title">Emergency Request</h1>
+            <p class="emergency-subtitle">Immediate Medical Assistance & Emergency Contacts</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- Emergency Hub -->
+                <div class="section">
+                    <h2 class="section-title">Emergency Hub</h2>
+                    <div class="emergency-hub">
+                        <h3 style="color: #d32f2f; margin-bottom: 1.5rem; font-size: 1.3rem;">Critical Actions</h3>
+                        <div class="critical-actions">
+                            <button class="action-btn call-emergency">
+                                <i>🚨</i> Call Emergency Services (911)
+                            </button>
+                            <button class="action-btn send-location">
+                                <i>📍</i> Send Current Location
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Important Information -->
+                <div class="info-box">
+                    <h3 class="info-title">Important Information</h3>
+                    <p class="info-text">
+                        In case of a medical emergency, remain calm and provide clear information to the emergency service operator. 
+                        If possible, have your student ID and health insurance details ready. Our emergency response team is trained 
+                        to handle critical situations with care and professionalism. Remember to state your location clearly and 
+                        describe the nature of the emergency.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- Emergency Contacts -->
+                <div class="section">
+                    <h2 class="section-title">Emergency Contacts</h2>
+                    <div class="contacts-list">
+                        <div class="contact-card">
+                            <div class="contact-header">
+                                <div class="contact-avatar">ER</div>
+                                <div class="contact-details">
+                                    <h3>Dr. Elena Rodriguez</h3>
+                                    <p>Campus Doctor</p>
+                                </div>
+                            </div>
+                            <div class="contact-actions">
+                                <button class="contact-btn call-contact">Call Dr. Rodriguez</button>
+                                <button class="contact-btn message-contact">Message</button>
+                            </div>
+                        </div>
+
+                        <div class="contact-card">
+                            <div class="contact-header">
+                                <div class="contact-avatar">DC</div>
+                                <div class="contact-details">
+                                    <h3>Prof. David Chen</h3>
+                                    <p>Academic Advisor</p>
+                                </div>
+                            </div>
+                            <div class="contact-actions">
+                                <button class="contact-btn call-contact">Call Prof. Chen</button>
+                                <button class="contact-btn message-contact">Message</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Footer -->
+        <div class="emergency-footer">
+            <div class="emergency-hotline">
+                <i>📞</i> 24/7 Emergency Hotline: 1-800-XXX-XXXX
+            </div>
+            <p>Available for immediate medical assistance and crisis support</p>
+        </div>
+    </div>
+
+    <script>
+        // Emergency Button Actions
+        document.querySelector('.call-emergency').addEventListener('click', function() {
+            const confirmCall = confirm('Are you sure you want to call Emergency Services (911)?\n\nThis will initiate an emergency call.');
+            if (confirmCall) {
+                alert('Calling Emergency Services (911)...\n\nPlease stay on the line and provide your:\n1. Location\n2. Nature of emergency\n3. Contact information');
+            }
+        });
+
+        document.querySelector('.send-location').addEventListener('click', function() {
+            alert('Your current location has been shared with:\n• Emergency Services\n• Campus Security\n• Emergency Contacts\n\nLocation sharing active for 30 minutes.');
+        });
+
+        // Contact Button Actions
+        document.querySelectorAll('.call-contact').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const contactName = this.closest('.contact-card').querySelector('h3').textContent;
+                alert(`Calling ${contactName}...\n\nPlease wait while we connect your call.`);
+            });
+        });
+
+        document.querySelectorAll('.message-contact').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const contactName = this.closest('.contact-card').querySelector('h3').textContent;
+                alert(`Opening secure message interface for ${contactName}.\n\nYou can send your emergency message here.`);
+            });
+        });
+    </script>
+</body>
+</html>
