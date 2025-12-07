@@ -628,6 +628,39 @@
         }
     </style>
 </head>
+
+<script>
+const API_URL = 'http://localhost:8000';
+// Le code du widget est dans ChatbotWidget.html
+</script>
+
+<!-- CHATBOT - Add before </body> in ALL pages -->
+<style>
+    #chatbot-widget{position:fixed;bottom:20px;right:20px;z-index:1000;font-family:'Segoe UI',Arial,sans-serif}#chat-button{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#2e7d32 0%,#4caf50 100%);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(46,125,50,0.4);display:flex;align-items:center;justify-content:center;transition:all .3s ease}#chat-button:hover{transform:scale(1.1)}#chat-button svg{width:30px;height:30px;fill:white}#chat-window{display:none;position:fixed;bottom:90px;right:20px;width:380px;height:550px;background:white;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,0.2);flex-direction:column;overflow:hidden}#chat-window.open{display:flex}.chat-header{background:linear-gradient(135deg,#2e7d32 0%,#4caf50 100%);color:white;padding:20px;display:flex;justify-content:space-between;align-items:center}.chat-header h3{margin:0;font-size:1.3rem}.chat-header p{margin:5px 0 0 0;opacity:0.9;font-size:0.9rem}#close-chat{background:none;border:none;color:white;font-size:1.5rem;cursor:pointer}#chat-messages{flex:1;overflow-y:auto;padding:20px;background:#f8fff8}.message{margin-bottom:15px;display:flex;flex-direction:column}.message.user{align-items:flex-end}.message.bot{align-items:flex-start}.message-content{max-width:80%;padding:12px 16px;border-radius:12px;word-wrap:break-word}.message.user .message-content{background:#2e7d32;color:white}.message.bot .message-content{background:white;color:#333;border:1px solid #e8f5e8}.message-time{font-size:0.75rem;color:#999;margin-top:5px}.chat-input-container{padding:15px;background:white;border-top:1px solid #e8f5e8;display:flex;gap:10px}#chat-input{flex:1;padding:12px 15px;border:2px solid #e8f5e8;border-radius:25px;font-size:0.95rem;outline:none}#chat-input:focus{border-color:#4caf50}#send-button{background:#4caf50;color:white;border:none;width:45px;height:45px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}#send-button:hover{background:#388e3c}.quick-actions{padding:10px 20px;background:white;border-top:1px solid #e8f5e8;display:flex;gap:8px;flex-wrap:wrap}.quick-action-btn{padding:8px 12px;background:#e8f5e8;color:#2e7d32;border:none;border-radius:15px;font-size:0.85rem;cursor:pointer}.quick-action-btn:hover{background:#4caf50;color:white}
+</style>
+
+<div id="chatbot-widget">
+    <button id="chat-button"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg></button>
+    <div id="chat-window">
+        <div class="chat-header"><div><h3>CareConnect Assistant</h3><p>Ask me anything</p></div><button id="close-chat">×</button></div>
+        <div class="quick-actions">
+            <button class="quick-action-btn" data-msg="Book an appointment">📅 Appointment</button>
+            <button class="quick-action-btn" data-msg="I need emergency help">🚨 Emergency</button>
+        </div>
+        <div id="chat-messages">
+            <div class="message bot"><div class="message-content">Hello! How can I help you today?</div></div>
+        </div>
+        <div class="chat-input-container">
+            <input type="text" id="chat-input" placeholder="Type your message..." />
+            <button id="send-button"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+        </div>
+    </div>
+</div>
+
+<script>
+let conversationId=null,userContext=null;const chatButton=document.getElementById('chat-button'),chatWindow=document.getElementById('chat-window'),closeChat=document.getElementById('close-chat'),chatMessages=document.getElementById('chat-messages'),chatInput=document.getElementById('chat-input'),sendButton=document.getElementById('send-button');chatButton.addEventListener('click',()=>{chatWindow.classList.toggle('open');chatWindow.classList.contains('open')&&chatInput.focus()});closeChat.addEventListener('click',()=>chatWindow.classList.remove('open'));async function sendMessage(msg){if(!msg.trim())return;addMessage(msg,'user');chatInput.value='';sendButton.disabled=true;showTypingIndicator();try{const res=await fetch(`${API_URL}/chat/`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,conversation_id:conversationId,user_context:userContext})});const data=await res.json();hideTypingIndicator();conversationId=data.conversation_id;addMessage(data.reply,'bot')}catch(e){hideTypingIndicator();addMessage('Sorry, error occurred.',  'bot');console.error(e)}finally{sendButton.disabled=false}}function addMessage(text,type){const msgDiv=document.createElement('div');msgDiv.className=`message ${type}`;const contentDiv=document.createElement('div');contentDiv.className='message-content';contentDiv.textContent=text;const timeDiv=document.createElement('div');timeDiv.className='message-time';timeDiv.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});msgDiv.appendChild(contentDiv);msgDiv.appendChild(timeDiv);chatMessages.appendChild(msgDiv);chatMessages.scrollTop=chatMessages.scrollHeight}function showTypingIndicator(){const indicator=document.createElement('div');indicator.className='message bot';indicator.id='typing-indicator';indicator.innerHTML='<div style="padding:12px;background:white;border:1px solid #e8f5e8;border-radius:12px"><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;margin-right:4px;animation:typing 1.4s infinite"></span><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;margin-right:4px;animation:typing 1.4s infinite 0.2s"></span><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;animation:typing 1.4s infinite 0.4s"></span></div>';chatMessages.appendChild(indicator);chatMessages.scrollTop=chatMessages.scrollHeight}function hideTypingIndicator(){const indicator=document.getElementById('typing-indicator');indicator&&indicator.remove()}sendButton.addEventListener('click',()=>sendMessage(chatInput.value));chatInput.addEventListener('keypress',e=>{e.key==='Enter'&&sendMessage(chatInput.value)});document.querySelectorAll('.quick-action-btn').forEach(btn=>btn.addEventListener('click',()=>sendMessage(btn.dataset.msg)));function loadUserContext(){const username=sessionStorage.getItem('username'),fullName=sessionStorage.getItem('fullName'),studentId=sessionStorage.getItem('studentId');username&&(userContext={name:fullName||username,student_id:studentId||'N/A'})}loadUserContext();const style=document.createElement('style');style.textContent='@keyframes typing{0%,60%,100%{opacity:0.3}30%{opacity:1}}';document.head.appendChild(style);
+</script>
+
 <body>
     <!-- Header -->
     <header class="main-header">

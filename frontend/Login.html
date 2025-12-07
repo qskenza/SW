@@ -397,24 +397,6 @@
             }
         }
 
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-            
-            .welcome-panel, .login-panel {
-                padding: 2rem 1.5rem;
-            }
-            
-            .welcome-header h1 {
-                font-size: 2rem;
-            }
-            
-            .login-title {
-                font-size: 1.5rem;
-            }
-        }
-
         /* Animation */
         @keyframes fadeIn {
             from {
@@ -483,7 +465,7 @@
                 </ul>
 
                 <div class="welcome-footer">
-                    <p>"Caring for your health with compassion and cutting-edge technology. Join thousands of students and patients who trust us with their healthcare journey."</p>
+                    <p>"Caring for your health with compassion and cutting-edge technology."</p>
                 </div>
             </div>
         </div>
@@ -532,7 +514,7 @@
 
                 <div class="emergency-access">
                     <p><strong>Need immediate medical assistance?</strong></p>
-                    <a href="emergency-request.html" class="emergency-link">Access Emergency Services →</a>
+                    <a href="EmergencyRequest.html" class="emergency-link">Access Emergency Services →</a>
                 </div>
 
                 <div class="divider">
@@ -558,12 +540,13 @@
 
             <div class="login-footer">
                 <p>By logging in, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
-                <p>Need help? Contact <a href="mailto:support@careconnect.com">support@careconnect.com</a></p>
             </div>
         </div>
     </div>
 
     <script>
+        const API_URL = 'http://localhost:8000';
+
         // Toggle password visibility
         const togglePassword = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
@@ -595,7 +578,6 @@
         }
 
         function validateUsername(username) {
-            // Accepts student ID (S followed by numbers) or email or regular username
             const studentIdRegex = /^S\d+$/;
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
@@ -613,7 +595,7 @@
             if (validateUsername(this.value.trim())) {
                 showSuccess(this, usernameError);
             } else {
-                showError(this, usernameError, 'Please enter a valid username, student ID (S12345), or email');
+                showError(this, usernameError, 'Please enter a valid username');
             }
         });
 
@@ -625,23 +607,21 @@
             }
         });
 
-        // Form submission
-        loginForm.addEventListener('submit', function(e) {
+        // Form submission with real API
+        loginForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const username = usernameInput.value.trim();
             const password = passwordInputField.value;
             let isValid = true;
 
-            // Validate username
             if (!validateUsername(username)) {
-                showError(usernameInput, usernameError, 'Please enter a valid username, student ID (S12345), or email');
+                showError(usernameInput, usernameError, 'Please enter a valid username');
                 isValid = false;
             } else {
                 showSuccess(usernameInput, usernameError);
             }
 
-            // Validate password
             if (!validatePassword(password)) {
                 showError(passwordInputField, passwordError, 'Password must be at least 8 characters');
                 isValid = false;
@@ -650,106 +630,73 @@
             }
 
             if (isValid) {
-                // Show loading state
                 const submitBtn = loginForm.querySelector('.login-button');
                 const originalText = submitBtn.textContent;
                 submitBtn.textContent = 'Logging in...';
                 submitBtn.disabled = true;
 
-                // Simulate API call
-                setTimeout(() => {
-                    // Check for demo credentials
-                    const demoCredentials = [
-                        { user: 'alexandra', pass: 'password123' },
-                        { user: 'S2023001', pass: 'password123' },
-                        { user: 'student@email.com', pass: 'password123' },
-                        { user: 'admin', pass: 'admin123' }
-                    ];
+                try {
+                    const response = await fetch(`${API_URL}/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
 
-                    const isValidLogin = demoCredentials.some(cred => 
-                        (username === cred.user || username.toLowerCase() === cred.user) && 
-                        password === cred.pass
-                    );
+                    const data = await response.json();
 
-                    if (isValidLogin) {
-                        // Success - redirect to dashboard
-                        alert('✅ Login successful! Redirecting to your dashboard...');
+                    if (response.ok) {
+                        sessionStorage.setItem('access_token', data.access_token);
+                        sessionStorage.setItem('username', data.user.username);
+                        sessionStorage.setItem('fullName', data.user.full_name);
+                        sessionStorage.setItem('role', data.user.role);
                         
-                        // Store login state (in a real app, you'd use session storage or cookies)
-                        sessionStorage.setItem('isLoggedIn', 'true');
-                        sessionStorage.setItem('username', username);
-                        
-                        // Redirect to medical dashboard
-                        window.location.href = 'medical-dashboard.html';
+                        alert('✅ Login successful! Redirecting...');
+                        window.location.href = 'MedicalDashboard.html';
                     } else {
-                        // Invalid credentials
-                        alert('❌ Invalid username or password. Try:\nUsername: alexandra\nPassword: password123');
+                        alert(`❌ ${data.detail}\n\nTry: alexandra / password123`);
                         submitBtn.textContent = originalText;
                         submitBtn.disabled = false;
-                        
-                        // Shake animation for error
-                        loginForm.style.animation = 'none';
-                        setTimeout(() => {
-                            loginForm.style.animation = 'shake 0.5s';
-                        }, 10);
                     }
-                }, 1500);
-            } else {
-                // Shake animation for validation error
-                loginForm.style.animation = 'none';
-                setTimeout(() => {
-                    loginForm.style.animation = 'shake 0.5s';
-                }, 10);
+                } catch (error) {
+                    alert('❌ Cannot connect to server. Make sure backend is running on http://localhost:8000');
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
             }
         });
 
-        // Add shake animation for errors
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-                20%, 40%, 60%, 80% { transform: translateX(5px); }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Forgot password functionality
+        // Forgot password
         document.querySelector('.forgot-password').addEventListener('click', function(e) {
             e.preventDefault();
-            const email = prompt('Please enter your email address to reset your password:');
+            const email = prompt('Enter your email for password reset:');
             if (email) {
-                alert(`Password reset instructions have been sent to ${email}\n\nIn a real application, this would trigger an email with reset instructions.`);
+                alert(`Password reset instructions sent to ${email}`);
             }
         });
 
-        // Social login buttons
+        // Social login
         document.querySelectorAll('.social-button').forEach(btn => {
             btn.addEventListener('click', function() {
                 const provider = this.querySelector('span:last-child').textContent;
-                alert(`In a real application, this would redirect to ${provider} OAuth login.`);
+                alert(`${provider} OAuth login would open here.`);
             });
         });
 
         // Signup link
         document.querySelector('.signup-link').addEventListener('click', function(e) {
             e.preventDefault();
-            alert('Account creation page would open here.\n\nIn a real application, this would redirect to the signup form.');
+            alert('Account creation page would open here.');
         });
 
-        // Auto-fill demo credentials for testing
+        // Auto-fill demo credentials
         window.addEventListener('load', function() {
-            // Check if it's a first visit
-            const hasVisited = sessionStorage.getItem('hasVisitedLogin');
-            if (!hasVisited) {
-                // Auto-fill demo credentials
+            if (!sessionStorage.getItem('hasVisitedLogin')) {
                 usernameInput.value = 'alexandra';
                 passwordInputField.value = 'password123';
                 sessionStorage.setItem('hasVisitedLogin', 'true');
                 
-                // Show welcome message
                 setTimeout(() => {
-                    alert('👋 Welcome to CareConnect Demo!\n\nDemo credentials have been pre-filled for you.\n\nUsername: alexandra\nPassword: password123\n\nClick "Login to Dashboard" to continue.');
+                    alert('👋 Demo credentials pre-filled!\n\nUsername: alexandra\nPassword: password123');
                 }, 500);
             }
         });
