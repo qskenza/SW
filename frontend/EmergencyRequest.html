@@ -184,6 +184,12 @@
             padding: 1.8rem;
             border-left: 5px solid #4caf50;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
         .contact-header {
@@ -275,7 +281,6 @@
             color: white;
             text-align: center;
             padding: 2rem;
-            margin-top: 2rem;
             border-radius: 0 0 20px 20px;
         }
 
@@ -283,11 +288,64 @@
             font-size: 1.5rem;
             font-weight: 600;
             margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .emergency-hotline i {
+        .emergency-hotline:hover {
             color: #ff5252;
-            margin-right: 10px;
+        }
+
+        .emergency-procedures-btn {
+            margin-top: 1rem;
+            padding: 1rem 1.5rem;
+            background: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .emergency-procedures-btn:hover {
+            background: #b71c1c;
+            transform: translateY(-2px);
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .status-active {
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .emergency-status {
+            background: #fff3e0;
+            border: 2px solid #f57c00;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .emergency-status p {
+            color: #f57c00;
+            font-weight: 600;
+            margin: 0;
         }
 
         /* Responsive */
@@ -326,6 +384,10 @@
                 margin-right: 0;
                 margin-bottom: 1rem;
             }
+            
+            .contact-actions {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -345,7 +407,7 @@
             </nav>
             <div class="user-info">
                 <div class="user-avatar">AM</div>
-                <span>Loading...</span>
+                <span>Alexandra Miller</span>
                 <button onclick="logout()" style="margin-left: 1rem; padding: 0.5rem 1rem; background: #d32f2f; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">
                     Logout
                 </button>
@@ -365,6 +427,11 @@
         <div class="content">
             <!-- Left Column -->
             <div class="left-column">
+                <!-- Emergency Status -->
+                <div class="emergency-status">
+                    <p><span class="status-indicator status-active"></span> Emergency services are currently ACTIVE and available 24/7</p>
+                </div>
+
                 <!-- Emergency Hub -->
                 <div class="section">
                     <h2 class="section-title">Emergency Hub</h2>
@@ -372,7 +439,7 @@
                         <h3 style="color: #d32f2f; margin-bottom: 1.5rem; font-size: 1.3rem;">Critical Actions</h3>
                         <div class="critical-actions">
                             <button class="action-btn call-emergency">
-                                <i>🚨</i> Call Emergency Services (911)
+                                <i>🚨</i> Call Emergency Services (2222)
                             </button>
                             <button class="action-btn send-location">
                                 <i>📍</i> Send Current Location
@@ -386,10 +453,13 @@
                     <h3 class="info-title">Important Information</h3>
                     <p class="info-text">
                         In case of a medical emergency, remain calm and provide clear information to the emergency service operator. 
-                        If possible, have your student ID and health insurance details ready. Our emergency response team is trained 
+                        If possible, have your student ID (2023001) and health insurance details ready. Our emergency response team is trained 
                         to handle critical situations with care and professionalism. Remember to state your location clearly and 
                         describe the nature of the emergency.
                     </p>
+                    <button class="emergency-procedures-btn" onclick="showEmergencyProcedures()">
+                        🚨 View Emergency Procedures
+                    </button>
                 </div>
             </div>
 
@@ -408,22 +478,36 @@
                                 </div>
                             </div>
                             <div class="contact-actions">
-                                <button class="contact-btn call-contact">Call Dr. Rodriguez</button>
-                                <button class="contact-btn message-contact">Message</button>
+                                <button class="contact-btn call-contact" onclick="callContact('Dr. Elena Rodriguez', '0535-86-0101')">Call Dr. Rodriguez</button>
+                                <button class="contact-btn message-contact" onclick="messageContact('Dr. Elena Rodriguez')">Message</button>
                             </div>
                         </div>
 
                         <div class="contact-card">
                             <div class="contact-header">
-                                <div class="contact-avatar">DC</div>
+                                <div class="contact-avatar">CS</div>
                                 <div class="contact-details">
-                                    <h3>Prof. David Chen</h3>
-                                    <p>Academic Advisor</p>
+                                    <h3>Campus Security</h3>
+                                    <p>24/7 Security Services</p>
                                 </div>
                             </div>
                             <div class="contact-actions">
-                                <button class="contact-btn call-contact">Call Prof. Chen</button>
-                                <button class="contact-btn message-contact">Message</button>
+                                <button class="contact-btn call-contact" onclick="callContact('Campus Security', '0535-86-0103')">Call Security</button>
+                                <button class="contact-btn message-contact" onclick="messageContact('Campus Security')">Message Security</button>
+                            </div>
+                        </div>
+
+                        <div class="contact-card">
+                            <div class="contact-header">
+                                <div class="contact-avatar">HC</div>
+                                <div class="contact-details">
+                                    <h3>Health Center</h3>
+                                    <p>Medical Services</p>
+                                </div>
+                            </div>
+                            <div class="contact-actions">
+                                <button class="contact-btn call-contact" onclick="callContact('Health Center', '0535-86-0104')">Call Health Center</button>
+                                <button class="contact-btn message-contact" onclick="messageContact('Health Center')">Message</button>
                             </div>
                         </div>
                     </div>
@@ -433,47 +517,137 @@
 
         <!-- Emergency Footer -->
         <div class="emergency-footer">
-            <div class="emergency-hotline">
-                <i>📞</i> 24/7 Emergency Hotline: 1-800-XXX-XXXX
+            <div class="emergency-hotline" onclick="callEmergencyHotline()">
+                <span style="color: #ff5252;">📞</span> 24/7 Emergency Hotline: 0535 86 2222
             </div>
             <p>Available for immediate medical assistance and crisis support</p>
         </div>
     </div>
 
     <script>
+        const API_URL = 'http://localhost:8000';
+
         // Emergency Button Actions
         document.querySelector('.call-emergency').addEventListener('click', function() {
-            const confirmCall = confirm('Are you sure you want to call Emergency Services (911)?\n\nThis will initiate an emergency call.');
+            const emergencyNumber = '2222';
+            const confirmCall = confirm(`ARE YOU IN IMMEDIATE DANGER?\n\nClick OK to call Emergency Services (${emergencyNumber}) for:\n• Life-threatening emergencies\n• Serious injuries\n• Medical crises\n\nOR click Cancel for non-emergency assistance.`);
+            
             if (confirmCall) {
-                alert('Calling Emergency Services (911)...\n\nPlease stay on the line and provide your:\n1. Location\n2. Nature of emergency\n3. Contact information');
+                alert(`🚨 DIALING EMERGENCY SERVICES (${emergencyNumber})\n\nYour information:\n• Name: Alexandra Miller\n• Student ID: 2023001\n• Department: SSE - Computer Science\n\nPlease provide:\n1. Your exact location\n2. Nature of emergency\n3. Number of people involved\n\nStay on the line until help arrives.`);
+                logEmergencyAction('Emergency Services (2222) call initiated');
             }
         });
 
         document.querySelector('.send-location').addEventListener('click', function() {
-            alert('Your current location has been shared with:\n• Emergency Services\n• Campus Security\n• Emergency Contacts\n\nLocation sharing active for 30 minutes.');
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    const locationMessage = `📍 EMERGENCY LOCATION SHARED:\n\n📱 GPS Coordinates:\nLatitude: ${lat.toFixed(6)}\nLongitude: ${lng.toFixed(6)}\n\n👤 Student Info:\nName: Alexandra Miller\nID: 2023001\nDepartment: SSE\n\n⏰ Timestamp: ${new Date().toLocaleString()}\n\n✅ Location sent to:\n• Emergency Services (2222)\n• Campus Security\n• Health Center`;
+                    
+                    alert(locationMessage);
+                    logEmergencyAction(`Location shared: ${lat}, ${lng}`);
+                }, function(error) {
+                    const manualLocation = prompt('Unable to get GPS location.\n\nPlease enter your current location\n(building/room/address):');
+                    if (manualLocation) {
+                        alert(`📍 Location shared: ${manualLocation}\n\nStudent: Alexandra Miller (2023001)\nDepartment: SSE - Computer Science`);
+                        logEmergencyAction(`Manual location: ${manualLocation}`);
+                    }
+                });
+            } else {
+                const manualLocation = prompt('Enter your current location\n(building/room/address):');
+                if (manualLocation) {
+                    alert(`📍 Location shared: ${manualLocation}\n\nStudent: Alexandra Miller (2023001)`);
+                    logEmergencyAction(`Manual location: ${manualLocation}`);
+                }
+            }
         });
 
-        // Contact Button Actions
-        document.querySelectorAll('.call-contact').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const contactName = this.closest('.contact-card').querySelector('h3').textContent;
-                alert(`Calling ${contactName}...\n\nPlease wait while we connect your call.`);
-            });
-        });
+        function callContact(contactName, phoneNumber) {
+            const confirmCall = confirm(`Call ${contactName}?\n\nPhone: ${phoneNumber}\n\nYour info will be shared:\n• Alexandra Miller\n• Student ID: 2023001\n• SSE - Computer Science`);
+            
+            if (confirmCall) {
+                alert(`📞 Calling ${contactName}...\n\nPhone: ${phoneNumber}\n\nConnecting your emergency call...`);
+                logEmergencyAction(`Called ${contactName}`);
+            }
+        }
 
-        document.querySelectorAll('.message-contact').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const contactName = this.closest('.contact-card').querySelector('h3').textContent;
-                alert(`Opening secure message interface for ${contactName}.\n\nYou can send your emergency message here.`);
-            });
-        });
+        function messageContact(contactName) {
+            const message = prompt(`Send emergency message to ${contactName}:\n\nEnter your message (max 200 characters):`);
+            
+            if (message && message.trim()) {
+                if (message.length > 200) {
+                    alert('Message too long! Please keep it under 200 characters.');
+                    return;
+                }
+                
+                alert(`📱 MESSAGE SENT\n\nTo: ${contactName}\nFrom: Alexandra Miller (2023001)\nMessage: "${message}"\n\nYou will receive a confirmation when read.`);
+                logEmergencyAction(`Sent message to ${contactName}`);
+            }
+        }
+
+        function callEmergencyHotline() {
+            const hotlineNumber = '0535 86 2222';
+            const confirmCall = confirm(`Call 24/7 Emergency Hotline?\n\nNumber: ${hotlineNumber}\n\nServices Available:\n• Immediate medical advice\n• Crisis counseling\n• Emergency coordination\n\nYour info: Alexandra Miller (2023001)\nClick OK to call.`);
+            
+            if (confirmCall) {
+                alert(`📞 Calling Emergency Hotline: ${hotlineNumber}\n\nStudent: Alexandra Miller\nID: 2023001\nDepartment: SSE\n\nConnecting...`);
+                logEmergencyAction('Called Emergency Hotline');
+            }
+        }
+
+        function showEmergencyProcedures() {
+            const procedures = `🚨 EMERGENCY PROCEDURES 🚨
+
+Your Information:
+• Name: Alexandra Miller
+• Student ID: 2023001
+• Department: SSE - Computer Science
+• Academic Year: 2025/2026
+
+1. STAY CALM
+   • Take deep breaths
+   • Assess the situation safely
+
+2. CALL FOR HELP
+   • Dial 2222 for life-threatening emergencies
+   • Use campus emergency numbers for other situations
+
+3. PROVIDE INFORMATION
+   • Your exact location (building, room, floor)
+   • Nature of emergency (medical, security, fire)
+   • Number of people involved
+   • Your student ID: 2023001
+
+4. FOLLOW INSTRUCTIONS
+   • Stay on the line with the operator
+   • Follow dispatcher guidance
+   • Do not hang up until told to do so
+
+5. SEND LOCATION
+   • Enable location sharing when prompted
+   • Provide landmarks if possible
+   • Stay in place unless instructed to move
+
+Emergency Numbers:
+• Emergency Services: 2222
+• Campus Security: 0535-86-0103
+• Health Center: 0535-86-0104
+• Emergency Hotline: 0535 86 2222`;
+            
+            alert(procedures);
+        }
+
+        function logEmergencyAction(action) {
+            const timestamp = new Date().toLocaleString();
+            console.log(`[${timestamp}] 🚨 ${action} - Alexandra Miller (2023001)`);
+        }
+
+        console.log('🚨 Emergency System Ready - Alexandra Miller (2023001)');
     </script>
-    <script>
-    const API_URL = 'http://localhost:8000';
-    // Le code du widget est dans ChatbotWidget.html
-    </script>
 
-    <!-- CHATBOT - Add before </body> in ALL pages -->
+    <!-- CHATBOT -->
     <style>
         #chatbot-widget{position:fixed;bottom:20px;right:20px;z-index:1000;font-family:'Segoe UI',Arial,sans-serif}#chat-button{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#2e7d32 0%,#4caf50 100%);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(46,125,50,0.4);display:flex;align-items:center;justify-content:center;transition:all .3s ease}#chat-button:hover{transform:scale(1.1)}#chat-button svg{width:30px;height:30px;fill:white}#chat-window{display:none;position:fixed;bottom:90px;right:20px;width:380px;height:550px;background:white;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,0.2);flex-direction:column;overflow:hidden}#chat-window.open{display:flex}.chat-header{background:linear-gradient(135deg,#2e7d32 0%,#4caf50 100%);color:white;padding:20px;display:flex;justify-content:space-between;align-items:center}.chat-header h3{margin:0;font-size:1.3rem}.chat-header p{margin:5px 0 0 0;opacity:0.9;font-size:0.9rem}#close-chat{background:none;border:none;color:white;font-size:1.5rem;cursor:pointer}#chat-messages{flex:1;overflow-y:auto;padding:20px;background:#f8fff8}.message{margin-bottom:15px;display:flex;flex-direction:column}.message.user{align-items:flex-end}.message.bot{align-items:flex-start}.message-content{max-width:80%;padding:12px 16px;border-radius:12px;word-wrap:break-word}.message.user .message-content{background:#2e7d32;color:white}.message.bot .message-content{background:white;color:#333;border:1px solid #e8f5e8}.message-time{font-size:0.75rem;color:#999;margin-top:5px}.chat-input-container{padding:15px;background:white;border-top:1px solid #e8f5e8;display:flex;gap:10px}#chat-input{flex:1;padding:12px 15px;border:2px solid #e8f5e8;border-radius:25px;font-size:0.95rem;outline:none}#chat-input:focus{border-color:#4caf50}#send-button{background:#4caf50;color:white;border:none;width:45px;height:45px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}#send-button:hover{background:#388e3c}.quick-actions{padding:10px 20px;background:white;border-top:1px solid #e8f5e8;display:flex;gap:8px;flex-wrap:wrap}.quick-action-btn{padding:8px 12px;background:#e8f5e8;color:#2e7d32;border:none;border-radius:15px;font-size:0.85rem;cursor:pointer}.quick-action-btn:hover{background:#4caf50;color:white}
     </style>
@@ -481,23 +655,23 @@
     <div id="chatbot-widget">
         <button id="chat-button"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg></button>
         <div id="chat-window">
-            <div class="chat-header"><div><h3>CareConnect Assistant</h3><p>Ask me anything</p></div><button id="close-chat">×</button></div>
+            <div class="chat-header"><div><h3>CareConnect Assistant</h3><p>Emergency Support</p></div><button id="close-chat">×</button></div>
             <div class="quick-actions">
-                <button class="quick-action-btn" data-msg="Book an appointment">📅 Appointment</button>
                 <button class="quick-action-btn" data-msg="I need emergency help">🚨 Emergency</button>
+                <button class="quick-action-btn" data-msg="Emergency procedures">📋 Procedures</button>
             </div>
             <div id="chat-messages">
-                <div class="message bot"><div class="message-content">Hello! How can I help you today?</div></div>
+                <div class="message bot"><div class="message-content">🚨 Emergency Support Active\n\nHow can I help you?\n• Call Emergency (2222)\n• Send Location\n• Emergency Procedures</div></div>
             </div>
             <div class="chat-input-container">
-                <input type="text" id="chat-input" placeholder="Type your message..." />
+                <input type="text" id="chat-input" placeholder="Describe your emergency..." />
                 <button id="send-button"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
             </div>
         </div>
     </div>
 
     <script>
-    let conversationId=null,userContext=null;const chatButton=document.getElementById('chat-button'),chatWindow=document.getElementById('chat-window'),closeChat=document.getElementById('close-chat'),chatMessages=document.getElementById('chat-messages'),chatInput=document.getElementById('chat-input'),sendButton=document.getElementById('send-button');chatButton.addEventListener('click',()=>{chatWindow.classList.toggle('open');chatWindow.classList.contains('open')&&chatInput.focus()});closeChat.addEventListener('click',()=>chatWindow.classList.remove('open'));async function sendMessage(msg){if(!msg.trim())return;addMessage(msg,'user');chatInput.value='';sendButton.disabled=true;showTypingIndicator();try{const res=await fetch(`${API_URL}/chat/`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,conversation_id:conversationId,user_context:userContext})});const data=await res.json();hideTypingIndicator();conversationId=data.conversation_id;addMessage(data.reply,'bot')}catch(e){hideTypingIndicator();addMessage('Sorry, error occurred.',  'bot');console.error(e)}finally{sendButton.disabled=false}}function addMessage(text,type){const msgDiv=document.createElement('div');msgDiv.className=`message ${type}`;const contentDiv=document.createElement('div');contentDiv.className='message-content';contentDiv.textContent=text;const timeDiv=document.createElement('div');timeDiv.className='message-time';timeDiv.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});msgDiv.appendChild(contentDiv);msgDiv.appendChild(timeDiv);chatMessages.appendChild(msgDiv);chatMessages.scrollTop=chatMessages.scrollHeight}function showTypingIndicator(){const indicator=document.createElement('div');indicator.className='message bot';indicator.id='typing-indicator';indicator.innerHTML='<div style="padding:12px;background:white;border:1px solid #e8f5e8;border-radius:12px"><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;margin-right:4px;animation:typing 1.4s infinite"></span><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;margin-right:4px;animation:typing 1.4s infinite 0.2s"></span><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;animation:typing 1.4s infinite 0.4s"></span></div>';chatMessages.appendChild(indicator);chatMessages.scrollTop=chatMessages.scrollHeight}function hideTypingIndicator(){const indicator=document.getElementById('typing-indicator');indicator&&indicator.remove()}sendButton.addEventListener('click',()=>sendMessage(chatInput.value));chatInput.addEventListener('keypress',e=>{e.key==='Enter'&&sendMessage(chatInput.value)});document.querySelectorAll('.quick-action-btn').forEach(btn=>btn.addEventListener('click',()=>sendMessage(btn.dataset.msg)));function loadUserContext(){const username=sessionStorage.getItem('username'),fullName=sessionStorage.getItem('fullName'),studentId=sessionStorage.getItem('studentId');username&&(userContext={name:fullName||username,student_id:studentId||'N/A'})}loadUserContext();const style=document.createElement('style');style.textContent='@keyframes typing{0%,60%,100%{opacity:0.3}30%{opacity:1}}';document.head.appendChild(style);
+    let conversationId=null,userContext={name:'Alexandra Miller',student_id:'2023001',department:'SSE',major:'Computer Science'};const chatButton=document.getElementById('chat-button'),chatWindow=document.getElementById('chat-window'),closeChat=document.getElementById('close-chat'),chatMessages=document.getElementById('chat-messages'),chatInput=document.getElementById('chat-input'),sendButton=document.getElementById('send-button');chatButton.addEventListener('click',()=>{chatWindow.classList.toggle('open');chatWindow.classList.contains('open')&&chatInput.focus()});closeChat.addEventListener('click',()=>chatWindow.classList.remove('open'));async function sendMessage(msg){if(!msg.trim())return;addMessage(msg,'user');chatInput.value='';sendButton.disabled=true;showTypingIndicator();try{const res=await fetch(`${API_URL}/chat/`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,conversation_id:conversationId,user_context:userContext})});const data=await res.json();hideTypingIndicator();conversationId=data.conversation_id;addMessage(data.reply,'bot')}catch(e){hideTypingIndicator();addMessage('Sorry, error occurred.',  'bot');console.error(e)}finally{sendButton.disabled=false}}function addMessage(text,type){const msgDiv=document.createElement('div');msgDiv.className=`message ${type}`;const contentDiv=document.createElement('div');contentDiv.className='message-content';contentDiv.textContent=text;const timeDiv=document.createElement('div');timeDiv.className='message-time';timeDiv.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});msgDiv.appendChild(contentDiv);msgDiv.appendChild(timeDiv);chatMessages.appendChild(msgDiv);chatMessages.scrollTop=chatMessages.scrollHeight}function showTypingIndicator(){const indicator=document.createElement('div');indicator.className='message bot';indicator.id='typing-indicator';indicator.innerHTML='<div style="padding:12px;background:white;border:1px solid #e8f5e8;border-radius:12px"><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;margin-right:4px;animation:typing 1.4s infinite"></span><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;margin-right:4px;animation:typing 1.4s infinite 0.2s"></span><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;animation:typing 1.4s infinite 0.4s"></span></div>';chatMessages.appendChild(indicator);chatMessages.scrollTop=chatMessages.scrollHeight}function hideTypingIndicator(){const indicator=document.getElementById('typing-indicator');indicator&&indicator.remove()}sendButton.addEventListener('click',()=>sendMessage(chatInput.value));chatInput.addEventListener('keypress',e=>{e.key==='Enter'&&sendMessage(chatInput.value)});document.querySelectorAll('.quick-action-btn').forEach(btn=>btn.addEventListener('click',()=>sendMessage(btn.dataset.msg)));const style=document.createElement('style');style.textContent='@keyframes typing{0%,60%,100%{opacity:0.3}30%{opacity:1}}';document.head.appendChild(style);
     </script>
 </body>
 </html>

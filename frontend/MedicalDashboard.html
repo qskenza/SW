@@ -100,8 +100,8 @@
         /* Dashboard Layout */
         .dashboard-layout {
             display: grid;
-            grid-template-columns: 300px 1fr 350px;
-            gap: 2rem;
+            grid-template-columns: 350px 1fr 400px;
+            gap: 2.5rem;
         }
 
         /* Cards */
@@ -177,50 +177,56 @@
             opacity: 0.8;
         }
 
-        .edit-profile-btn {
-            background: white;
-            color: #2e7d32;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            margin-top: 1.5rem;
+        /* Medical Information Card - Updated */
+        .medical-info-card {
+            background: #f8fff8;
+            border-radius: 12px;
+            padding: 1.8rem;
+            border: 2px solid #e8f5e8;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
-        .edit-profile-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        /* Medical Records */
-        .medical-summary {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
+        .medical-section {
             margin-bottom: 2rem;
         }
 
-        .summary-card {
-            background: #f8fff8;
-            border-radius: 10px;
-            padding: 1.5rem;
-            text-align: center;
-            border: 2px solid #e8f5e8;
+        .medical-section:last-child {
+            margin-bottom: 0;
         }
 
-        .summary-card h3 {
+        .medical-section-title {
             color: #2e7d32;
-            margin-bottom: 0.8rem;
             font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #4caf50;
         }
 
-        .summary-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #388e3c;
+        .medical-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .medical-list li {
+            padding: 0.6rem 0;
+            color: #555;
+            border-bottom: 1px solid #e8f5e8;
+        }
+
+        .medical-list li:last-child {
+            border-bottom: none;
+        }
+
+        .medical-count {
+            background: #2e7d32;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
         }
 
         .add-entry-btn {
@@ -237,50 +243,11 @@
             align-items: center;
             justify-content: center;
             gap: 0.8rem;
+            margin-top: 1.5rem;
         }
 
         .add-entry-btn:hover {
             background: #388e3c;
-        }
-
-        /* Quick Actions */
-        .quick-actions-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.2rem;
-        }
-
-        .action-card {
-            background: #f8fff8;
-            border-radius: 10px;
-            padding: 1.5rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid #e8f5e8;
-        }
-
-        .action-card:hover {
-            background: #4caf50;
-            border-color: #4caf50;
-            transform: translateY(-3px);
-        }
-
-        .action-card:hover .action-icon,
-        .action-card:hover .action-title {
-            color: white;
-        }
-
-        .action-icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: #4caf50;
-        }
-
-        .action-title {
-            color: #2e7d32;
-            font-weight: 600;
-            font-size: 1.1rem;
         }
 
         /* Recent Visits */
@@ -327,6 +294,24 @@
         .status-upcoming {
             background: #fff3e0;
             color: #f57c00;
+        }
+
+        .view-all-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+
+        .view-all-btn:hover {
+            background: #388e3c;
+            transform: translateY(-2px);
         }
 
         /* Appointments */
@@ -391,24 +376,37 @@
             border: 2px solid #4caf50;
         }
 
+        .reschedule-btn:disabled {
+            background: #f5f5f5;
+            color: #999;
+            border-color: #ccc;
+            cursor: not-allowed;
+        }
+
         .cancel-btn {
             background: #ffebee;
             color: #d32f2f;
             border: 2px solid #ffcdd2;
         }
 
-        .appointment-btn:hover {
+        .appointment-btn:hover:not(:disabled) {
             transform: translateY(-2px);
+        }
+
+        .reschedule-notice {
+            background: #fff3e0;
+            border-left: 4px solid #f57c00;
+            padding: 0.8rem 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #666;
         }
 
         /* Responsive */
         @media (max-width: 1100px) {
             .dashboard-layout {
                 grid-template-columns: 1fr;
-            }
-            
-            .medical-summary {
-                grid-template-columns: repeat(4, 1fr);
             }
         }
 
@@ -423,21 +421,9 @@
                 flex-wrap: wrap;
                 justify-content: center;
             }
-            
-            .medical-summary {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .quick-actions-grid {
-                grid-template-columns: 1fr;
-            }
         }
 
         @media (max-width: 480px) {
-            .medical-summary {
-                grid-template-columns: 1fr;
-            }
-            
             .appointment-actions {
                 flex-direction: column;
             }
@@ -477,53 +463,78 @@
             <!-- Left Column - Profile -->
             <div class="left-column">
                 <div class="card profile-card">
-                    <h2 class="card-title" style="color: white; border-color: white;">Student Profile</h2>
+                    <h2 class="card-title" style="color: white; border-color: white;">Student Information</h2>
                     <div class="profile-header">
                         <div class="profile-avatar">AM</div>
                         <div class="profile-info">
                             <h2>Alexandra Miller</h2>
-                            <p>S2023001</p>
+                            <p>Student ID: 2023001</p>
                         </div>
                     </div>
                     <div class="profile-details">
                         <div class="detail-item">
                             <span class="detail-label">Institution:</span>
-                            <span>Greenwood High School</span>
+                            <span>Al Akhawayn University</span>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">Program:</span>
-                            <span>Biology</span>
+                            <span class="detail-label">Department:</span>
+                            <span>SSE</span>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">Student ID:</span>
-                            <span>S2023001</span>
+                            <span class="detail-label">Major:</span>
+                            <span>Computer Science</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Academic Year:</span>
+                            <span>2025/2026</span>
                         </div>
                     </div>
-                    <button class="edit-profile-btn">Edit Profile</button>
                 </div>
 
-                <!-- Medical Summary -->
+                <!-- Medical Information -->
                 <div class="card">
                     <h2 class="card-title">Medical Information</h2>
-                    <div class="medical-summary">
-                        <div class="summary-card">
-                            <h3>Allergies</h3>
-                            <div class="summary-value">2</div>
+                    <div class="medical-info-card">
+                        <div class="medical-section">
+                            <h3 class="medical-section-title">
+                                Allergies <span class="medical-count">2</span>
+                            </h3>
+                            <ul class="medical-list">
+                                <li>Peanuts</li>
+                                <li>Penicillin</li>
+                            </ul>
                         </div>
-                        <div class="summary-card">
-                            <h3>Medications</h3>
-                            <div class="summary-value">1</div>
+
+                        <div class="medical-section">
+                            <h3 class="medical-section-title">
+                                Current Medications <span class="medical-count">1</span>
+                            </h3>
+                            <ul class="medical-list">
+                                <li>Inhaler (Albuterol) - As needed</li>
+                            </ul>
                         </div>
-                        <div class="summary-card">
-                            <h3>Conditions</h3>
-                            <div class="summary-value">2</div>
+
+                        <div class="medical-section">
+                            <h3 class="medical-section-title">
+                                Chronic Conditions <span class="medical-count">2</span>
+                            </h3>
+                            <ul class="medical-list">
+                                <li>Asthma</li>
+                                <li>Seasonal Allergies</li>
+                            </ul>
                         </div>
-                        <div class="summary-card">
-                            <h3>Visits (2024)</h3>
-                            <div class="summary-value">3</div>
+
+                        <div class="medical-section">
+                            <h3 class="medical-section-title">
+                                Total Visits (2024) <span class="medical-count">3</span>
+                            </h3>
+                            <ul class="medical-list">
+                                <li>Last visit: March 1, 2024</li>
+                                <li>Upcoming: October 26, 2024</li>
+                            </ul>
                         </div>
                     </div>
-                    <button class="add-entry-btn">
+                    <button class="add-entry-btn" onclick="window.location.href='AddMedicalEntry.html'">
                         <span>+</span> Add Medical Entry
                     </button>
                 </div>
@@ -544,9 +555,9 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td class="visit-date">2023-11-15</td>
-                                <td>Seasonal Allergies</td>
-                                <td class="visit-doctor">Dr. Bob Johnston</td>
+                                <td class="visit-date">2024-03-01</td>
+                                <td>Routine Check-up</td>
+                                <td class="visit-doctor">Dr. Elena Rodriguez</td>
                                 <td><span class="visit-status status-completed">Completed</span></td>
                             </tr>
                             <tr>
@@ -556,64 +567,16 @@
                                 <td><span class="visit-status status-completed">Completed</span></td>
                             </tr>
                             <tr>
-                                <td class="visit-date">2024-03-01</td>
-                                <td>Routine Check-up</td>
-                                <td class="visit-doctor">Dr. Elena Rodriguez</td>
-                                <td><span class="visit-status status-completed">Completed</span></td>
-                            </tr>
-                            <tr>
-                                <td class="visit-date">Ruocco Oradeug</td>
-                                <td>Vistacalini Treatment</td>
-                                <td class="visit-doctor">Pulymyromi Casadatani</td>
+                                <td class="visit-date">2023-11-15</td>
+                                <td>Seasonal Allergies</td>
+                                <td class="visit-doctor">Dr. Bob Johnston</td>
                                 <td><span class="visit-status status-completed">Completed</span></td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="card">
-                    <h2 class="card-title">Quick Actions</h2>
-                    <div class="quick-actions-grid">
-                        <div class="action-card">
-                            <div class="action-icon">📅</div>
-                            <div class="action-title">Book Appointment</div>
-                        </div>
-                        <div class="action-card">
-                            <div class="action-icon">📋</div>
-                            <div class="action-title">Medical Records</div>
-                        </div>
-                        <div class="action-card">
-                            <div class="action-icon">💬</div>
-                            <div class="action-title">Contact Support</div>
-                        </div>
-                        <div class="action-card">
-                            <div class="action-icon">💊</div>
-                            <div class="action-title">Prescription Refill</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column - Upcoming Appointments -->
-            <div class="right-column">
-                <div class="card">
-                    <h2 class="card-title">Upcoming Appointment</h2>
-                    <div class="appointment-card">
-                        <div class="appointment-header">
-                            <div class="appointment-date">Wednesday, Oct 26</div>
-                            <div class="appointment-time">10:00 AM</div>
-                        </div>
-                        <div class="appointment-details">
-                            <h3>Dr. Alice Smith</h3>
-                            <p>General Practitioner</p>
-                            <p>Campus Health Center, Room 101</p>
-                        </div>
-                        <div class="appointment-actions">
-                            <button class="appointment-btn reschedule-btn">Reschedule</button>
-                            <button class="appointment-btn cancel-btn">Cancel</button>
-                        </div>
-                    </div>
+                    <button class="view-all-btn" onclick="window.location.href='VisitHistory.html'">
+                        View All Visit History
+                    </button>
                 </div>
 
                 <!-- Health Status -->
@@ -626,39 +589,77 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Right Column - Upcoming Appointments -->
+            <div class="right-column">
+                <div class="card">
+                    <h2 class="card-title">Upcoming Appointment</h2>
+                    <div class="appointment-card" data-appointment-date="2024-10-26T10:00:00">
+                        <div class="appointment-header">
+                            <div class="appointment-date">Wednesday, Oct 26</div>
+                            <div class="appointment-time">10:00 AM</div>
+                        </div>
+                        <div class="appointment-details">
+                            <h3>Dr. Alice Smith</h3>
+                            <p>General Practitioner</p>
+                            <p>Campus Health Center, Room 101</p>
+                        </div>
+                        <div class="appointment-actions">
+                            <button class="appointment-btn reschedule-btn" id="rescheduleBtn">Reschedule</button>
+                            <button class="appointment-btn cancel-btn">Cancel</button>
+                        </div>
+                        <div class="reschedule-notice" id="rescheduleNotice" style="display: none;">
+                            ⚠️ Rescheduling is only available up to 12 hours before the appointment time.
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Quick Actions
-        document.querySelectorAll('.action-card').forEach(card => {
-            card.addEventListener('click', function() {
-                const action = this.querySelector('.action-title').textContent;
-                alert(`Opening ${action} interface...`);
-            });
+        // Check if reschedule is allowed (12 hours before appointment)
+        function checkRescheduleAvailability() {
+            const appointmentCard = document.querySelector('[data-appointment-date]');
+            const appointmentDateStr = appointmentCard.getAttribute('data-appointment-date');
+            const appointmentDate = new Date(appointmentDateStr);
+            const now = new Date();
+            const hoursUntilAppointment = (appointmentDate - now) / (1000 * 60 * 60);
+            
+            const rescheduleBtn = document.getElementById('rescheduleBtn');
+            const rescheduleNotice = document.getElementById('rescheduleNotice');
+            
+            if (hoursUntilAppointment < 12) {
+                rescheduleBtn.disabled = true;
+                rescheduleNotice.style.display = 'block';
+                rescheduleBtn.title = 'Cannot reschedule within 12 hours of appointment';
+            } else {
+                rescheduleBtn.disabled = false;
+                rescheduleNotice.style.display = 'none';
+            }
+        }
+
+        // Appointment Reschedule Button
+        document.getElementById('rescheduleBtn').addEventListener('click', function() {
+            if (!this.disabled) {
+                // Redirect to appointment booking page with pre-selected date section
+                window.location.href = 'AppointmentBooking.html#datetime-selection';
+            }
         });
 
-        // Edit Profile Button
-        document.querySelector('.edit-profile-btn').addEventListener('click', function() {
-            alert('Opening profile editor...\n\nYou can update your personal and medical information here.');
-        });
-
-        // Add Medical Entry Button
-        document.querySelector('.add-entry-btn').addEventListener('click', function() {
-            alert('Opening medical entry form...\n\nYou can add new allergies, medications, or medical conditions.');
-        });
-
-        // Appointment Buttons
-        document.querySelector('.reschedule-btn').addEventListener('click', function() {
-            alert('Opening appointment rescheduler...\n\nYou can select a new date and time for your appointment.');
-        });
-
+        // Appointment Cancel Button
         document.querySelector('.cancel-btn').addEventListener('click', function() {
             const confirmCancel = confirm('Are you sure you want to cancel your appointment with Dr. Alice Smith?\n\nDate: October 26, 2024\nTime: 10:00 AM');
             if (confirmCancel) {
                 alert('Appointment cancelled successfully.\n\nYou will receive a confirmation email shortly.');
             }
         });
+
+        // Initialize reschedule check
+        checkRescheduleAvailability();
+        
+        // Check every minute
+        setInterval(checkRescheduleAvailability, 60000);
     </script>
     <script>
     const API_URL = 'http://localhost:8000';

@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareConnect - Visit History</title>
+    <script src="common.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .main-header {
+            background: white;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #388e3c;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #1b5e20;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #4caf50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: 2.8rem;
+            color: #2e7d32;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .page-subtitle {
+            font-size: 1.3rem;
+            color: #666;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-title {
+            font-size: 1.3rem;
+            color: #2e7d32;
+            font-weight: 600;
+        }
+
+        .filter-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 200px;
+            gap: 1.5rem;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            color: #2e7d32;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .filter-input, .filter-select {
+            padding: 0.8rem 1rem;
+            border: 2px solid #e8f5e8;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .filter-input:focus, .filter-select:focus {
+            outline: none;
+            border-color: #4caf50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .clear-filters-btn {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .clear-filters-btn:hover {
+            background: #4caf50;
+            color: white;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.8rem;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+            text-align: center;
+            border-top: 4px solid #4caf50;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem 2rem;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: #4caf50;
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        /* Visit Cards */
+        .visits-container {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .visit-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+            border-left: 5px solid #4caf50;
+            transition: all 0.3s ease;
+        }
+
+        .visit-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+
+        .visit-card.upcoming {
+            border-left-color: #f57c00;
+            background: #fff3e0;
+        }
+
+        .visit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .visit-date-info {
+            flex: 1;
+        }
+
+        .visit-date {
+            font-size: 1.5rem;
+            color: #2e7d32;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .visit-time {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .visit-status-badge {
+            padding: 0.5rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-completed {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .status-upcoming {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-cancelled {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .visit-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-box {
+            background: #f8fff8;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            color: #2e7d32;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .visit-notes {
+            background: #e8f5e8;
+            padding: 1.2rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .notes-label {
+            color: #2e7d32;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .notes-content {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .visit-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e8f5e8;
+        }
+
+        .action-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-details-btn {
+            background: #4caf50;
+            color: white;
+        }
+
+        .view-details-btn:hover {
+            background: #388e3c;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-state-title {
+            font-size: 1.5rem;
+            color: #2e7d32;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state-text {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .report-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #e8f5e8;
+        }
+
+        .report-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .report-section-title {
+            color: #2e7d32;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .report-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .report-info-item {
+            background: #f8fff8;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .report-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.3rem;
+        }
+
+        .report-value {
+            font-size: 1.05rem;
+            color: #2e7d32;
+            font-weight: 600;
+        }
+
+        .report-text {
+            color: #555;
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+
+        .modal-actions {
+            padding: 1.5rem 2rem;
+            background: #f8fff8;
+            border-radius: 0 0 15px 15px;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 0.9rem 1.8rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+
+        .close-modal-btn {
+            background: white;
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+        }
+
+        .close-modal-btn:hover {
+            background: #e8f5e8;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .filter-controls {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .visit-details {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .filter-controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .visit-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">CareConnect</div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="MedicalDashboard.html">Dashboard</a></li>
+                    <li><a href="AppointmentBooking.html">Appointments</a></li>
+                    <li><a href="StudentProfile.html">Student Profile</a></li>
+                    <li><a href="EmergencyRequest.html">Emergency</a></li>
+                </ul>
+            </nav>
+            <div class="user-info">
+                <div class="user-avatar">AM</div>
+                <span>Loading...</span>
+                <button onclick="logout()" style="margin-left: 1rem; padding: 0.5rem 1rem; background: #d32f2f; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Medical Visit History</h1>
+            <p class="page-subtitle">Complete Record of All Medical Consultations</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">12</div>
+                <div class="stat-label">Total Visits</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">1</div>
+                <div class="stat-label">Upcoming</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">10</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">1</div>
+                <div class="stat-label">Cancelled</div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="filter-header">
+                <h2 class="filter-title">Filter Visits</h2>
+            </div>
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <label class="filter-label">Search</label>
+                    <input type="text" class="filter-input" placeholder="Search by diagnosis, doctor..." id="searchInput">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Date From</label>
+                    <input type="date" class="filter-input" id="dateFrom">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Date To</label>
+                    <input type="date" class="filter-input" id="dateTo">
+                </div>
+                <div class="filter-group">
+                    <button class="clear-filters-btn" onclick="clearFilters()">Clear Filters</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="all" onclick="switchTab('all')">All Visits</button>
+            <button class="tab" data-tab="upcoming" onclick="switchTab('upcoming')">Upcoming</button>
+            <button class="tab" data-tab="completed" onclick="switchTab('completed')">Completed</button>
+            <button class="tab" data-tab="cancelled" onclick="switchTab('cancelled')">Cancelled</button>
+        </div>
+
+        <!-- Visits Container -->
+        <div class="visits-container" id="visitsContainer">
+            <!-- Upcoming Visit -->
+            <div class="visit-card upcoming" data-status="upcoming">
+                <div class="visit-header">
+                    <div class="visit-date-info">
+                        <div class="visit-date">Wednesday, October 26, 2024</div>
+                        <div class="visit-time">10:00 AM - 10:30 AM</div>
+                    </div>
+                    <div class="visit-status-badge status-upcoming">Upcoming</div>
+                </div>
+                <div class="visit-details">
+                    <div class="detail-box">
+                        <div class="detail-label">Doctor</div>
+                        <div class="detail-value">Dr. Alice Smith</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Type</div>
+                        <div class="detail-value">General Consultation</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Location</div>
+                        <div class="detail-value">Room 101</div>
+                    </div>
+                </div>
+                <div class="visit-notes">
+                    <div class="notes-label">Appointment Notes</div>
+                    <div class="notes-content">Follow-up consultation for seasonal allergies management.</div>
+                </div>
+                <div class="visit-actions">
+                    <button class="action-btn view-details-btn">View Details</button>
+                </div>
+            </div>
+
+            <!-- Completed Visits -->
+            <div class="visit-card" data-status="completed">
+                <div class="visit-header">
+                    <div class="visit-date-info">
+                        <div class="visit-date">Tuesday, March 1, 2024</div>
+                        <div class="visit-time">2:00 PM - 2:30 PM</div>
+                    </div>
+                    <div class="visit-status-badge status-completed">Completed</div>
+                </div>
+                <div class="visit-details">
+                    <div class="detail-box">
+                        <div class="detail-label">Doctor</div>
+                        <div class="detail-value">Dr. Elena Rodriguez</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Diagnosis</div>
+                        <div class="detail-value">Routine Check-up</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Location</div>
+                        <div class="detail-value">Room 204</div>
+                    </div>
+                </div>
+                <div class="visit-notes">
+                    <div class="notes-label">Visit Summary</div>
+                    <div class="notes-content">Annual physical examination completed. All vital signs normal. Continue current medication regimen for asthma management. Next check-up recommended in 12 months.</div>
+                </div>
+                <div class="visit-actions">
+                    <button class="action-btn view-details-btn">View Full Report</button>
+                </div>
+            </div>
+
+            <div class="visit-card" data-status="completed">
+                <div class="visit-header">
+                    <div class="visit-date-info">
+                        <div class="visit-date">Saturday, January 20, 2024</div>
+                        <div class="visit-time">11:00 AM - 11:45 AM</div>
+                    </div>
+                    <div class="visit-status-badge status-completed">Completed</div>
+                </div>
+                <div class="visit-details">
+                    <div class="detail-box">
+                        <div class="detail-label">Doctor</div>
+                        <div class="detail-value">Dr. Alice Smith</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Diagnosis</div>
+                        <div class="detail-value">Minor Ankle Sprain</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Location</div>
+                        <div class="detail-value">Room 101</div>
+                    </div>
+                </div>
+                <div class="visit-notes">
+                    <div class="notes-label">Visit Summary</div>
+                    <div class="notes-content">Grade I ankle sprain from sports activity. RICE protocol recommended. Prescribed anti-inflammatory medication. Follow-up in 2 weeks showed complete recovery.</div>
+                </div>
+                <div class="visit-actions">
+                    <button class="action-btn view-details-btn">View Full Report</button>
+                </div>
+            </div>
+
+            <div class="visit-card" data-status="completed">
+                <div class="visit-header">
+                    <div class="visit-date-info">
+                        <div class="visit-date">Wednesday, November 15, 2023</div>
+                        <div class="visit-time">3:30 PM - 4:00 PM</div>
+                    </div>
+                    <div class="visit-status-badge status-completed">Completed</div>
+                </div>
+                <div class="visit-details">
+                    <div class="detail-box">
+                        <div class="detail-label">Doctor</div>
+                        <div class="detail-value">Dr. Bob Johnston</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Diagnosis</div>
+                        <div class="detail-value">Seasonal Allergies</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Location</div>
+                        <div class="detail-value">Room 302</div>
+                    </div>
+                </div>
+                <div class="visit-notes">
+                    <div class="notes-label">Visit Summary</div>
+                    <div class="notes-content">Patient presented with typical seasonal allergy symptoms. Prescribed antihistamines. Advised to avoid known allergens and use air purifier. Symptoms resolved within one week.</div>
+                </div>
+                <div class="visit-actions">
+                    <button class="action-btn view-details-btn">View Full Report</button>
+                </div>
+            </div>
+
+            <!-- Cancelled Visit Example -->
+            <div class="visit-card" data-status="cancelled">
+                <div class="visit-header">
+                    <div class="visit-date-info">
+                        <div class="visit-date">Friday, October 15, 2023</div>
+                        <div class="visit-time">9:00 AM - 9:30 AM</div>
+                    </div>
+                    <div class="visit-status-badge status-cancelled">Cancelled</div>
+                </div>
+                <div class="visit-details">
+                    <div class="detail-box">
+                        <div class="detail-label">Doctor</div>
+                        <div class="detail-value">Dr. Sarah Chen</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Type</div>
+                        <div class="detail-value">Follow-up</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Cancelled By</div>
+                        <div class="detail-value">Patient</div>
+                    </div>
+                </div>
+                <div class="visit-notes">
+                    <div class="notes-label">Cancellation Reason</div>
+                    <div class="notes-content">Scheduling conflict - Rescheduled to a later date</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Report Modal -->
+    <div class="modal" id="reportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Full Medical Report</h2>
+                <button class="modal-close" onclick="closeReportModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content will be dynamically inserted -->
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn close-modal-btn" onclick="closeReportModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'all';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+            
+            // Filter visits
+            filterVisits();
+        }
+
+        function filterVisits() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            const visitCards = document.querySelectorAll('.visit-card');
+            let visibleCount = 0;
+            
+            visitCards.forEach(card => {
+                const status = card.getAttribute('data-status');
+                const cardText = card.textContent.toLowerCase();
+                const cardDate = card.querySelector('.visit-date').textContent;
+                
+                let showCard = true;
+                
+                // Tab filter
+                if (currentTab !== 'all' && status !== currentTab) {
+                    showCard = false;
+                }
+                
+                // Search filter
+                if (searchTerm && !cardText.includes(searchTerm)) {
+                    showCard = false;
+                }
+                
+                // Date filters (simplified - in production, parse dates properly)
+                // For demo purposes, showing all cards
+                
+                if (showCard) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Show empty state if no results
+            const container = document.getElementById('visitsContainer');
+            let emptyState = document.querySelector('.empty-state');
+            
+            if (visibleCount === 0 && !emptyState) {
+                emptyState = document.createElement('div');
+                emptyState.className = 'empty-state';
+                emptyState.innerHTML = `
+                    <div class="empty-state-icon">📋</div>
+                    <h3 class="empty-state-title">No visits found</h3>
+                    <p class="empty-state-text">Try adjusting your filters or search terms</p>
+                `;
+                container.appendChild(emptyState);
+            } else if (visibleCount > 0 && emptyState) {
+                emptyState.remove();
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            filterVisits();
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', filterVisits);
+        document.getElementById('dateFrom').addEventListener('change', filterVisits);
+        document.getElementById('dateTo').addEventListener('change', filterVisits);
+
+        // Action button handlers
+        document.querySelectorAll('.view-details-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const card = this.closest('.visit-card');
+                const date = card.querySelector('.visit-date').textContent;
+                const time = card.querySelector('.visit-time').textContent;
+                const doctor = card.querySelectorAll('.detail-value')[0].textContent;
+                const diagnosis = card.querySelectorAll('.detail-value')[1]?.textContent || 'N/A';
+                const location = card.querySelectorAll('.detail-value')[2]?.textContent || 'N/A';
+                const status = card.querySelector('.visit-status-badge').textContent;
+                const notes = card.querySelector('.notes-content')?.textContent || 'No notes available';
+                
+                showFullReport(date, time, doctor, diagnosis, location, status, notes);
+            });
+        });
+
+        function showFullReport(date, time, doctor, diagnosis, location, status, notes) {
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                <div class="report-section">
+                    <h3 class="report-section-title">Visit Information</h3>
+                    <div class="report-info-grid">
+                        <div class="report-info-item">
+                            <div class="report-label">Date</div>
+                            <div class="report-value">${date}</div>
+                        </div>
+                        <div class="report-info-item">
+                            <div class="report-label">Time</div>
+                            <div class="report-value">${time}</div>
+                        </div>
+                        <div class="report-info-item">
+                            <div class="report-label">Status</div>
+                            <div class="report-value">${status}</div>
+                        </div>
+                        <div class="report-info-item">
+                            <div class="report-label">Location</div>
+                            <div class="report-value">${location}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">Healthcare Provider</h3>
+                    <div class="report-info-grid">
+                        <div class="report-info-item">
+                            <div class="report-label">Doctor</div>
+                            <div class="report-value">${doctor}</div>
+                        </div>
+                        <div class="report-info-item">
+                            <div class="report-label">Diagnosis</div>
+                            <div class="report-value">${diagnosis}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">Visit Summary & Notes</h3>
+                    <p class="report-text">${notes}</p>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">Patient Information</h3>
+                    <div class="report-info-grid">
+                        <div class="report-info-item">
+                            <div class="report-label">Patient Name</div>
+                            <div class="report-value">Alexandra Miller</div>
+                        </div>
+                        <div class="report-info-item">
+                            <div class="report-label">Student ID</div>
+                            <div class="report-value">2023001</div>
+                        </div>
+                        <div class="report-info-item">
+                            <div class="report-label">Department</div>
+                            <div class="report-value">SSE - Computer Science</div>
+                        </div>
+                        <div class="report-info-item">
+                            <div class="report-label">Academic Year</div>
+                            <div class="report-value">2025/2026</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('reportModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('reportModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeReportModal();
+            }
+        });
+
+        
+    </script>
+    
+    <script>
+    const API_URL = 'http://localhost:8000';
+    </script>
+
+    <!-- CHATBOT -->
+    <style>
+        #chatbot-widget{position:fixed;bottom:20px;right:20px;z-index:1000;font-family:'Segoe UI',Arial,sans-serif}#chat-button{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#2e7d32 0%,#4caf50 100%);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(46,125,50,0.4);display:flex;align-items:center;justify-content:center;transition:all .3s ease}#chat-button:hover{transform:scale(1.1)}#chat-button svg{width:30px;height:30px;fill:white}#chat-window{display:none;position:fixed;bottom:90px;right:20px;width:380px;height:550px;background:white;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,0.2);flex-direction:column;overflow:hidden}#chat-window.open{display:flex}.chat-header{background:linear-gradient(135deg,#2e7d32 0%,#4caf50 100%);color:white;padding:20px;display:flex;justify-content:space-between;align-items:center}.chat-header h3{margin:0;font-size:1.3rem}.chat-header p{margin:5px 0 0 0;opacity:0.9;font-size:0.9rem}#close-chat{background:none;border:none;color:white;font-size:1.5rem;cursor:pointer}#chat-messages{flex:1;overflow-y:auto;padding:20px;background:#f8fff8}.message{margin-bottom:15px;display:flex;flex-direction:column}.message.user{align-items:flex-end}.message.bot{align-items:flex-start}.message-content{max-width:80%;padding:12px 16px;border-radius:12px;word-wrap:break-word}.message.user .message-content{background:#2e7d32;color:white}.message.bot .message-content{background:white;color:#333;border:1px solid #e8f5e8}.message-time{font-size:0.75rem;color:#999;margin-top:5px}.chat-input-container{padding:15px;background:white;border-top:1px solid #e8f5e8;display:flex;gap:10px}#chat-input{flex:1;padding:12px 15px;border:2px solid #e8f5e8;border-radius:25px;font-size:0.95rem;outline:none}#chat-input:focus{border-color:#4caf50}#send-button{background:#4caf50;color:white;border:none;width:45px;height:45px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}#send-button:hover{background:#388e3c}.quick-actions{padding:10px 20px;background:white;border-top:1px solid #e8f5e8;display:flex;gap:8px;flex-wrap:wrap}.quick-action-btn{padding:8px 12px;background:#e8f5e8;color:#2e7d32;border:none;border-radius:15px;font-size:0.85rem;cursor:pointer}.quick-action-btn:hover{background:#4caf50;color:white}
+    </style>
+
+    <div id="chatbot-widget">
+        <button id="chat-button"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg></button>
+        <div id="chat-window">
+            <div class="chat-header"><div><h3>CareConnect Assistant</h3><p>Ask me anything</p></div><button id="close-chat">×</button></div>
+            <div class="quick-actions">
+                <button class="quick-action-btn" data-msg="Book an appointment">📅 Appointment</button>
+                <button class="quick-action-btn" data-msg="I need emergency help">🚨 Emergency</button>
+            </div>
+            <div id="chat-messages">
+                <div class="message bot"><div class="message-content">Hello! How can I help you today?</div></div>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" id="chat-input" placeholder="Type your message..." />
+                <button id="send-button"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let conversationId=null,userContext=null;const chatButton=document.getElementById('chat-button'),chatWindow=document.getElementById('chat-window'),closeChat=document.getElementById('close-chat'),chatMessages=document.getElementById('chat-messages'),chatInput=document.getElementById('chat-input'),sendButton=document.getElementById('send-button');chatButton.addEventListener('click',()=>{chatWindow.classList.toggle('open');chatWindow.classList.contains('open')&&chatInput.focus()});closeChat.addEventListener('click',()=>chatWindow.classList.remove('open'));async function sendMessage(msg){if(!msg.trim())return;addMessage(msg,'user');chatInput.value='';sendButton.disabled=true;showTypingIndicator();try{const res=await fetch(`${API_URL}/chat/`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,conversation_id:conversationId,user_context:userContext})});const data=await res.json();hideTypingIndicator();conversationId=data.conversation_id;addMessage(data.reply,'bot')}catch(e){hideTypingIndicator();addMessage('Sorry, error occurred.',  'bot');console.error(e)}finally{sendButton.disabled=false}}function addMessage(text,type){const msgDiv=document.createElement('div');msgDiv.className=`message ${type}`;const contentDiv=document.createElement('div');contentDiv.className='message-content';contentDiv.textContent=text;const timeDiv=document.createElement('div');timeDiv.className='message-time';timeDiv.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});msgDiv.appendChild(contentDiv);msgDiv.appendChild(timeDiv);chatMessages.appendChild(msgDiv);chatMessages.scrollTop=chatMessages.scrollHeight}function showTypingIndicator(){const indicator=document.createElement('div');indicator.className='message bot';indicator.id='typing-indicator';indicator.innerHTML='<div style="padding:12px;background:white;border:1px solid #e8f5e8;border-radius:12px"><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;margin-right:4px;animation:typing 1.4s infinite"></span><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;margin-right:4px;animation:typing 1.4s infinite 0.2s"></span><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;animation:typing 1.4s infinite 0.4s"></span></div>';chatMessages.appendChild(indicator);chatMessages.scrollTop=chatMessages.scrollHeight}function hideTypingIndicator(){const indicator=document.getElementById('typing-indicator');indicator&&indicator.remove()}sendButton.addEventListener('click',()=>sendMessage(chatInput.value));chatInput.addEventListener('keypress',e=>{e.key==='Enter'&&sendMessage(chatInput.value)});document.querySelectorAll('.quick-action-btn').forEach(btn=>btn.addEventListener('click',()=>sendMessage(btn.dataset.msg)));function loadUserContext(){const username=sessionStorage.getItem('username'),fullName=sessionStorage.getItem('fullName'),studentId=sessionStorage.getItem('studentId');username&&(userContext={name:fullName||username,student_id:studentId||'N/A'})}loadUserContext();const style=document.createElement('style');style.textContent='@keyframes typing{0%,60%,100%{opacity:0.3}30%{opacity:1}}';document.head.appendChild(style);
+    </script>
+</body>
+</html>

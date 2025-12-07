@@ -1,13 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.ext.declarative import declarative_base
 from typing import Generator
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Database URL
+# Database URL - use SQLite for simplicity, can be changed to PostgreSQL
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./careconnect.db")
 
 # Create engine
@@ -18,9 +17,6 @@ engine = create_engine(
 
 # Create session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Base class for models
-Base = declarative_base()
 
 # Dependency to get DB session
 def get_db() -> Generator[Session, None, None]:
@@ -33,15 +29,18 @@ def get_db() -> Generator[Session, None, None]:
 # Initialize database
 def init_db():
     """Create all tables in the database"""
-    from models import Base
-    Base.metadata.create_all(bind=engine)
+    import models
+    models.Base.metadata.create_all(bind=engine)
     print("✅ Database initialized successfully")
+    
+    # Seed initial data
+    seed_db()
 
-# Seed initial data
 def seed_db():
     """Seed database with initial data"""
-    from models import User, Doctor
+    import models
     import bcrypt
+    from datetime import date
     
     def hash_password(password: str) -> str:
         pwd_bytes = password.encode('utf-8')
@@ -53,70 +52,177 @@ def seed_db():
     
     try:
         # Check if data already exists
-        if db.query(User).first():
+        if db.query(models.User).first():
             print("⚠️  Database already seeded")
             return
         
-        # Create default users
-        default_users = [
-            User(
-                username="alexandra",
-                email="alexandra@example.com",
-                password_hash=hash_password("password123"),
-                full_name="Alexandra Miller",
-                student_id="S2023001",
-                institution="Greenwood High School",
-                program="Biology",
-                role="student"
+        # Create default user - Alexandra Miller
+        alexandra = models.User(
+            username="alexandra",
+            email="a.miller@aui.ma",  # ✅ CHANGED: AUI email format
+            password_hash=hash_password("password123"),
+            full_name="Alexandra Miller",
+            student_id="2023001",  # ✅ CHANGED: Numbers only (removed "S")
+            institution="Al Akhawayn University",  # ✅ CHANGED: AUI
+            department="SSE",  # ✅ ADDED: Department
+            major="Computer Science",  # ✅ CHANGED: From "program" to "major"
+            academic_year="2025/2026",  # ✅ ADDED: Academic year
+            year_level="junior",  # ✅ ADDED: Year level
+            phone="+212 612-345678",  # ✅ ADDED: Phone
+            date_of_birth=date(2002, 5, 10),  # ✅ ADDED: Date of birth
+            gender="female",  # ✅ ADDED: Gender
+            role="student"
+        )
+        db.add(alexandra)
+        db.flush()
+        
+        # ✅ ADDED: Emergency contact for Alexandra
+        emergency_contact = models.EmergencyContact(
+            user_id=alexandra.id,
+            name="Jane Miller",
+            relationship="Mother",
+            phone="+1 555-123-4567",
+            email="jane.miller@example.com"
+        )
+        db.add(emergency_contact)
+        
+        # ✅ ADDED: Medical records for Alexandra
+        allergies = [
+            models.MedicalRecord(
+                user_id=alexandra.id,
+                type="allergy",
+                name="Peanuts",
+                severity="severe"
             ),
-            User(
-                username="admin",
-                email="admin@careconnect.com",
-                password_hash=hash_password("admin123"),
-                full_name="Admin User",
-                role="admin"
+            models.MedicalRecord(
+                user_id=alexandra.id,
+                type="allergy",
+                name="Penicillin",
+                severity="moderate"
             )
         ]
         
-        for user in default_users:
-            db.add(user)
+        medications = [
+            models.MedicalRecord(
+                user_id=alexandra.id,
+                type="medication",
+                name="Inhaler (Albuterol)",
+                description="As needed"
+            )
+        ]
+        
+        conditions = [
+            models.MedicalRecord(
+                user_id=alexandra.id,
+                type="condition",
+                name="Asthma",
+                severity="moderate"
+            ),
+            models.MedicalRecord(
+                user_id=alexandra.id,
+                type="condition",
+                name="Seasonal Allergies",
+                severity="mild"
+            )
+        ]
+        
+        for record in allergies + medications + conditions:
+            db.add(record)
         
         # Create default doctors
-        default_doctors = [
-            Doctor(
+        doctors = [
+            models.Doctor(
                 name="Dr. Sarah Chen",
                 specialty="General Practitioner, Pediatrics",
-                email="sarah.chen@careconnect.com",
-                phone="555-0101",
-                rating=48,
+                email="sarah.chen@aui.ma",  # ✅ CHANGED: AUI email
+                phone="0535-86-0101",  # ✅ CHANGED: Moroccan format
+                rating=4.8,  # ✅ CHANGED: Decimal rating instead of integer
                 reviews_count=127,
                 avatar="SC"
             ),
-            Doctor(
+            models.Doctor(
                 name="Dr. Emily Carter",
                 specialty="Pediatrician",
-                email="emily.carter@careconnect.com",
-                phone="555-0102",
-                rating=49,
+                email="emily.carter@aui.ma",  # ✅ CHANGED: AUI email
+                phone="0535-86-0102",  # ✅ CHANGED: Moroccan format
+                rating=4.9,  # ✅ CHANGED: Decimal rating
                 reviews_count=89,
                 avatar="EC"
             ),
-            Doctor(
+            models.Doctor(
                 name="Dr. Elena Rodriguez",
                 specialty="Campus Doctor",
-                email="elena.rodriguez@careconnect.com",
-                phone="555-0103",
-                rating=47,
+                email="elena.rodriguez@aui.ma",  # ✅ CHANGED: AUI email
+                phone="0535-86-0103",  # ✅ CHANGED: Moroccan format
+                rating=4.7,  # ✅ CHANGED: Decimal rating
                 reviews_count=156,
                 avatar="ER"
             )
         ]
         
-        for doctor in default_doctors:
+        for doctor in doctors:
             db.add(doctor)
+        
+        db.flush()
+        
+        # ✅ ADDED: Sample visits for Alexandra
+        visits = [
+            models.Visit(
+                user_id=alexandra.id,
+                doctor_id=doctors[2].id,  # Dr. Elena Rodriguez
+                visit_date=date(2024, 3, 1),
+                time_start="2:00 PM",
+                time_end="2:30 PM",
+                diagnosis="Routine Check-up",
+                type="General Consultation",
+                location="Room 204",
+                notes="Annual physical examination completed. All vital signs normal. Continue current medication regimen for asthma management. Next check-up recommended in 12 months.",
+                status="completed"
+            ),
+            models.Visit(
+                user_id=alexandra.id,
+                doctor_id=doctors[0].id,  # Dr. Sarah Chen
+                visit_date=date(2024, 1, 20),
+                time_start="11:00 AM",
+                time_end="11:45 AM",
+                diagnosis="Minor Ankle Sprain",
+                type="Injury Assessment",
+                location="Room 101",
+                notes="Grade I ankle sprain from sports activity. RICE protocol recommended. Prescribed anti-inflammatory medication. Follow-up in 2 weeks showed complete recovery.",
+                status="completed"
+            ),
+            models.Visit(
+                user_id=alexandra.id,
+                doctor_id=doctors[1].id,  # Dr. Emily Carter
+                visit_date=date(2023, 11, 15),
+                time_start="3:30 PM",
+                time_end="4:00 PM",
+                diagnosis="Seasonal Allergies",
+                type="General Consultation",
+                location="Room 302",
+                notes="Patient presented with typical seasonal allergy symptoms. Prescribed antihistamines. Advised to avoid known allergens and use air purifier. Symptoms resolved within one week.",
+                status="completed"
+            )
+        ]
+        
+        for visit in visits:
+            db.add(visit)
+        
+        # Create admin user
+        admin = models.User(
+            username="admin",
+            email="admin@aui.ma",  # ✅ CHANGED: AUI email
+            password_hash=hash_password("admin123"),
+            full_name="Admin User",
+            student_id="0000000",  # ✅ ADDED: Required field
+            institution="Al Akhawayn University",  # ✅ CHANGED: AUI
+            role="admin"
+        )
+        db.add(admin)
         
         db.commit()
         print("✅ Database seeded successfully")
+        print("📧 Alexandra's email: a.miller@aui.ma")  # ✅ ADDED: Confirmation
         
     except Exception as e:
         print(f"❌ Error seeding database: {e}")
@@ -127,5 +233,3 @@ def seed_db():
 if __name__ == "__main__":
     print("Initializing database...")
     init_db()
-    print("Seeding database...")
-    seed_db()

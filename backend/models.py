@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, Boolean, Float, Date
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship as orm_relationship
 from datetime import datetime
 
 Base = declarative_base()
@@ -12,37 +12,79 @@ class User(Base):
     username = Column(String(50), unique=True, index=True, nullable=False)
     email = Column(String(100), unique=True, index=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
-    full_name = Column(String(100))
-    student_id = Column(String(50), unique=True, index=True)
-    institution = Column(String(100))
-    program = Column(String(100))
+    full_name = Column(String(100), nullable=False)
+    student_id = Column(String(50), unique=True, index=True, nullable=False)  # Numbers only
+    institution = Column(String(100), default="Al Akhawayn University")
+    department = Column(String(10))  # SSE, SBA, SSAH
+    major = Column(String(100))
+    academic_year = Column(String(20), default="2025/2026")
+    year_level = Column(String(20))  # freshman, sophomore, junior, senior
+    phone = Column(String(20))
+    date_of_birth = Column(Date)
+    gender = Column(String(20))
     role = Column(String(20), default="student")  # student, doctor, admin
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
-    medical_records = relationship("MedicalRecord", back_populates="user")
-    appointments = relationship("Appointment", back_populates="user")
-    emergency_requests = relationship("EmergencyRequest", back_populates="user")
-    chat_conversations = relationship("ChatConversation", back_populates="user")
+    medical_records = orm_relationship("MedicalRecord", back_populates="user", cascade="all, delete-orphan")
+    appointments = orm_relationship("Appointment", back_populates="user", cascade="all, delete-orphan")
+    emergency_requests = orm_relationship("EmergencyRequest", back_populates="user", cascade="all, delete-orphan")
+    emergency_contact = orm_relationship("EmergencyContact", back_populates="user", uselist=False, cascade="all, delete-orphan")
+
+class EmergencyContact(Base):
+    __tablename__ = "emergency_contacts"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True)
+    name = Column(String(100), nullable=False)
+    relationship = Column(String(50), nullable=False)  # This is a column, not SQLAlchemy relationship
+    phone = Column(String(20), nullable=False)
+    email = Column(String(100))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = orm_relationship("User", back_populates="emergency_contact")
 
 class MedicalRecord(Base):
     __tablename__ = "medical_records"
     
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    type = Column(String(20))  # allergy, medication, condition, visit
-    name = Column(String(100))
+    type = Column(String(20), nullable=False)  # allergy, medication, condition
+    name = Column(String(100), nullable=False)
     description = Column(Text)
-    diagnosis = Column(String(200))
-    doctor_name = Column(String(100))
-    visit_date = Column(DateTime)
-    status = Column(String(20), default="active")  # active, resolved, completed
+    severity = Column(String(20))  # mild, moderate, severe
+    diagnosed_date = Column(Date)
+    is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
-    user = relationship("User", back_populates="medical_records")
+    user = orm_relationship("User", back_populates="medical_records")
+
+class Visit(Base):
+    __tablename__ = "visits"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    doctor_id = Column(Integer, ForeignKey("doctors.id"))
+    visit_date = Column(Date, nullable=False)
+    time_start = Column(String(10))
+    time_end = Column(String(10))
+    diagnosis = Column(String(200))
+    type = Column(String(50))  # General Consultation, Follow-up, Emergency, etc.
+    location = Column(String(100))
+    notes = Column(Text)
+    status = Column(String(20), default="completed")  # upcoming, completed, cancelled
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = orm_relationship("User")
+    doctor = orm_relationship("Doctor")
 
 class Doctor(Base):
     __tablename__ = "doctors"
@@ -52,14 +94,14 @@ class Doctor(Base):
     specialty = Column(String(100))
     email = Column(String(100), unique=True)
     phone = Column(String(20))
-    rating = Column(Integer, default=0)
+    rating = Column(Float, default=0.0)
     reviews_count = Column(Integer, default=0)
     avatar = Column(String(10))
     is_available = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships
-    appointments = relationship("Appointment", back_populates="doctor")
+    appointments = orm_relationship("Appointment", back_populates="doctor")
 
 class Appointment(Base):
     __tablename__ = "appointments"
@@ -70,14 +112,16 @@ class Appointment(Base):
     appointment_date = Column(DateTime, nullable=False)
     appointment_time = Column(String(10))
     type = Column(String(50), default="General Consultation")
+    location = Column(String(100))
     status = Column(String(20), default="upcoming")  # upcoming, completed, cancelled
     notes = Column(Text)
+    can_reschedule = Column(Boolean, default=True)  # Based on 12-hour rule
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
-    user = relationship("User", back_populates="appointments")
-    doctor = relationship("Doctor", back_populates="appointments")
+    user = orm_relationship("User", back_populates="appointments")
+    doctor = orm_relationship("Doctor", back_populates="appointments")
 
 class EmergencyRequest(Base):
     __tablename__ = "emergency_requests"
@@ -87,36 +131,12 @@ class EmergencyRequest(Base):
     type = Column(String(50))
     description = Column(Text, nullable=False)
     location = Column(String(200))
+    latitude = Column(Float)
+    longitude = Column(Float)
     status = Column(String(20), default="active")  # active, responded, resolved
     priority = Column(String(20), default="high")  # low, medium, high, critical
     created_at = Column(DateTime, default=datetime.utcnow)
     resolved_at = Column(DateTime)
     
     # Relationships
-    user = relationship("User", back_populates="emergency_requests")
-
-class ChatConversation(Base):
-    __tablename__ = "chat_conversations"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    conversation_id = Column(String(100), unique=True, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    last_activity = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    # Relationships
-    user = relationship("User", back_populates="chat_conversations")
-    messages = relationship("ChatMessage", back_populates="conversation")
-
-class ChatMessage(Base):
-    __tablename__ = "chat_messages"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    conversation_id = Column(Integer, ForeignKey("chat_conversations.id"), nullable=False)
-    role = Column(String(20))  # user, assistant, system
-    content = Column(Text, nullable=False)
-    tokens_used = Column(Integer)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    # Relationships
-    conversation = relationship("ChatConversation", back_populates="messages")
+    user = orm_relationship("User", back_populates="emergency_requests")
