@@ -77,6 +77,8 @@ class AppointmentUpdate(BaseModel):
     appointment_time: Optional[str] = None
     type: Optional[str] = None
     notes: Optional[str] = None
+
+
 class UserLogin(BaseModel):
     username: str
     password: str
@@ -86,7 +88,7 @@ class UserRegister(BaseModel):
     username: str
     password: str
     full_name: str
-    student_id: str
+    student_id: str  # For students: numeric ID, for doctors: license number or generated
     role: str = "student"  # student or doctor
     # Student fields
     department: Optional[str] = None
@@ -191,29 +193,59 @@ def root():
 # ---------------------------------------------------------
 @app.post("/auth/register")
 def register(user: UserRegister, db: Session = Depends(get_db)):
-    # Check if user exists
-    exists = db.query(models.User).filter(
-        (models.User.username == user.username)
-        | (models.User.student_id == user.student_id)
+    # Check if username already exists
+    existing_user = db.query(models.User).filter(
+        models.User.username == user.username
     ).first()
+    
+    if existing_user:
+        raise HTTPException(400, "Username already exists")
 
-    if exists:
-        raise HTTPException(400, "Username or Student ID already exists")
+    # For students, check if student_id already exists
+    if user.role == "student":
+        existing_student = db.query(models.User).filter(
+            models.User.student_id == user.student_id
+        ).first()
+        if existing_student:
+            raise HTTPException(400, "Student ID already exists")
 
     # Validate role-specific fields
     if user.role == "student":
         if not user.department or not user.major:
             raise HTTPException(400, "Department and Major required for students")
         if user.department not in ["SSE", "SBA", "SSAH"]:
-            raise HTTPException(400, "Invalid department")
+            raise HTTPException(400, "Invalid department. Must be SSE, SBA, or SSAH")
     elif user.role == "doctor":
         if not user.license_number or not user.specialization:
-            raise HTTPException(400, "License and Specialization required for doctors")
+            raise HTTPException(400, "License number and Specialization required for doctors")
+        # Check if license number already exists
+        existing_doctor = db.query(models.Doctor).filter(
+            models.Doctor.license_number == user.license_number
+        ).first()
+        if existing_doctor:
+            raise HTTPException(400, "License number already registered")
     else:
-        raise HTTPException(400, "Invalid role")
+        raise HTTPException(400, "Invalid role. Must be 'student' or 'doctor'")
 
     # Generate AUI email
     email = generate_aui_email(user.full_name)
+    
+    # Check if email already exists and make it unique if needed
+    base_email = email
+    counter = 1
+    while db.query(models.User).filter(models.User.email == email).first():
+        name_parts = base_email.split('@')
+        email = f"{name_parts[0]}{counter}@{name_parts[1]}"
+        counter += 1
+
+    # Generate student_id for doctors if not provided properly
+    if user.role == "doctor":
+        # Use a numeric ID for doctors based on timestamp
+        import time
+        doctor_id = str(int(time.time()))[-7:]  # Last 7 digits of timestamp
+        student_id = f"D{doctor_id}"
+    else:
+        student_id = user.student_id
 
     # Create user
     db_user = models.User(
@@ -221,10 +253,10 @@ def register(user: UserRegister, db: Session = Depends(get_db)):
         password_hash=hash_password(user.password),
         full_name=user.full_name,
         email=email,
-        student_id=user.student_id,
+        student_id=student_id,
         institution="Al Akhawayn University",
         department=user.department if user.role == "student" else None,
-        major=user.major if user.role == "student" else None,
+        major=user.major if user.role == "student" else user.specialization,
         academic_year="2025/2026",
         phone=user.phone,
         date_of_birth=datetime.strptime(user.date_of_birth, "%Y-%m-%d").date()
@@ -235,10 +267,14 @@ def register(user: UserRegister, db: Session = Depends(get_db)):
     )
 
     db.add(db_user)
-    db.flush()
+    db.flush()  # Get the user ID
 
-    # If doctor, create doctor entry
+    # If doctor, create doctor entry linked to user
     if user.role == "doctor":
+        # Generate avatar initials
+        name_parts = user.full_name.split()
+        avatar = ''.join([n[0].upper() for n in name_parts[:2]]) if len(name_parts) >= 2 else user.full_name[:2].upper()
+        
         doctor = models.Doctor(
             user_id=db_user.id,
             name=user.full_name,
@@ -246,7 +282,7 @@ def register(user: UserRegister, db: Session = Depends(get_db)):
             specialty=user.specialization,
             email=email,
             phone=user.phone,
-            avatar=''.join([n[0].upper() for n in user.full_name.split()[:2]]),
+            avatar=avatar,
             rating=0.0,
             reviews_count=0,
             is_available=True
@@ -292,7 +328,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
             "full_name": db_user.full_name,
             "email": db_user.email,
             "student_id": db_user.student_id,
-            "role": db_user.role,  # ← CRITICAL: role-based routing
+            "role": db_user.role,
             "department": db_user.department,
             "major": db_user.major
         }
@@ -311,7 +347,7 @@ def get_profile(
         models.EmergencyContact.user_id == current_user.id
     ).first()
 
-    return {
+    response = {
         "username": current_user.username,
         "email": current_user.email,
         "full_name": current_user.full_name,
@@ -331,6 +367,19 @@ def get_profile(
             "email": emergency.email
         } if emergency else None,
     }
+    
+    # If doctor, add doctor-specific info
+    if current_user.role == "doctor":
+        doctor = db.query(models.Doctor).filter(
+            models.Doctor.user_id == current_user.id
+        ).first()
+        if doctor:
+            response["license_number"] = doctor.license_number
+            response["specialty"] = doctor.specialty
+            response["rating"] = doctor.rating
+            response["reviews_count"] = doctor.reviews_count
+    
+    return response
 
 
 @app.put("/profile/update")
@@ -342,6 +391,15 @@ def update_profile(
     if updates.full_name:
         current_user.full_name = updates.full_name
         current_user.email = generate_aui_email(updates.full_name)
+        
+        # Update doctor name if applicable
+        if current_user.role == "doctor":
+            doctor = db.query(models.Doctor).filter(
+                models.Doctor.user_id == current_user.id
+            ).first()
+            if doctor:
+                doctor.name = updates.full_name
+                doctor.email = current_user.email
 
     if updates.phone:
         current_user.phone = updates.phone
@@ -370,7 +428,7 @@ def update_profile(
 
     return {
         "message": "Profile updated",
-        "email": current_user.email  # Return new email
+        "email": current_user.email
     }
 
 
@@ -596,6 +654,10 @@ def create_emergency_request(
 
     return {"message": "Emergency request created", "id": emergency.id}
 
+
+# ---------------------------------------------------------
+# APPOINTMENTS
+# ---------------------------------------------------------
 @app.get("/appointments")
 def get_appointments(
     current_user: models.User = Depends(get_current_user),
@@ -745,7 +807,7 @@ def cancel_appointment(
 
 
 # ---------------------------------------------------------
-# ENDPOINT POUR SUPPRIMER DÉFINITIVEMENT UN RECORD MÉDICAL
+# PERMANENT DELETE MEDICAL RECORD
 # ---------------------------------------------------------
 @app.delete("/medical-records/{entry_id}/permanent")
 def permanently_delete_medical_entry(
@@ -768,7 +830,7 @@ def permanently_delete_medical_entry(
 
 
 # ---------------------------------------------------------
-# ENDPOINT POUR LES VISITES (DOCTOR DASHBOARD)
+# DOCTOR DASHBOARD ENDPOINTS
 # ---------------------------------------------------------
 @app.get("/doctor/patients")
 def get_doctor_patients(
@@ -847,8 +909,6 @@ def get_doctor_schedule(
     }
 
 
-
-
 # ---------------------------------------------------------
 # CHATBOT ENDPOINTS
 # ---------------------------------------------------------
@@ -892,6 +952,16 @@ async def chat_endpoint(request: ChatRequest):
             conversation_id=request.conversation_id or "error",
             mode="error",
         )
+
+
+# ---------------------------------------------------------
+# STARTUP EVENT - Initialize Database
+# ---------------------------------------------------------
+@app.on_event("startup")
+def startup_event():
+    """Initialize database on startup"""
+    from database import init_db
+    init_db()
 
 
 # ---------------------------------------------------------

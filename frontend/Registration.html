@@ -26,7 +26,7 @@
             border-radius: 20px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 500px;
+            max-width: 550px;
             padding: 3rem;
         }
 
@@ -147,6 +147,15 @@
             display: none;
         }
 
+        .success-message {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
         .info-box {
             background: #e3f2fd;
             border-left: 4px solid #2196f3;
@@ -197,12 +206,31 @@
             display: none;
         }
 
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .password-strength {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .strength-weak { color: #d32f2f; }
+        .strength-medium { color: #f57c00; }
+        .strength-strong { color: #2e7d32; }
+
         @media (max-width: 600px) {
             .register-container {
                 padding: 2rem 1.5rem;
             }
 
             .role-selection {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
                 grid-template-columns: 1fr;
             }
         }
@@ -220,6 +248,7 @@
         </div>
 
         <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
 
         <form id="registerForm">
             <!-- Role Selection -->
@@ -262,13 +291,14 @@
                         class="form-input" 
                         placeholder="e.g., 2023001 (numbers only)"
                         pattern="[0-9]+"
-                        required
+                        title="Student ID must contain only numbers"
                     >
+                    <small style="color: #666;">Numbers only (e.g., 2023001)</small>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="department">Department *</label>
-                    <select id="department" class="form-select" required>
+                    <select id="department" class="form-select">
                         <option value="">Select Department</option>
                         <option value="SSE">SSE - School of Science and Engineering</option>
                         <option value="SBA">SBA - School of Business Administration</option>
@@ -283,8 +313,18 @@
                         id="major" 
                         class="form-input" 
                         placeholder="e.g., Computer Science"
-                        required
                     >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="yearLevel">Year Level</label>
+                    <select id="yearLevel" class="form-select">
+                        <option value="">Select Year Level</option>
+                        <option value="freshman">Freshman</option>
+                        <option value="sophomore">Sophomore</option>
+                        <option value="junior">Junior</option>
+                        <option value="senior">Senior</option>
+                    </select>
                 </div>
             </div>
 
@@ -298,15 +338,34 @@
                         class="form-input" 
                         placeholder="e.g., MD-2024-12345"
                     >
+                    <small style="color: #666;">Your official medical license number</small>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="specialty">specialty *</label>
+                    <label class="form-label" for="specialization">Specialization *</label>
+                    <select id="specialization" class="form-select">
+                        <option value="">Select Specialization</option>
+                        <option value="General Practitioner">General Practitioner</option>
+                        <option value="Pediatrician">Pediatrician</option>
+                        <option value="Cardiologist">Cardiologist</option>
+                        <option value="Dermatologist">Dermatologist</option>
+                        <option value="Neurologist">Neurologist</option>
+                        <option value="Psychiatrist">Psychiatrist</option>
+                        <option value="Orthopedist">Orthopedist</option>
+                        <option value="Gynecologist">Gynecologist</option>
+                        <option value="Ophthalmologist">Ophthalmologist</option>
+                        <option value="ENT Specialist">ENT Specialist</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="otherSpecializationGroup" style="display: none;">
+                    <label class="form-label" for="otherSpecialization">Specify Specialization *</label>
                     <input 
                         type="text" 
-                        id="specialty" 
+                        id="otherSpecialization" 
                         class="form-input" 
-                        placeholder="e.g., General Practitioner"
+                        placeholder="Enter your specialization"
                     >
                 </div>
             </div>
@@ -322,6 +381,28 @@
                 >
             </div>
 
+            <!-- Date of Birth -->
+            <div class="form-group">
+                <label class="form-label" for="dateOfBirth">Date of Birth</label>
+                <input 
+                    type="date" 
+                    id="dateOfBirth" 
+                    class="form-input"
+                >
+            </div>
+
+            <!-- Gender -->
+            <div class="form-group">
+                <label class="form-label" for="gender">Gender</label>
+                <select id="gender" class="form-select">
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                    <option value="prefer-not-to-say">Prefer not to say</option>
+                </select>
+            </div>
+
             <!-- Username -->
             <div class="form-group">
                 <label class="form-label" for="username">Username *</label>
@@ -329,34 +410,38 @@
                     type="text" 
                     id="username" 
                     class="form-input" 
-                    placeholder="Choose a username"
+                    placeholder="Choose a username (min 3 characters)"
+                    minlength="3"
                     required
                 >
+                <small style="color: #666;">This will be used to log in</small>
             </div>
 
             <!-- Password -->
-            <div class="form-group">
-                <label class="form-label" for="password">Password *</label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    class="form-input" 
-                    placeholder="Minimum 8 characters"
-                    minlength="8"
-                    required
-                >
-            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="password">Password *</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        class="form-input" 
+                        placeholder="Min 8 characters"
+                        minlength="8"
+                        required
+                    >
+                    <div class="password-strength" id="passwordStrength"></div>
+                </div>
 
-            <!-- Confirm Password -->
-            <div class="form-group">
-                <label class="form-label" for="confirmPassword">Confirm Password *</label>
-                <input 
-                    type="password" 
-                    id="confirmPassword" 
-                    class="form-input" 
-                    placeholder="Re-enter password"
-                    required
-                >
+                <div class="form-group">
+                    <label class="form-label" for="confirmPassword">Confirm Password *</label>
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        class="form-input" 
+                        placeholder="Re-enter password"
+                        required
+                    >
+                </div>
             </div>
 
             <button type="submit" class="submit-btn" id="submitBtn">Create Account</button>
@@ -372,11 +457,13 @@
 
         // Generate AUI email preview
         function generateEmail(fullName) {
-            const names = fullName.trim().split(' ');
+            const names = fullName.trim().split(' ').filter(n => n.length > 0);
             if (names.length >= 2) {
                 const firstInitial = names[0][0].toLowerCase();
                 const lastName = names[names.length - 1].toLowerCase();
                 return `${firstInitial}.${lastName}@aui.ma`;
+            } else if (names.length === 1) {
+                return `${names[0].toLowerCase()}@aui.ma`;
             }
             return '';
         }
@@ -385,6 +472,34 @@
         document.getElementById('fullName').addEventListener('input', function() {
             const email = generateEmail(this.value);
             document.getElementById('emailPreview').textContent = email ? `Email: ${email}` : 'Email: will appear here';
+        });
+
+        // Password strength checker
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthDiv = document.getElementById('passwordStrength');
+            
+            if (password.length === 0) {
+                strengthDiv.textContent = '';
+                return;
+            }
+            
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+            
+            if (strength <= 1) {
+                strengthDiv.textContent = '⚠️ Weak password';
+                strengthDiv.className = 'password-strength strength-weak';
+            } else if (strength === 2) {
+                strengthDiv.textContent = '⚡ Medium password';
+                strengthDiv.className = 'password-strength strength-medium';
+            } else {
+                strengthDiv.textContent = '✅ Strong password';
+                strengthDiv.className = 'password-strength strength-strong';
+            }
         });
 
         // Role selection
@@ -398,66 +513,158 @@
                 if (role === 'student') {
                     document.getElementById('studentFields').style.display = 'block';
                     document.getElementById('doctorFields').style.display = 'none';
-                    // Make student fields required
-                    document.getElementById('studentId').required = true;
-                    document.getElementById('department').required = true;
-                    document.getElementById('major').required = true;
-                    document.getElementById('licenseNumber').required = false;
-                    document.getElementById('specialty').required = false;
                 } else {
                     document.getElementById('studentFields').style.display = 'none';
                     document.getElementById('doctorFields').style.display = 'block';
-                    // Make doctor fields required
-                    document.getElementById('studentId').required = false;
-                    document.getElementById('department').required = false;
-                    document.getElementById('major').required = false;
-                    document.getElementById('licenseNumber').required = true;
-                    document.getElementById('specialty').required = true;
                 }
             });
         });
 
+        // Specialization "Other" handler
+        document.getElementById('specialization').addEventListener('change', function() {
+            const otherGroup = document.getElementById('otherSpecializationGroup');
+            if (this.value === 'Other') {
+                otherGroup.style.display = 'block';
+            } else {
+                otherGroup.style.display = 'none';
+            }
+        });
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+            
+            // Scroll to error
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        // Hide messages
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
         // Form submission
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            hideMessages();
 
             const submitBtn = document.getElementById('submitBtn');
-            const errorMessage = document.getElementById('errorMessage');
             
-            // Clear previous errors
-            errorMessage.style.display = 'none';
-
-            // Validate passwords
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-
-            if (password !== confirmPassword) {
-                errorMessage.textContent = 'Passwords do not match!';
-                errorMessage.style.display = 'block';
-                return;
-            }
-
             // Get role
             const role = document.querySelector('input[name="role"]:checked').value;
 
-            // Prepare data
+            // Get form values
+            const fullName = document.getElementById('fullName').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const phone = document.getElementById('phone').value.trim() || null;
+            const dateOfBirth = document.getElementById('dateOfBirth').value || null;
+            const gender = document.getElementById('gender').value || null;
+
+            // Validate full name
+            if (fullName.split(' ').filter(n => n.length > 0).length < 2) {
+                showError('Please enter your full name (first and last name)');
+                return;
+            }
+
+            // Validate username
+            if (username.length < 3) {
+                showError('Username must be at least 3 characters');
+                return;
+            }
+
+            // Validate passwords
+            if (password.length < 8) {
+                showError('Password must be at least 8 characters');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('Passwords do not match!');
+                return;
+            }
+
+            // Prepare data based on role
             const formData = {
-                username: document.getElementById('username').value,
+                username: username,
                 password: password,
-                full_name: document.getElementById('fullName').value,
-                phone: document.getElementById('phone').value || null,
+                full_name: fullName,
+                phone: phone,
+                date_of_birth: dateOfBirth,
+                gender: gender,
                 role: role
             };
 
             // Add role-specific fields
             if (role === 'student') {
-                formData.student_id = document.getElementById('studentId').value;
-                formData.department = document.getElementById('department').value;
-                formData.major = document.getElementById('major').value;
+                const studentId = document.getElementById('studentId').value.trim();
+                const department = document.getElementById('department').value;
+                const major = document.getElementById('major').value.trim();
+                const yearLevel = document.getElementById('yearLevel').value || null;
+
+                // Validate student fields
+                if (!studentId) {
+                    showError('Student ID is required');
+                    return;
+                }
+                if (!/^[0-9]+$/.test(studentId)) {
+                    showError('Student ID must contain only numbers');
+                    return;
+                }
+                if (!department) {
+                    showError('Please select a department');
+                    return;
+                }
+                if (!major) {
+                    showError('Major is required');
+                    return;
+                }
+
+                formData.student_id = studentId;
+                formData.department = department;
+                formData.major = major;
+                formData.year_level = yearLevel;
             } else {
-                formData.student_id = 'DOC-' + Date.now(); // Generate doctor ID
-                formData.license_number = document.getElementById('licenseNumber').value;
-                formData.specialty = document.getElementById('specialty').value;
+                // Doctor fields
+                const licenseNumber = document.getElementById('licenseNumber').value.trim();
+                let specialization = document.getElementById('specialization').value;
+                
+                // If "Other" is selected, use the custom specialization
+                if (specialization === 'Other') {
+                    specialization = document.getElementById('otherSpecialization').value.trim();
+                    if (!specialization) {
+                        showError('Please specify your specialization');
+                        return;
+                    }
+                }
+
+                // Validate doctor fields
+                if (!licenseNumber) {
+                    showError('Medical license number is required');
+                    return;
+                }
+                if (!specialization) {
+                    showError('Please select a specialization');
+                    return;
+                }
+
+                // For doctors, student_id will be generated by backend
+                formData.student_id = licenseNumber; // Use license as temporary ID
+                formData.license_number = licenseNumber;
+                formData.specialization = specialization;
             }
 
             // Disable submit button
@@ -465,6 +672,8 @@
             submitBtn.textContent = 'Creating Account...';
 
             try {
+                console.log('Sending registration data:', formData);
+                
                 const response = await fetch(`${API_URL}/auth/register`, {
                     method: 'POST',
                     headers: {
@@ -474,6 +683,7 @@
                 });
 
                 const data = await response.json();
+                console.log('Registration response:', data);
 
                 if (response.ok) {
                     // Store token and user info
@@ -484,27 +694,47 @@
                     sessionStorage.setItem('email', data.user.email);
                     sessionStorage.setItem('role', data.user.role);
 
-                    alert(`✅ Account created successfully!\n\nYour AUI email: ${data.user.email}\n\nRedirecting to your dashboard...`);
+                    showSuccess('Account created successfully! Redirecting...');
 
-                    // Redirect based on role
-                    if (data.user.role === 'doctor') {
-                        window.location.href = 'DoctorDashboard.html';
-                    } else {
-                        window.location.href = 'MedicalDashboard.html';
-                    }
+                    // Show confirmation
+                    setTimeout(() => {
+                        alert(`✅ Account created successfully!\n\nYour AUI email: ${data.user.email}\nRole: ${data.user.role === 'doctor' ? 'Doctor' : 'Student'}\n\nRedirecting to your dashboard...`);
+
+                        // Redirect based on role
+                        if (data.user.role === 'doctor') {
+                            window.location.href = 'DoctorDashboard.html';
+                        } else {
+                            window.location.href = 'MedicalDashboard.html';
+                        }
+                    }, 500);
                 } else {
-                    errorMessage.textContent = data.detail || 'Registration failed. Please try again.';
-                    errorMessage.style.display = 'block';
+                    // Handle specific error messages
+                    let errorMessage = data.detail || 'Registration failed. Please try again.';
+                    
+                    // Make error messages more user-friendly
+                    if (errorMessage.includes('Username already exists')) {
+                        errorMessage = 'This username is already taken. Please choose a different one.';
+                    } else if (errorMessage.includes('Student ID already exists')) {
+                        errorMessage = 'This Student ID is already registered. Please check your ID or contact support.';
+                    } else if (errorMessage.includes('License number already registered')) {
+                        errorMessage = 'This license number is already registered. Please check your license or contact support.';
+                    }
+                    
+                    showError(errorMessage);
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Create Account';
                 }
             } catch (error) {
                 console.error('Registration error:', error);
-                errorMessage.textContent = 'Network error. Please check your connection and try again.';
-                errorMessage.style.display = 'block';
+                showError('Network error. Please check if the server is running and try again.');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Create Account';
             }
+        });
+
+        // Auto-validate student ID format
+        document.getElementById('studentId').addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
         });
     </script>
 </body>

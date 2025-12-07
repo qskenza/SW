@@ -95,6 +95,21 @@
             font-size: 0.9rem;
         }
 
+        .logout-btn {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #b71c1c;
+        }
+
         /* Quick Stats Bar */
         .stats-bar {
             background: white;
@@ -307,54 +322,6 @@
         .form-input[readonly] {
             background: #f5f5f5;
             cursor: not-allowed;
-        }
-
-        /* Medical Information Tab */
-        .medical-summary {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
-        }
-
-        .summary-card {
-            background: #f8fff8;
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            border: 2px solid #e8f5e8;
-        }
-
-        .summary-card h3 {
-            color: #1b5e20;
-            margin-bottom: 0.8rem;
-            font-size: 1rem;
-        }
-
-        .summary-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #388e3c;
-        }
-
-        .add-entry-btn {
-            background: #4caf50;
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.8rem;
-            width: 100%;
-        }
-
-        .add-entry-btn:hover {
-            background: #388e3c;
         }
 
         /* Schedule Tab */
@@ -627,185 +594,38 @@
             transform: translateY(-2px);
         }
 
-        /* Emergency Alerts */
-        .emergency-alert {
-            background: #ffebee;
-            border-radius: 12px;
-            padding: 1.5rem;
-            border-left: 4px solid #d32f2f;
-            margin-bottom: 2rem;
-        }
-
-        .alert-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .alert-icon {
-            font-size: 2rem;
-            color: #d32f2f;
-        }
-
-        .alert-title {
-            color: #d32f2f;
-            font-weight: 600;
-            font-size: 1.2rem;
-        }
-
-        .alert-patient {
-            font-weight: 600;
-            color: #555;
-            margin-bottom: 0.5rem;
-        }
-
-        .alert-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .alert-btn {
-            flex: 1;
-            padding: 0.8rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .acknowledge-btn {
-            background: #d32f2f;
-            color: white;
-        }
-
-        .view-btn {
-            background: white;
-            color: #d32f2f;
-            border: 2px solid #d32f2f;
-        }
-
-        /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-
-        .modal {
-            background: white;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-wide {
-            max-width: 800px;
-        }
-
-        .modal-header {
-            background: #1b5e20;
-            color: white;
-            padding: 1.5rem 2rem;
-            border-radius: 20px 20px 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h2 {
-            font-size: 1.5rem;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 2rem;
-            cursor: pointer;
-            line-height: 1;
-        }
-
-        .modal-body {
-            padding: 2rem;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 1rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .modal-cancel {
-            background: #f5f5f5;
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 3rem;
             color: #666;
         }
 
-        .modal-submit {
-            background: #1b5e20;
-            color: white;
+        .loading-spinner {
+            border: 4px solid #e8f5e8;
+            border-top: 4px solid #4caf50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
         }
 
-        .modal-btn:hover {
-            transform: translateY(-2px);
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        /* Quick Action Form Styles */
-        .form-textarea {
-            width: 100%;
-            padding: 1rem 1.2rem;
-            border: 2px solid #e8f5e8;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: #f8fff8;
-            resize: vertical;
-            min-height: 100px;
-            font-family: inherit;
-        }
-
-        .form-textarea:focus {
-            outline: none;
-            border-color: #4caf50;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-            background: white;
-        }
-
-        .datetime-inputs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #888;
         }
 
         /* Responsive */
         @media (max-width: 1200px) {
             .form-grid {
                 grid-template-columns: 1fr;
-            }
-            
-            .medical-summary {
-                grid-template-columns: repeat(2, 1fr);
             }
             
             .quick-actions-grid {
@@ -868,17 +688,9 @@
             .stat-divider:nth-child(even) {
                 display: none;
             }
-            
-            .datetime-inputs {
-                grid-template-columns: 1fr;
-            }
         }
 
         @media (max-width: 480px) {
-            .medical-summary {
-                grid-template-columns: 1fr;
-            }
-            
             .quick-actions-grid {
                 grid-template-columns: 1fr;
             }
@@ -897,17 +709,6 @@
                 display: none;
             }
         }
-
-        /* Animations */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .pulse {
-            animation: pulse 2s infinite;
-        }
     </style>
 </head>
 <body>
@@ -918,10 +719,11 @@
             <nav></nav>
             <div class="doctor-info">
                 <div class="doctor-details">
-                    <div class="doctor-name">Dr. Sarah Chen</div>
-                    <div class="doctor-role">General Practitioner</div>
+                    <div class="doctor-name" id="headerDoctorName">Loading...</div>
+                    <div class="doctor-role" id="headerDoctorSpecialty">Loading...</div>
                 </div>
-                <div class="doctor-avatar">SC</div>
+                <div class="doctor-avatar" id="headerDoctorAvatar">--</div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
         </div>
     </header>
@@ -929,17 +731,17 @@
     <!-- Quick Stats -->
     <div class="stats-bar">
         <div class="stat-item">
-            <div class="stat-number">8</div>
+            <div class="stat-number" id="statPatientsToday">0</div>
             <div class="stat-label">Patients Today</div>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
-            <div class="stat-number">24</div>
+            <div class="stat-number" id="statAppointmentsWeek">0</div>
             <div class="stat-label">Appointments This Week</div>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
-            <div class="stat-number">3</div>
+            <div class="stat-number" id="statPendingPrescriptions">0</div>
             <div class="stat-label">Pending Prescriptions</div>
         </div>
         <div class="stat-divider"></div>
@@ -949,7 +751,7 @@
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
-            <div class="stat-number">4.9★</div>
+            <div class="stat-number" id="statRating">0★</div>
             <div class="stat-label">Patient Rating</div>
         </div>
     </div>
@@ -957,17 +759,17 @@
     <!-- Main Container -->
     <div class="container">
         <h1 class="dashboard-title">Doctor Dashboard</h1>
-        <p class="dashboard-subtitle">Welcome back, Dr. Chen. Here's your overview for today.</p>
+        <p class="dashboard-subtitle" id="welcomeMessage">Welcome back! Here's your overview for today.</p>
 
         <!-- Profile Section with Tabs -->
         <section class="profile-section">
             <!-- Profile Header -->
             <div class="profile-header">
-                <div class="profile-avatar-large">SC</div>
+                <div class="profile-avatar-large" id="profileAvatar">--</div>
                 <div class="profile-basic-info">
-                    <h2>Dr. Sarah Chen</h2>
-                    <p>General Practitioner, Pediatrics • ID: DOC-2024-CS</p>
-                    <p>License: MD-2024-12345 • Campus Health Center</p>
+                    <h2 id="profileName">Loading...</h2>
+                    <p id="profileDetails">Loading...</p>
+                    <p id="profileLicense">Loading...</p>
                 </div>
                 <button class="edit-profile-btn" id="editProfileBtn">
                     <span>✏️</span> Edit Profile
@@ -988,104 +790,39 @@
                 <form id="personalForm">
                     <div class="form-grid">
                         <div class="form-group">
-                            <label class="form-label">First Name</label>
-                            <input type="text" class="form-input" value="Sarah" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Last Name</label>
-                            <input type="text" class="form-input" value="Chen" readonly>
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-input" id="formFullName" readonly>
                         </div>
                         <div class="form-group">
                             <label class="form-label">License Number</label>
-                            <input type="text" class="form-input" value="MD-2024-12345" readonly>
+                            <input type="text" class="form-input" id="formLicenseNumber" readonly>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">specialty</label>
-                            <input type="text" class="form-input" value="General Practitioner, Pediatrics" readonly>
+                            <label class="form-label">Specialization</label>
+                            <input type="text" class="form-input" id="formSpecialty" readonly>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Email Address</label>
-                            <input type="email" class="form-input" value="dr.chen@careconnect.com" readonly>
+                            <input type="email" class="form-input" id="formEmail" readonly>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Phone Number</label>
-                            <input type="tel" class="form-input" value="(123) 456-7891" readonly>
+                            <input type="tel" class="form-input" id="formPhone" readonly>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Office Location</label>
-                            <input type="text" class="form-input" value="Campus Health Center, Room 204" readonly>
+                            <input type="text" class="form-input" value="Campus Health Center" readonly>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Years of Experience</label>
-                            <input type="text" class="form-input" value="8 years" readonly>
-                        </div>
-                    </div>
-                    <div style="text-align: right; margin-top: 2rem;">
-                        <button type="button" class="edit-profile-btn" id="editPersonalBtn">
-                            <span>✏️</span> Edit Information
-                        </button>
                     </div>
                 </form>
             </div>
 
             <div class="tab-content" id="schedule-tab">
                 <h3 class="tab-title">Today's Schedule</h3>
-                
-                <div class="schedule-list">
-                    <div class="schedule-item" data-appointment="1">
-                        <div class="schedule-time">
-                            <span class="time-badge">09:00 AM</span>
-                            <span class="appointment-status status-confirmed">Confirmed</span>
-                        </div>
-                        <div class="patient-name">Alexandra Miller</div>
-                        <div class="appointment-type">Follow-up Consultation</div>
-                        <div class="appointment-actions">
-                            <button class="action-btn start-btn">Start Consultation</button>
-                            <button class="action-btn cancel-btn">Cancel</button>
-                            <button class="action-btn reschedule-btn" data-patient="Alexandra Miller" data-type="Follow-up Consultation">Reschedule</button>
-                        </div>
-                    </div>
-
-                    <div class="schedule-item" data-appointment="2">
-                        <div class="schedule-time">
-                            <span class="time-badge">10:30 AM</span>
-                            <span class="appointment-status status-waiting">Waiting</span>
-                        </div>
-                        <div class="patient-name">Michael Chen</div>
-                        <div class="appointment-type">Annual Physical</div>
-                        <div class="appointment-actions">
-                            <button class="action-btn start-btn">Start Consultation</button>
-                            <button class="action-btn cancel-btn">Cancel</button>
-                            <button class="action-btn reschedule-btn" data-patient="Michael Chen" data-type="Annual Physical">Reschedule</button>
-                        </div>
-                    </div>
-
-                    <div class="schedule-item" data-appointment="3">
-                        <div class="schedule-time">
-                            <span class="time-badge">02:00 PM</span>
-                            <span class="appointment-status status-confirmed">Confirmed</span>
-                        </div>
-                        <div class="patient-name">Sarah Johnson</div>
-                        <div class="appointment-type">Vaccination</div>
-                        <div class="appointment-actions">
-                            <button class="action-btn start-btn">Start Consultation</button>
-                            <button class="action-btn cancel-btn">Cancel</button>
-                            <button class="action-btn reschedule-btn" data-patient="Sarah Johnson" data-type="Vaccination">Reschedule</button>
-                        </div>
-                    </div>
-
-                    <div class="schedule-item" data-appointment="4">
-                        <div class="schedule-time">
-                            <span class="time-badge">03:30 PM</span>
-                            <span class="appointment-status status-confirmed">Confirmed</span>
-                        </div>
-                        <div class="patient-name">Robert Williams</div>
-                        <div class="appointment-type">Injury Assessment</div>
-                        <div class="appointment-actions">
-                            <button class="action-btn start-btn">Start Consultation</button>
-                            <button class="action-btn cancel-btn">Cancel</button>
-                            <button class="action-btn reschedule-btn" data-patient="Robert Williams" data-type="Injury Assessment">Reschedule</button>
-                        </div>
+                <div id="scheduleContainer">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading schedule...</p>
                     </div>
                 </div>
             </div>
@@ -1127,12 +864,6 @@
                         <input type="text" class="form-input" value="30 minutes" readonly>
                     </div>
                 </div>
-
-                <div style="text-align: right; margin-top: 2rem;">
-                    <button type="button" class="edit-profile-btn" id="editAvailabilityBtn">
-                        <span>✏️</span> Edit Availability
-                    </button>
-                </div>
             </div>
 
             <div class="tab-content" id="quickactions-tab">
@@ -1158,478 +889,37 @@
         <!-- Patient Queue -->
         <section class="queue-section">
             <div class="queue-header">
-                <h2 class="section-title">Current Patient Queue</h2>
+                <h2 class="section-title">Today's Patients</h2>
                 <div class="queue-actions">
                     <button class="queue-btn call-next-btn" id="callNextBtn">
                         Call Next Patient
                     </button>
-                    <button class="queue-btn refresh-btn">
-                        Refresh Queue
+                    <button class="queue-btn refresh-btn" onclick="loadSchedule()">
+                        Refresh
                     </button>
                 </div>
             </div>
             
-            <table class="queue-table">
-                <thead>
-                    <tr>
-                        <th>Queue #</th>
-                        <th>Patient</th>
-                        <th>Reason</th>
-                        <th>Wait Time</th>
-                        <th>Priority</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="current-patient" data-patient-id="P001">
-                        <td class="patient-id">#001</td>
-                        <td>
-                            <div class="patient-info">
-                                <div class="patient-avatar">AJ</div>
-                                <div>
-                                    <div style="font-weight: 600; color: #1b5e20;">Alice Johnson</div>
-                                    <div style="font-size: 0.9rem; color: #666;">ID: 52021001</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>Seasonal Allergies Consultation</td>
-                        <td class="wait-time">0 min</td>
-                        <td><span class="priority-normal">Normal</span></td>
-                    </tr>
-                    <tr data-patient-id="P002">
-                        <td class="patient-id">#002</td>
-                        <td>
-                            <div class="patient-info">
-                                <div class="patient-avatar">BW</div>
-                                <div>
-                                    <div style="font-weight: 600; color: #1b5e20;">Bob Williams</div>
-                                    <div style="font-size: 0.9rem; color: #666;">ID: 52021002</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>Sprain Follow-up</td>
-                        <td class="wait-time">15 min</td>
-                        <td><span class="priority-high">High</span></td>
-                    </tr>
-                    <tr data-patient-id="P003">
-                        <td class="patient-id">#003</td>
-                        <td>
-                            <div class="patient-info">
-                                <div class="patient-avatar">EK</div>
-                                <div>
-                                    <div style="font-weight: 600; color: #1b5e20;">Emma Kim</div>
-                                    <div style="font-size: 0.9rem; color: #666;">ID: 52021003</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>Routine Check-up</td>
-                        <td class="wait-time">25 min</td>
-                        <td><span class="priority-low">Low</span></td>
-                    </tr>
-                    <tr data-patient-id="P004">
-                        <td class="patient-id">#004</td>
-                        <td>
-                            <div class="patient-info">
-                                <div class="patient-avatar">DP</div>
-                                <div>
-                                    <div style="font-weight: 600; color: #1b5e20;">David Park</div>
-                                    <div style="font-size: 0.9rem; color: #666;">ID: 52021004</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>Vaccination</td>
-                        <td class="wait-time">40 min</td>
-                        <td><span class="priority-normal">Normal</span></td>
-                    </tr>
-                </tbody>
-            </table>
+            <div id="patientQueueContainer">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading patients...</p>
+                </div>
+            </div>
         </section>
-
-        <!-- Emergency Alert -->
-        <div class="emergency-alert">
-            <div class="alert-header">
-                <div class="alert-icon">⚠️</div>
-                <div class="alert-title">Emergency Alert</div>
-            </div>
-            <div class="alert-patient">Patient: Robert Williams</div>
-            <div style="color: #666; font-size: 0.95rem; margin-bottom: 0.5rem;">
-                Severe allergic reaction reported. Requires immediate attention.
-            </div>
-            <div style="color: #d32f2f; font-weight: 600; font-size: 0.9rem;">
-                Room: Emergency 3 • Time: 14:30
-            </div>
-            <div class="alert-actions">
-                <button class="alert-btn acknowledge-btn">Acknowledge</button>
-                <button class="alert-btn view-btn" id="viewEmergencyBtn">View Details</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Profile Modal -->
-    <div class="modal-overlay" id="editProfileModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2>Edit Professional Information</h2>
-                <button class="close-modal" data-modal="editProfileModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="editProfileForm">
-                    <div class="form-group">
-                        <label class="form-label">First Name</label>
-                        <input type="text" class="form-input" value="Sarah" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Last Name</label>
-                        <input type="text" class="form-input" value="Chen" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email Address</label>
-                        <input type="email" class="form-input" value="dr.chen@careconnect.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Phone Number</label>
-                        <input type="tel" class="form-input" value="(123) 456-7891" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">specialty</label>
-                        <input type="text" class="form-input" value="General Practitioner, Pediatrics" required>
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="modal-btn modal-cancel" data-modal="editProfileModal">Cancel</button>
-                        <button type="submit" class="modal-btn modal-submit">Save Changes</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Reschedule Appointment Modal -->
-    <div class="modal-overlay" id="rescheduleModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2>Reschedule Appointment</h2>
-                <button class="close-modal" data-modal="rescheduleModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div style="background: #f8fff8; padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
-                    <div style="font-weight: 600; color: #1b5e20;" id="reschedulePatientName">Patient Name</div>
-                    <div style="color: #666;" id="rescheduleAppointmentType">Appointment Type</div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Select New Date</label>
-                    <input type="date" class="form-input" id="newAppointmentDate" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Select New Time</label>
-                    <div class="datetime-inputs">
-                        <select class="form-input" id="newAppointmentHour" required>
-                            <option value="">Hour</option>
-                            <option value="09">09</option>
-                            <option value="10">10</option>
-                            <option value="11">11</option>
-                            <option value="12">12</option>
-                            <option value="13">13</option>
-                            <option value="14">14</option>
-                            <option value="15">15</option>
-                            <option value="16">16</option>
-                        </select>
-                        <select class="form-input" id="newAppointmentMinute" required>
-                            <option value="">Minute</option>
-                            <option value="00">00</option>
-                            <option value="15">15</option>
-                            <option value="30">30</option>
-                            <option value="45">45</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Rescheduling Reason</label>
-                    <textarea class="form-textarea" id="rescheduleReason" placeholder="Please provide reason for rescheduling..." rows="3"></textarea>
-                </div>
-                
-                <div class="modal-actions">
-                    <button type="button" class="modal-btn modal-cancel" data-modal="rescheduleModal">Cancel</button>
-                    <button type="button" class="modal-btn modal-submit" id="confirmRescheduleBtn">Confirm Reschedule</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Cancel Appointment Modal -->
-    <div class="modal-overlay" id="cancelAppointmentModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2>Cancel Appointment</h2>
-                <button class="close-modal" data-modal="cancelAppointmentModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p style="margin-bottom: 1.5rem;">Are you sure you want to cancel this appointment?</p>
-                <div style="background: #f8fff8; padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
-                    <div style="font-weight: 600; color: #1b5e20;" id="modalPatientName">Patient Name</div>
-                    <div style="color: #666;" id="modalAppointmentType">Appointment Type</div>
-                    <div style="color: #666; margin-top: 0.5rem;" id="modalDateTime">Date and Time</div>
-                    <div style="color: #666;" id="modalLocation">Location</div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Cancellation Reason</label>
-                    <select class="form-input" id="cancellationReason">
-                        <option value="">Select a reason...</option>
-                        <option value="emergency">Medical Emergency</option>
-                        <option value="doctor_unavailable">Doctor Unavailable</option>
-                        <option value="facility_issue">Facility Issue</option>
-                        <option value="other">Other Reason</option>
-                    </select>
-                </div>
-                <div class="form-group" id="otherReasonGroup" style="display: none;">
-                    <label class="form-label">Please specify</label>
-                    <textarea class="form-textarea" rows="3" placeholder="Enter reason for cancellation..."></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="modal-btn modal-cancel" data-modal="cancelAppointmentModal">Cancel</button>
-                    <button type="button" class="modal-btn modal-submit" id="confirmCancelBtn">Confirm Cancellation</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Emergency Details Modal -->
-    <div class="modal-overlay" id="emergencyDetailsModal">
-        <div class="modal modal-wide">
-            <div class="modal-header">
-                <h2>Emergency Case Details</h2>
-                <button class="close-modal" data-modal="emergencyDetailsModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div style="background: #ffebee; padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
-                    <div style="font-weight: 600; color: #d32f2f; font-size: 1.2rem;">⚠️ CRITICAL CASE</div>
-                    <div style="color: #666; margin-top: 0.5rem;">Severe Allergic Reaction - Anaphylaxis</div>
-                </div>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Patient Name</label>
-                        <input type="text" class="form-input" value="Robert Williams" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Patient ID</label>
-                        <input type="text" class="form-input" value="52021005" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Age</label>
-                        <input type="text" class="form-input" value="42" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Blood Type</label>
-                        <input type="text" class="form-input" value="O+" readonly>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Vital Signs</label>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <input type="text" class="form-input" value="BP: 90/60 mmHg" readonly style="background: #ffebee;">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" class="form-input" value="HR: 120 bpm" readonly style="background: #ffebee;">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" class="form-input" value="SpO2: 92%" readonly style="background: #ffebee;">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" class="form-input" value="Temp: 38.5°C" readonly style="background: #ffebee;">
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Symptoms Observed</label>
-                    <textarea class="form-textarea" readonly style="background: #f8fff8;">
-• Difficulty breathing
-• Facial swelling (lips, eyes)
-• Hives/rash over torso
-• Wheezing
-• Nausea and vomiting
-• Dizziness
-                    </textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Allergen Exposure</label>
-                    <input type="text" class="form-input" value="Peanuts (known allergy)" readonly>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Emergency Treatment Given</label>
-                    <textarea class="form-textarea" readonly style="background: #f8fff8;">
-1. Epinephrine 0.3mg IM - 14:32
-2. Oxygen via mask 6L/min - 14:33
-3. Albuterol nebulizer - 14:35
-4. Diphenhydramine 50mg IV - 14:36
-                    </textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Current Status</label>
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <div style="width: 12px; height: 12px; background: #d32f2f; border-radius: 50%;"></div>
-                        <span style="color: #d32f2f; font-weight: 600;">CRITICAL - Requires ICU monitoring</span>
-                    </div>
-                </div>
-                
-                <div class="modal-actions">
-                    <button type="button" class="modal-btn modal-cancel" data-modal="emergencyDetailsModal">Close</button>
-                    <button type="button" class="modal-btn modal-submit" id="transferToICU">Transfer to ICU</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Update Medical Record Modal -->
-    <div class="modal-overlay" id="updateRecordModal">
-        <div class="modal modal-wide">
-            <div class="modal-header">
-                <h2>Update Medical Record</h2>
-                <button class="close-modal" data-modal="updateRecordModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="medicalRecordForm">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">Patient Name</label>
-                            <input type="text" class="form-input" id="recordPatientName" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Patient ID</label>
-                            <input type="text" class="form-input" id="recordPatientId" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Visit Date</label>
-                            <input type="date" class="form-input" id="recordVisitDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Primary Diagnosis</label>
-                            <input type="text" class="form-input" id="recordDiagnosis" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Symptoms Reported</label>
-                        <textarea class="form-textarea" id="recordSymptoms" placeholder="List all symptoms reported by the patient..." rows="3" required></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Clinical Examination Findings</label>
-                        <textarea class="form-textarea" id="recordExamination" placeholder="Enter examination findings..." rows="3"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Prescription Given</label>
-                        <textarea class="form-textarea" id="recordPrescription" placeholder="Enter prescribed medications and instructions..." rows="4" required></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Clinical Notes</label>
-                        <textarea class="form-textarea" id="recordNotes" placeholder="Add any additional notes or observations..." rows="3"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Follow-up Date</label>
-                        <input type="date" class="form-input" id="recordFollowupDate">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Follow-up Instructions</label>
-                        <textarea class="form-textarea" id="recordFollowupInstructions" placeholder="Enter follow-up instructions for the patient..." rows="2"></textarea>
-                    </div>
-                    
-                    <div class="modal-actions">
-                        <button type="button" class="modal-btn modal-cancel" data-modal="updateRecordModal">Cancel</button>
-                        <button type="submit" class="modal-btn modal-submit">Save Medical Record</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Action Modals -->
-    <div class="modal-overlay" id="prescriptionModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2>New Prescription</h2>
-                <button class="close-modal" data-modal="prescriptionModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="prescriptionForm">
-                    <div class="form-group">
-                        <label class="form-label">Patient Name</label>
-                        <input type="text" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Medication</label>
-                        <input type="text" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Dosage</label>
-                        <input type="text" class="form-input" placeholder="e.g., 500mg" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Instructions</label>
-                        <textarea class="form-textarea" rows="3" required></textarea>
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="modal-btn modal-cancel" data-modal="prescriptionModal">Cancel</button>
-                        <button type="submit" class="modal-btn modal-submit">Issue Prescription</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="referralModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2>Create Referral</h2>
-                <button class="close-modal" data-modal="referralModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="referralForm">
-                    <div class="form-group">
-                        <label class="form-label">Patient Name</label>
-                        <input type="text" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Specialist Type</label>
-                        <select class="form-input" required>
-                            <option value="">Select specialist...</option>
-                            <option value="cardiologist">Cardiologist</option>
-                            <option value="neurologist">Neurologist</option>
-                            <option value="orthopedic">Orthopedic Surgeon</option>
-                            <option value="dermatologist">Dermatologist</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Reason for Referral</label>
-                        <textarea class="form-textarea" rows="3" required></textarea>
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="modal-btn modal-cancel" data-modal="referralModal">Cancel</button>
-                        <button type="submit" class="modal-btn modal-submit">Create Referral</button>
-                    </div>
-                </form>
-            </div>
-        </div>
     </div>
 
     <script>
         const API_URL = 'http://localhost:8000';
+        let doctorData = null;
 
-        // Check if user is doctor
-        window.addEventListener('load', async function() {
-            const role = sessionStorage.getItem('role');
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check authentication
             const token = sessionStorage.getItem('token');
+            const role = sessionStorage.getItem('role');
             
             if (!token) {
                 window.location.href = 'Login.html';
@@ -1642,9 +932,101 @@
                 return;
             }
             
-            // Load doctor data
+            // Load doctor profile
+            await loadDoctorProfile();
+            
+            // Load schedule
+            await loadSchedule();
+            
+            // Initialize tabs
+            initializeTabs();
+            
+            // Initialize quick actions
+            initializeQuickActions();
+        });
+
+        // ============================================
+        // LOAD DOCTOR PROFILE
+        // ============================================
+        async function loadDoctorProfile() {
             try {
+                const token = sessionStorage.getItem('token');
                 const response = await fetch(`${API_URL}/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        sessionStorage.clear();
+                        window.location.href = 'Login.html';
+                        return;
+                    }
+                    throw new Error('Failed to load profile');
+                }
+                
+                doctorData = await response.json();
+                console.log('Doctor data loaded:', doctorData);
+                
+                // Update UI with doctor data
+                updateDoctorUI(doctorData);
+                
+            } catch (error) {
+                console.error('Error loading doctor profile:', error);
+                alert('Error loading profile. Please try logging in again.');
+            }
+        }
+
+        // ============================================
+        // UPDATE UI WITH DOCTOR DATA
+        // ============================================
+        function updateDoctorUI(data) {
+            const fullName = data.full_name || 'Doctor';
+            const specialty = data.specialty || data.major || 'General Practitioner';
+            const initials = getInitials(fullName);
+            const licenseNumber = data.license_number || 'N/A';
+            const email = data.email || 'N/A';
+            const phone = data.phone || 'N/A';
+            const rating = data.rating || 0;
+            const reviewsCount = data.reviews_count || 0;
+            
+            // Header
+            document.getElementById('headerDoctorName').textContent = fullName;
+            document.getElementById('headerDoctorSpecialty').textContent = specialty;
+            document.getElementById('headerDoctorAvatar').textContent = initials;
+            
+            // Welcome message
+            document.getElementById('welcomeMessage').textContent = 
+                `Welcome back, Dr. ${fullName.split(' ').pop()}. Here's your overview for today.`;
+            
+            // Profile section
+            document.getElementById('profileAvatar').textContent = initials;
+            document.getElementById('profileName').textContent = `Dr. ${fullName}`;
+            document.getElementById('profileDetails').textContent = 
+                `${specialty} • ID: ${data.student_id || 'N/A'}`;
+            document.getElementById('profileLicense').textContent = 
+                `License: ${licenseNumber} • Campus Health Center`;
+            
+            // Form fields
+            document.getElementById('formFullName').value = fullName;
+            document.getElementById('formLicenseNumber').value = licenseNumber;
+            document.getElementById('formSpecialty').value = specialty;
+            document.getElementById('formEmail').value = email;
+            document.getElementById('formPhone').value = phone;
+            
+            // Stats
+            document.getElementById('statRating').textContent = 
+                rating > 0 ? `${rating.toFixed(1)}★` : 'New';
+        }
+
+        // ============================================
+        // LOAD SCHEDULE
+        // ============================================
+        async function loadSchedule() {
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/doctor/schedule`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -1652,329 +1034,199 @@
                 
                 if (response.ok) {
                     const data = await response.json();
-                    // Update UI with doctor data
-                    document.querySelector('.doctor-name').textContent = data.full_name;
-                    // ... update other fields
+                    displaySchedule(data.appointments || []);
+                    displayPatientQueue(data.appointments || []);
+                    
+                    // Update stats
+                    document.getElementById('statPatientsToday').textContent = 
+                        data.appointments ? data.appointments.length : 0;
+                    document.getElementById('statAppointmentsWeek').textContent = 
+                        data.appointments ? data.appointments.length : 0;
+                } else {
+                    // Show empty state
+                    displaySchedule([]);
+                    displayPatientQueue([]);
                 }
+                
             } catch (error) {
-                console.error('Error loading doctor data:', error);
+                console.error('Error loading schedule:', error);
+                displaySchedule([]);
+                displayPatientQueue([]);
             }
-        });
-        // Tab Functionality
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const tabId = this.getAttribute('data-tab');
-                
-                // Remove active class from all tabs
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                
-                // Add active class to clicked tab
-                this.classList.add('active');
-                document.getElementById(`${tabId}-tab`).classList.add('active');
-            });
-        });
-
-        // Edit Profile Button
-        document.getElementById('editProfileBtn').addEventListener('click', function() {
-            document.getElementById('editProfileModal').style.display = 'flex';
-        });
-
-        // Edit Personal Information Button
-        document.getElementById('editPersonalBtn').addEventListener('click', function() {
-            const inputs = document.querySelectorAll('#personalForm .form-input');
-            inputs.forEach(input => input.readOnly = false);
-            this.innerHTML = '💾 Save Changes';
-            this.onclick = function() {
-                inputs.forEach(input => input.readOnly = true);
-                this.innerHTML = '<span>✏️</span> Edit Information';
-                alert('Personal information updated successfully!');
-            };
-        });
-
-        // Edit Availability Button
-        document.getElementById('editAvailabilityBtn').addEventListener('click', function() {
-            const inputs = document.querySelectorAll('#availability-tab .form-input');
-            inputs.forEach(input => input.readOnly = false);
-            this.innerHTML = '💾 Save Changes';
-            this.onclick = function() {
-                inputs.forEach(input => input.readOnly = true);
-                this.innerHTML = '<span>✏️</span> Edit Availability';
-                alert('Availability updated successfully!');
-            };
-        });
-
-        // Appointment Actions
-        document.querySelectorAll('.start-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const appointment = this.closest('.schedule-item');
-                const patientName = appointment.querySelector('.patient-name').textContent;
-                const time = appointment.querySelector('.time-badge').textContent;
-                alert(`Starting consultation with ${patientName} at ${time}\n\nConsultation room will be prepared.`);
-            });
-        });
-
-        // Reschedule Appointment Button
-        document.querySelectorAll('.reschedule-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const appointment = this.closest('.schedule-item');
-                const patientName = this.getAttribute('data-patient');
-                const appointmentType = this.getAttribute('data-type');
-                const time = appointment.querySelector('.time-badge').textContent;
-                
-                // Set modal content
-                document.getElementById('reschedulePatientName').textContent = patientName;
-                document.getElementById('rescheduleAppointmentType').textContent = appointmentType;
-                
-                // Set today's date as default
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('newAppointmentDate').value = today;
-                
-                // Show modal
-                document.getElementById('rescheduleModal').style.display = 'flex';
-            });
-        });
-
-        // Confirm Reschedule
-        document.getElementById('confirmRescheduleBtn').addEventListener('click', function() {
-            const date = document.getElementById('newAppointmentDate').value;
-            const hour = document.getElementById('newAppointmentHour').value;
-            const minute = document.getElementById('newAppointmentMinute').value;
-            const reason = document.getElementById('rescheduleReason').value;
-            
-            if (!date || !hour || !minute) {
-                alert('Please select both date and time for the new appointment.');
-                return;
-            }
-            
-            const patientName = document.getElementById('reschedulePatientName').textContent;
-            const newTime = `${hour}:${minute}`;
-            
-            alert(`Appointment rescheduled for ${patientName}\n\nNew Date: ${date}\nNew Time: ${newTime}\nReason: ${reason || 'Not specified'}\n\nPatient has been notified.`);
-            document.getElementById('rescheduleModal').style.display = 'none';
-            
-            // Reset form
-            document.getElementById('rescheduleReason').value = '';
-        });
-
-        // Cancel Appointment Button
-        document.querySelectorAll('.cancel-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const appointment = this.closest('.schedule-item');
-                const patientName = appointment.querySelector('.patient-name').textContent;
-                const appointmentType = appointment.querySelector('.appointment-type').textContent;
-                const time = appointment.querySelector('.time-badge').textContent;
-                
-                // Set modal content
-                document.getElementById('modalPatientName').textContent = patientName;
-                document.getElementById('modalAppointmentType').textContent = appointmentType;
-                document.getElementById('modalDateTime').textContent = `Today • ${time}`;
-                document.getElementById('modalLocation').textContent = 'Campus Health Center';
-                
-                // Show modal
-                document.getElementById('cancelAppointmentModal').style.display = 'flex';
-            });
-        });
-
-        // Emergency Alert View Details
-        document.getElementById('viewEmergencyBtn').addEventListener('click', function() {
-            document.getElementById('emergencyDetailsModal').style.display = 'flex';
-        });
-
-        // Transfer to ICU Button
-        document.getElementById('transferToICU').addEventListener('click', function() {
-            alert('Patient transfer to ICU initiated.\n\nICU team has been notified and bed assigned.');
-        });
-
-        // Quick Actions
-        document.querySelectorAll('.action-card').forEach(card => {
-            card.addEventListener('click', function() {
-                const action = this.getAttribute('data-action');
-                
-                switch(action) {
-                    case 'prescription':
-                        document.getElementById('prescriptionModal').style.display = 'flex';
-                        break;
-                    case 'referral':
-                        document.getElementById('referralModal').style.display = 'flex';
-                        break;
-                    case 'record':
-                        // Set default values for medical record form
-                        const today = new Date().toISOString().split('T')[0];
-                        document.getElementById('recordVisitDate').value = today;
-                        
-                        // Show the update medical record modal
-                        document.getElementById('updateRecordModal').style.display = 'flex';
-                        break;
-                }
-            });
-        });
-
-        // Call Next Patient
-        document.getElementById('callNextBtn').addEventListener('click', function() {
-            const nextPatient = document.querySelector('.queue-table tbody tr:not(.current-patient)');
-            if (nextPatient) {
-                const patientName = nextPatient.querySelector('.patient-info div:first-child').textContent;
-                const patientId = nextPatient.getAttribute('data-patient-id');
-                
-                // Update queue
-                document.querySelector('.current-patient').classList.remove('current-patient');
-                nextPatient.classList.add('current-patient');
-                nextPatient.querySelector('.wait-time').textContent = '0 min';
-                
-                // Show notification
-                alert(`Calling patient: ${patientName}\nPatient ID: ${patientId}\n\nPlease proceed to Consultation Room 1.`);
-                
-                // Update stats
-                updatePatientStats();
-            } else {
-                alert('No more patients in the queue.');
-            }
-        });
-
-        // Refresh Queue
-        document.querySelector('.refresh-btn').addEventListener('click', function() {
-            alert('Refreshing patient queue...\n\nQueue status updated with latest patient information.');
-        });
-
-        // Emergency Alert Actions
-        document.querySelector('.acknowledge-btn').addEventListener('click', function() {
-            alert('Emergency alert acknowledged.\n\nStatus updated and notification sent to emergency team.');
-            document.querySelector('.emergency-alert').style.display = 'none';
-        });
-
-        // Modal Functions
-        document.querySelectorAll('.close-modal, .modal-cancel').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const modalId = this.getAttribute('data-modal');
-                document.getElementById(modalId).style.display = 'none';
-                
-                // Reset forms
-                if (modalId === 'cancelAppointmentModal') {
-                    document.getElementById('cancellationReason').value = '';
-                    document.getElementById('otherReasonGroup').style.display = 'none';
-                } else if (modalId === 'rescheduleModal') {
-                    document.getElementById('rescheduleReason').value = '';
-                    document.getElementById('newAppointmentHour').value = '';
-                    document.getElementById('newAppointmentMinute').value = '';
-                } else if (modalId === 'updateRecordModal') {
-                    document.getElementById('medicalRecordForm').reset();
-                }
-            });
-        });
-
-        // Close modal when clicking outside
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.style.display = 'none';
-                }
-            });
-        });
-
-        // Cancellation Reason Change
-        document.getElementById('cancellationReason').addEventListener('change', function() {
-            const otherReasonGroup = document.getElementById('otherReasonGroup');
-            otherReasonGroup.style.display = this.value === 'other' ? 'block' : 'none';
-        });
-
-        // Confirm Cancellation
-        document.getElementById('confirmCancelBtn').addEventListener('click', function() {
-            const reason = document.getElementById('cancellationReason').value;
-            if (!reason) {
-                alert('Please select a cancellation reason.');
-                return;
-            }
-            
-            alert('Appointment cancelled successfully.\n\nPatient has been notified via email and SMS.');
-            document.getElementById('cancelAppointmentModal').style.display = 'none';
-        });
-
-        // Edit Profile Form Submission
-        document.getElementById('editProfileForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Profile information updated successfully!');
-            document.getElementById('editProfileModal').style.display = 'none';
-        });
-
-        // Medical Record Form Submission
-        document.getElementById('medicalRecordForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Medical record updated successfully!');
-            document.getElementById('updateRecordModal').style.display = 'none';
-        });
-
-        // Prescription Form Submission
-        document.getElementById('prescriptionForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Prescription issued successfully!');
-            document.getElementById('prescriptionModal').style.display = 'none';
-        });
-
-        // Referral Form Submission
-        document.getElementById('referralForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Referral created successfully!');
-            document.getElementById('referralModal').style.display = 'none';
-        });
-
-        // Update Patient Stats
-        function updatePatientStats() {
-            const patientsToday = document.querySelector('.stat-number');
-            const currentCount = parseInt(patientsToday.textContent);
-            patientsToday.textContent = currentCount + 1;
-            
-            // Add pulse animation
-            patientsToday.classList.add('pulse');
-            setTimeout(() => {
-                patientsToday.classList.remove('pulse');
-            }, 2000);
         }
 
-        // Simulate real-time updates
-        function simulateQueueUpdates() {
-            setTimeout(() => {
-                const waitTimes = document.querySelectorAll('.wait-time');
-                waitTimes.forEach((time, index) => {
-                    if (index > 0) { // Skip current patient
-                        const currentTime = parseInt(time.textContent);
-                        if (currentTime < 60) { // Cap at 60 minutes
-                            time.textContent = (currentTime + 5) + ' min';
-                        }
+        // ============================================
+        // DISPLAY SCHEDULE
+        // ============================================
+        function displaySchedule(appointments) {
+            const container = document.getElementById('scheduleContainer');
+            
+            if (!appointments || appointments.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>📅 No appointments scheduled for today</p>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">
+                            Your schedule is clear. Enjoy your day!
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div class="schedule-list">';
+            
+            appointments.forEach(apt => {
+                const statusClass = apt.status === 'upcoming' ? 'status-confirmed' : 'status-waiting';
+                html += `
+                    <div class="schedule-item" data-appointment-id="${apt.id}">
+                        <div class="schedule-time">
+                            <span class="time-badge">${apt.time || 'TBD'}</span>
+                            <span class="appointment-status ${statusClass}">${apt.status || 'Scheduled'}</span>
+                        </div>
+                        <div class="patient-name">${apt.patient_name || 'Patient'}</div>
+                        <div class="appointment-type">${apt.type || 'General Consultation'}</div>
+                        <div class="appointment-actions">
+                            <button class="action-btn start-btn" onclick="startConsultation('${apt.patient_name}')">
+                                Start Consultation
+                            </button>
+                            <button class="action-btn reschedule-btn" onclick="rescheduleAppointment(${apt.id})">
+                                Reschedule
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // DISPLAY PATIENT QUEUE
+        // ============================================
+        function displayPatientQueue(appointments) {
+            const container = document.getElementById('patientQueueContainer');
+            
+            if (!appointments || appointments.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>👥 No patients in queue</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <table class="queue-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Patient</th>
+                            <th>Type</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            appointments.forEach((apt, index) => {
+                const initials = getInitials(apt.patient_name || 'Patient');
+                html += `
+                    <tr data-patient-id="${apt.id}">
+                        <td class="patient-id">#${String(index + 1).padStart(3, '0')}</td>
+                        <td>
+                            <div class="patient-info">
+                                <div class="patient-avatar">${initials}</div>
+                                <div>
+                                    <div style="font-weight: 600; color: #1b5e20;">${apt.patient_name || 'Patient'}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${apt.type || 'General Consultation'}</td>
+                        <td>${apt.time || 'TBD'}</td>
+                        <td><span class="priority-normal">${apt.status || 'Waiting'}</span></td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // TABS FUNCTIONALITY
+        // ============================================
+        function initializeTabs() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+        }
+
+        // ============================================
+        // QUICK ACTIONS
+        // ============================================
+        function initializeQuickActions() {
+            document.querySelectorAll('.action-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const action = this.getAttribute('data-action');
+                    
+                    switch(action) {
+                        case 'prescription':
+                            alert('📝 New Prescription\n\nThis feature would open a prescription form.');
+                            break;
+                        case 'referral':
+                            alert('📋 Create Referral\n\nThis feature would open a referral form.');
+                            break;
+                        case 'record':
+                            alert('🏥 Update Medical Record\n\nThis feature would open the medical records editor.');
+                            break;
                     }
                 });
-                
-                // Schedule next update
-                simulateQueueUpdates();
-            }, 30000); // Update every 30 seconds
+            });
         }
 
-        // Start simulation
-        simulateQueueUpdates();
+        // ============================================
+        // ACTIONS
+        // ============================================
+        function startConsultation(patientName) {
+            alert(`Starting consultation with ${patientName}\n\nConsultation room is being prepared.`);
+        }
 
-        // Set today's date in date inputs
-        const today = new Date().toISOString().split('T')[0];
-        document.querySelectorAll('input[type="date"]').forEach(input => {
-            if (!input.value) {
-                input.value = today;
-            }
+        function rescheduleAppointment(appointmentId) {
+            alert(`Reschedule appointment #${appointmentId}\n\nThis would open a rescheduling dialog.`);
+        }
+
+        document.getElementById('callNextBtn').addEventListener('click', function() {
+            alert('Calling next patient...\n\nThe next patient in queue has been notified.');
         });
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            // Ctrl + N to call next patient
-            if (e.ctrlKey && e.key === 'n') {
-                e.preventDefault();
-                document.getElementById('callNextBtn').click();
+        // ============================================
+        // UTILITIES
+        // ============================================
+        function getInitials(fullName) {
+            if (!fullName) return '--';
+            const names = fullName.trim().split(' ');
+            if (names.length >= 2) {
+                return (names[0][0] + names[names.length - 1][0]).toUpperCase();
             }
-            
-            // Escape to close modals
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.modal-overlay').forEach(modal => {
-                    modal.style.display = 'none';
-                });
-            }
-        });
+            return fullName.substring(0, 2).toUpperCase();
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'Login.html';
+        }
     </script>
 </body>
 </html>

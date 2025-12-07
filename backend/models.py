@@ -13,10 +13,10 @@ class User(Base):
     email = Column(String(100), unique=True, index=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
     full_name = Column(String(100), nullable=False)
-    student_id = Column(String(50), unique=True, index=True, nullable=False)  # Numbers only
+    student_id = Column(String(50), unique=True, index=True, nullable=False)  # For students: numeric, for doctors: D + timestamp
     institution = Column(String(100), default="Al Akhawayn University")
-    department = Column(String(10))  # SSE, SBA, SSAH
-    major = Column(String(100))
+    department = Column(String(10))  # SSE, SBA, SSAH (for students)
+    major = Column(String(100))  # Major for students, specialty for doctors
     academic_year = Column(String(20), default="2025/2026")
     year_level = Column(String(20))  # freshman, sophomore, junior, senior
     phone = Column(String(20))
@@ -32,6 +32,8 @@ class User(Base):
     appointments = orm_relationship("Appointment", back_populates="user", cascade="all, delete-orphan")
     emergency_requests = orm_relationship("EmergencyRequest", back_populates="user", cascade="all, delete-orphan")
     emergency_contact = orm_relationship("EmergencyContact", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    doctor_profile = orm_relationship("Doctor", back_populates="user", uselist=False)
+
 
 class EmergencyContact(Base):
     __tablename__ = "emergency_contacts"
@@ -47,6 +49,7 @@ class EmergencyContact(Base):
     
     # Relationships
     user = orm_relationship("User", back_populates="emergency_contact")
+
 
 class MedicalRecord(Base):
     __tablename__ = "medical_records"
@@ -64,6 +67,7 @@ class MedicalRecord(Base):
     
     # Relationships
     user = orm_relationship("User", back_populates="medical_records")
+
 
 class Visit(Base):
     __tablename__ = "visits"
@@ -86,14 +90,15 @@ class Visit(Base):
     user = orm_relationship("User")
     doctor = orm_relationship("Doctor")
 
+
 class Doctor(Base):
     __tablename__ = "doctors"
     
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), unique=True)  # ADDED
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=True)  # Nullable for seeded doctors
     name = Column(String(100), nullable=False)
-    license_number = Column(String(50), unique=True)  # ADDED
-    specialty = Column(String(100))  # ADDED
+    license_number = Column(String(50), unique=True, nullable=True)  # Nullable for seeded doctors
+    specialty = Column(String(100))
     email = Column(String(100), unique=True)
     phone = Column(String(20))
     rating = Column(Float, default=0.0)
@@ -103,7 +108,7 @@ class Doctor(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships
-    user = orm_relationship("User")  # ADDED
+    user = orm_relationship("User", back_populates="doctor_profile")
     appointments = orm_relationship("Appointment", back_populates="doctor")
 
 
@@ -126,6 +131,7 @@ class Appointment(Base):
     # Relationships
     user = orm_relationship("User", back_populates="appointments")
     doctor = orm_relationship("Doctor", back_populates="appointments")
+
 
 class EmergencyRequest(Base):
     __tablename__ = "emergency_requests"
