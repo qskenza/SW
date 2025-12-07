@@ -90,8 +90,10 @@ class Doctor(Base):
     __tablename__ = "doctors"
     
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True)  # ADDED
     name = Column(String(100), nullable=False)
-    specialty = Column(String(100))
+    license_number = Column(String(50), unique=True)  # ADDED
+    specialty = Column(String(100))  # ADDED
     email = Column(String(100), unique=True)
     phone = Column(String(20))
     rating = Column(Float, default=0.0)
@@ -101,7 +103,9 @@ class Doctor(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships
+    user = orm_relationship("User")  # ADDED
     appointments = orm_relationship("Appointment", back_populates="doctor")
+
 
 class Appointment(Base):
     __tablename__ = "appointments"

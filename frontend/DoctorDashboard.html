@@ -1000,7 +1000,7 @@
                             <input type="text" class="form-input" value="MD-2024-12345" readonly>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Specialization</label>
+                            <label class="form-label">specialty</label>
                             <input type="text" class="form-input" value="General Practitioner, Pediatrics" readonly>
                         </div>
                         <div class="form-group">
@@ -1290,7 +1290,7 @@
                         <input type="tel" class="form-input" value="(123) 456-7891" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Specialization</label>
+                        <label class="form-label">specialty</label>
                         <input type="text" class="form-input" value="General Practitioner, Pediatrics" required>
                     </div>
                     <div class="modal-actions">
@@ -1624,6 +1624,42 @@
     </div>
 
     <script>
+        const API_URL = 'http://localhost:8000';
+
+        // Check if user is doctor
+        window.addEventListener('load', async function() {
+            const role = sessionStorage.getItem('role');
+            const token = sessionStorage.getItem('token');
+            
+            if (!token) {
+                window.location.href = 'Login.html';
+                return;
+            }
+            
+            if (role !== 'doctor') {
+                alert('Access denied. This page is for doctors only.');
+                window.location.href = 'MedicalDashboard.html';
+                return;
+            }
+            
+            // Load doctor data
+            try {
+                const response = await fetch(`${API_URL}/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    // Update UI with doctor data
+                    document.querySelector('.doctor-name').textContent = data.full_name;
+                    // ... update other fields
+                }
+            } catch (error) {
+                console.error('Error loading doctor data:', error);
+            }
+        });
         // Tab Functionality
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', function() {

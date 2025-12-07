@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - CareConnect</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            padding: 3rem;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            font-size: 2.5rem;
+            color: #2e7d32;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            color: #2e7d32;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e8f5e8;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4caf50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e8f5e8;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #4caf50;
+        }
+
+        .email-preview {
+            background: #e8f5e8;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            color: #2e7d32;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #388e3c;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #666;
+        }
+
+        .login-link a {
+            color: #2e7d32;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #1565c0;
+        }
+
+        .role-selection {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .role-option {
+            padding: 1.5rem;
+            border: 2px solid #e8f5e8;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .role-option:hover {
+            border-color: #4caf50;
+            background: #f8fff8;
+        }
+
+        .role-option.selected {
+            border-color: #4caf50;
+            background: #e8f5e8;
+        }
+
+        .role-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .role-title {
+            font-weight: 600;
+            color: #2e7d32;
+        }
+
+        input[type="radio"] {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .register-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .role-selection {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="logo">
+            <h1>CareConnect</h1>
+            <p>Al Akhawayn University Health System</p>
+        </div>
+
+        <div class="info-box">
+            📧 Your AUI email will be automatically generated: <strong>(first letter).(lastname)@aui.ma</strong>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <form id="registerForm">
+            <!-- Role Selection -->
+            <div class="form-group">
+                <label class="form-label">I am registering as:</label>
+                <div class="role-selection">
+                    <label class="role-option selected" for="role-student">
+                        <input type="radio" name="role" id="role-student" value="student" checked>
+                        <div class="role-icon">🎓</div>
+                        <div class="role-title">Student</div>
+                    </label>
+                    <label class="role-option" for="role-doctor">
+                        <input type="radio" name="role" id="role-doctor" value="doctor">
+                        <div class="role-icon">👨‍⚕️</div>
+                        <div class="role-title">Doctor</div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Full Name -->
+            <div class="form-group">
+                <label class="form-label" for="fullName">Full Name *</label>
+                <input 
+                    type="text" 
+                    id="fullName" 
+                    class="form-input" 
+                    placeholder="First Last"
+                    required
+                >
+                <div class="email-preview" id="emailPreview">Email: will appear here</div>
+            </div>
+
+            <!-- Student-Specific Fields -->
+            <div id="studentFields">
+                <div class="form-group">
+                    <label class="form-label" for="studentId">Student ID *</label>
+                    <input 
+                        type="text" 
+                        id="studentId" 
+                        class="form-input" 
+                        placeholder="e.g., 2023001 (numbers only)"
+                        pattern="[0-9]+"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="department">Department *</label>
+                    <select id="department" class="form-select" required>
+                        <option value="">Select Department</option>
+                        <option value="SSE">SSE - School of Science and Engineering</option>
+                        <option value="SBA">SBA - School of Business Administration</option>
+                        <option value="SSAH">SSAH - School of Social Sciences and Humanities</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="major">Major *</label>
+                    <input 
+                        type="text" 
+                        id="major" 
+                        class="form-input" 
+                        placeholder="e.g., Computer Science"
+                        required
+                    >
+                </div>
+            </div>
+
+            <!-- Doctor-Specific Fields -->
+            <div id="doctorFields" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label" for="licenseNumber">Medical License Number *</label>
+                    <input 
+                        type="text" 
+                        id="licenseNumber" 
+                        class="form-input" 
+                        placeholder="e.g., MD-2024-12345"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="specialty">specialty *</label>
+                    <input 
+                        type="text" 
+                        id="specialty" 
+                        class="form-input" 
+                        placeholder="e.g., General Practitioner"
+                    >
+                </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="form-group">
+                <label class="form-label" for="phone">Phone Number</label>
+                <input 
+                    type="tel" 
+                    id="phone" 
+                    class="form-input" 
+                    placeholder="+212 XXX-XXXXXX"
+                >
+            </div>
+
+            <!-- Username -->
+            <div class="form-group">
+                <label class="form-label" for="username">Username *</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    class="form-input" 
+                    placeholder="Choose a username"
+                    required
+                >
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <label class="form-label" for="password">Password *</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    class="form-input" 
+                    placeholder="Minimum 8 characters"
+                    minlength="8"
+                    required
+                >
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="form-group">
+                <label class="form-label" for="confirmPassword">Confirm Password *</label>
+                <input 
+                    type="password" 
+                    id="confirmPassword" 
+                    class="form-input" 
+                    placeholder="Re-enter password"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">Create Account</button>
+        </form>
+
+        <div class="login-link">
+            Already have an account? <a href="Login.html">Login here</a>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+
+        // Generate AUI email preview
+        function generateEmail(fullName) {
+            const names = fullName.trim().split(' ');
+            if (names.length >= 2) {
+                const firstInitial = names[0][0].toLowerCase();
+                const lastName = names[names.length - 1].toLowerCase();
+                return `${firstInitial}.${lastName}@aui.ma`;
+            }
+            return '';
+        }
+
+        // Update email preview
+        document.getElementById('fullName').addEventListener('input', function() {
+            const email = generateEmail(this.value);
+            document.getElementById('emailPreview').textContent = email ? `Email: ${email}` : 'Email: will appear here';
+        });
+
+        // Role selection
+        document.querySelectorAll('.role-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.role-option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                const role = this.querySelector('input[type="radio"]').value;
+                
+                if (role === 'student') {
+                    document.getElementById('studentFields').style.display = 'block';
+                    document.getElementById('doctorFields').style.display = 'none';
+                    // Make student fields required
+                    document.getElementById('studentId').required = true;
+                    document.getElementById('department').required = true;
+                    document.getElementById('major').required = true;
+                    document.getElementById('licenseNumber').required = false;
+                    document.getElementById('specialty').required = false;
+                } else {
+                    document.getElementById('studentFields').style.display = 'none';
+                    document.getElementById('doctorFields').style.display = 'block';
+                    // Make doctor fields required
+                    document.getElementById('studentId').required = false;
+                    document.getElementById('department').required = false;
+                    document.getElementById('major').required = false;
+                    document.getElementById('licenseNumber').required = true;
+                    document.getElementById('specialty').required = true;
+                }
+            });
+        });
+
+        // Form submission
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Clear previous errors
+            errorMessage.style.display = 'none';
+
+            // Validate passwords
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'Passwords do not match!';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Get role
+            const role = document.querySelector('input[name="role"]:checked').value;
+
+            // Prepare data
+            const formData = {
+                username: document.getElementById('username').value,
+                password: password,
+                full_name: document.getElementById('fullName').value,
+                phone: document.getElementById('phone').value || null,
+                role: role
+            };
+
+            // Add role-specific fields
+            if (role === 'student') {
+                formData.student_id = document.getElementById('studentId').value;
+                formData.department = document.getElementById('department').value;
+                formData.major = document.getElementById('major').value;
+            } else {
+                formData.student_id = 'DOC-' + Date.now(); // Generate doctor ID
+                formData.license_number = document.getElementById('licenseNumber').value;
+                formData.specialty = document.getElementById('specialty').value;
+            }
+
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating Account...';
+
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Store token and user info
+                    sessionStorage.setItem('token', data.access_token);
+                    sessionStorage.setItem('username', data.user.username);
+                    sessionStorage.setItem('fullName', data.user.full_name);
+                    sessionStorage.setItem('studentId', data.user.student_id);
+                    sessionStorage.setItem('email', data.user.email);
+                    sessionStorage.setItem('role', data.user.role);
+
+                    alert(`✅ Account created successfully!\n\nYour AUI email: ${data.user.email}\n\nRedirecting to your dashboard...`);
+
+                    // Redirect based on role
+                    if (data.user.role === 'doctor') {
+                        window.location.href = 'DoctorDashboard.html';
+                    } else {
+                        window.location.href = 'MedicalDashboard.html';
+                    }
+                } else {
+                    errorMessage.textContent = data.detail || 'Registration failed. Please try again.';
+                    errorMessage.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Create Account';
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                errorMessage.textContent = 'Network error. Please check your connection and try again.';
+                errorMessage.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Account';
+            }
+        });
+    </script>
+</body>
+</html>

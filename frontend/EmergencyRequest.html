@@ -525,69 +525,96 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:8000';
+    const API_URL = 'http://localhost:8000';
+
+    // Wait for DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Emergency page loaded');
 
         // Emergency Button Actions
-        document.querySelector('.call-emergency').addEventListener('click', function() {
-            const emergencyNumber = '2222';
-            const confirmCall = confirm(`ARE YOU IN IMMEDIATE DANGER?\n\nClick OK to call Emergency Services (${emergencyNumber}) for:\n• Life-threatening emergencies\n• Serious injuries\n• Medical crises\n\nOR click Cancel for non-emergency assistance.`);
-            
-            if (confirmCall) {
-                alert(`🚨 DIALING EMERGENCY SERVICES (${emergencyNumber})\n\nYour information:\n• Name: Alexandra Miller\n• Student ID: 2023001\n• Department: SSE - Computer Science\n\nPlease provide:\n1. Your exact location\n2. Nature of emergency\n3. Number of people involved\n\nStay on the line until help arrives.`);
-                logEmergencyAction('Emergency Services (2222) call initiated');
-            }
-        });
+        const callEmergencyBtn = document.querySelector('.call-emergency');
+        const sendLocationBtn = document.querySelector('.send-location');
 
-        document.querySelector('.send-location').addEventListener('click', function() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    
-                    const locationMessage = `📍 EMERGENCY LOCATION SHARED:\n\n📱 GPS Coordinates:\nLatitude: ${lat.toFixed(6)}\nLongitude: ${lng.toFixed(6)}\n\n👤 Student Info:\nName: Alexandra Miller\nID: 2023001\nDepartment: SSE\n\n⏰ Timestamp: ${new Date().toLocaleString()}\n\n✅ Location sent to:\n• Emergency Services (2222)\n• Campus Security\n• Health Center`;
-                    
-                    alert(locationMessage);
-                    logEmergencyAction(`Location shared: ${lat}, ${lng}`);
-                }, function(error) {
-                    const manualLocation = prompt('Unable to get GPS location.\n\nPlease enter your current location\n(building/room/address):');
+        if (callEmergencyBtn) {
+            callEmergencyBtn.addEventListener('click', function() {
+                const emergencyNumber = '2222';
+                const confirmCall = confirm(`ARE YOU IN IMMEDIATE DANGER?\n\nClick OK to call Emergency Services (${emergencyNumber}) for:\n• Life-threatening emergencies\n• Serious injuries\n• Medical crises\n\nOR click Cancel for non-emergency assistance.`);
+                
+                if (confirmCall) {
+                    alert(`🚨 DIALING EMERGENCY SERVICES (${emergencyNumber})\n\nYour information:\n• Name: Alexandra Miller\n• Student ID: 2023001\n• Department: SSE - Computer Science\n\nPlease provide:\n1. Your exact location\n2. Nature of emergency\n3. Number of people involved\n\nStay on the line until help arrives.`);
+                    logEmergencyAction('Emergency Services (2222) call initiated');
+                }
+            });
+        }
+
+        if (sendLocationBtn) {
+            sendLocationBtn.addEventListener('click', function() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        const locationMessage = `📍 EMERGENCY LOCATION SHARED:\n\n📱 GPS Coordinates:\nLatitude: ${lat.toFixed(6)}\nLongitude: ${lng.toFixed(6)}\n\n👤 Student Info:\nName: Alexandra Miller\nID: 2023001\nDepartment: SSE\n\n⏰ Timestamp: ${new Date().toLocaleString()}\n\n✅ Location sent to:\n• Emergency Services (2222)\n• Campus Security\n• Health Center`;
+                        
+                        alert(locationMessage);
+                        logEmergencyAction(`Location shared: ${lat}, ${lng}`);
+                    }, function(error) {
+                        const manualLocation = prompt('Unable to get GPS location.\n\nPlease enter your current location\n(building/room/address):');
+                        if (manualLocation) {
+                            alert(`📍 Location shared: ${manualLocation}\n\nStudent: Alexandra Miller (2023001)\nDepartment: SSE - Computer Science`);
+                            logEmergencyAction(`Manual location: ${manualLocation}`);
+                        }
+                    });
+                } else {
+                    const manualLocation = prompt('Enter your current location\n(building/room/address):');
                     if (manualLocation) {
-                        alert(`📍 Location shared: ${manualLocation}\n\nStudent: Alexandra Miller (2023001)\nDepartment: SSE - Computer Science`);
+                        alert(`📍 Location shared: ${manualLocation}\n\nStudent: Alexandra Miller (2023001)`);
                         logEmergencyAction(`Manual location: ${manualLocation}`);
                     }
-                });
-            } else {
-                const manualLocation = prompt('Enter your current location\n(building/room/address):');
-                if (manualLocation) {
-                    alert(`📍 Location shared: ${manualLocation}\n\nStudent: Alexandra Miller (2023001)`);
-                    logEmergencyAction(`Manual location: ${manualLocation}`);
                 }
-            }
+            });
+        }
+
+        // Contact buttons - use event delegation for dynamically added buttons
+        document.querySelectorAll('.call-contact').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Get contact info from onclick attribute or parse from text
+                const contactText = this.textContent;
+                const contactName = this.closest('.contact-card').querySelector('h3').textContent;
+                
+                // Extract phone from onclick attribute
+                const onclickAttr = this.getAttribute('onclick');
+                const phoneMatch = onclickAttr.match(/'([0-9-]+)'/);
+                const phoneNumber = phoneMatch ? phoneMatch[1] : 'Unknown';
+                
+                const confirmCall = confirm(`Call ${contactName}?\n\nPhone: ${phoneNumber}\n\nYour info will be shared:\n• Alexandra Miller\n• Student ID: 2023001\n• SSE - Computer Science`);
+                
+                if (confirmCall) {
+                    alert(`📞 Calling ${contactName}...\n\nPhone: ${phoneNumber}\n\nConnecting your emergency call...`);
+                    logEmergencyAction(`Called ${contactName}`);
+                }
+            });
         });
 
-        function callContact(contactName, phoneNumber) {
-            const confirmCall = confirm(`Call ${contactName}?\n\nPhone: ${phoneNumber}\n\nYour info will be shared:\n• Alexandra Miller\n• Student ID: 2023001\n• SSE - Computer Science`);
-            
-            if (confirmCall) {
-                alert(`📞 Calling ${contactName}...\n\nPhone: ${phoneNumber}\n\nConnecting your emergency call...`);
-                logEmergencyAction(`Called ${contactName}`);
-            }
-        }
-
-        function messageContact(contactName) {
-            const message = prompt(`Send emergency message to ${contactName}:\n\nEnter your message (max 200 characters):`);
-            
-            if (message && message.trim()) {
-                if (message.length > 200) {
-                    alert('Message too long! Please keep it under 200 characters.');
-                    return;
-                }
+        document.querySelectorAll('.message-contact').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const contactName = this.closest('.contact-card').querySelector('h3').textContent;
+                const message = prompt(`Send emergency message to ${contactName}:\n\nEnter your message (max 200 characters):`);
                 
-                alert(`📱 MESSAGE SENT\n\nTo: ${contactName}\nFrom: Alexandra Miller (2023001)\nMessage: "${message}"\n\nYou will receive a confirmation when read.`);
-                logEmergencyAction(`Sent message to ${contactName}`);
-            }
-        }
+                if (message && message.trim()) {
+                    if (message.length > 200) {
+                        alert('Message too long! Please keep it under 200 characters.');
+                        return;
+                    }
+                    
+                    alert(`📱 MESSAGE SENT\n\nTo: ${contactName}\nFrom: Alexandra Miller (2023001)\nMessage: "${message}"\n\nYou will receive a confirmation when read.`);
+                    logEmergencyAction(`Sent message to ${contactName}`);
+                }
+            });
+        });
 
-        function callEmergencyHotline() {
+        // Emergency hotline
+        document.querySelector('.emergency-hotline').addEventListener('click', function() {
             const hotlineNumber = '0535 86 2222';
             const confirmCall = confirm(`Call 24/7 Emergency Hotline?\n\nNumber: ${hotlineNumber}\n\nServices Available:\n• Immediate medical advice\n• Crisis counseling\n• Emergency coordination\n\nYour info: Alexandra Miller (2023001)\nClick OK to call.`);
             
@@ -595,16 +622,21 @@
                 alert(`📞 Calling Emergency Hotline: ${hotlineNumber}\n\nStudent: Alexandra Miller\nID: 2023001\nDepartment: SSE\n\nConnecting...`);
                 logEmergencyAction('Called Emergency Hotline');
             }
-        }
+        });
+
+        // Emergency procedures button
+        document.querySelector('.emergency-procedures-btn').addEventListener('click', function() {
+            showEmergencyProcedures();
+        });
 
         function showEmergencyProcedures() {
             const procedures = `🚨 EMERGENCY PROCEDURES 🚨
 
 Your Information:
-• Name: Alexandra Miller
-• Student ID: 2023001
-• Department: SSE - Computer Science
-• Academic Year: 2025/2026
+- Name: Alexandra Miller
+- Student ID: 2023001
+- Department: SSE - Computer Science
+- Academic Year: 2025/2026
 
 1. STAY CALM
    • Take deep breaths
@@ -631,10 +663,10 @@ Your Information:
    • Stay in place unless instructed to move
 
 Emergency Numbers:
-• Emergency Services: 2222
-• Campus Security: 0535-86-0103
-• Health Center: 0535-86-0104
-• Emergency Hotline: 0535 86 2222`;
+- Emergency Services: 2222
+- Campus Security: 0535-86-0103
+- Health Center: 0535-86-0104
+- Emergency Hotline: 0535 86 2222`;
             
             alert(procedures);
         }
@@ -642,9 +674,14 @@ Emergency Numbers:
         function logEmergencyAction(action) {
             const timestamp = new Date().toLocaleString();
             console.log(`[${timestamp}] 🚨 ${action} - Alexandra Miller (2023001)`);
+            
+            // TODO: Send to backend
+            // fetch(`${API_URL}/emergency`, { ... });
         }
 
         console.log('🚨 Emergency System Ready - Alexandra Miller (2023001)');
+    });
+</script>
     </script>
 
     <!-- CHATBOT -->

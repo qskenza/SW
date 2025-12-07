@@ -645,19 +645,30 @@
                     const data = await response.json();
 
                     if (response.ok) {
-                        sessionStorage.setItem('access_token', data.access_token);
+                        // Store user data
+                        sessionStorage.setItem('token', data.access_token);
                         sessionStorage.setItem('username', data.user.username);
                         sessionStorage.setItem('fullName', data.user.full_name);
+                        sessionStorage.setItem('studentId', data.user.student_id);
+                        sessionStorage.setItem('email', data.user.email);
                         sessionStorage.setItem('role', data.user.role);
                         
-                        alert('✅ Login successful! Redirecting...');
-                        window.location.href = 'MedicalDashboard.html';
+                        alert('✅ Login successful!');
+                        
+                        // Role-based redirect
+                        if (data.user.role === 'doctor') {
+                            window.location.href = 'DoctorDashboard.html';
+                        } else {
+                            window.location.href = 'MedicalDashboard.html';
+                        }
                     } else {
-                        alert(`❌ ${data.detail}\n\nTry: alexandra / password123`);
+                        // ✅ ADD THIS: Handle login failure (wrong password, etc.)
+                        alert(`❌ Login failed: ${data.detail || 'Invalid username or password'}`);
                         submitBtn.textContent = originalText;
                         submitBtn.disabled = false;
                     }
                 } catch (error) {
+                    // Network error (server not running)
                     alert('❌ Cannot connect to server. Make sure backend is running on http://localhost:8000');
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
