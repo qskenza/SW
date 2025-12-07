@@ -64,6 +64,19 @@ def generate_aui_email(full_name: str) -> str:
 # ---------------------------------------------------------
 # Pydantic Schemas
 # ---------------------------------------------------------
+class AppointmentCreate(BaseModel):
+    doctor_id: int
+    appointment_date: str
+    appointment_time: str
+    type: str = "General Consultation"
+    notes: Optional[str] = None
+
+
+class AppointmentUpdate(BaseModel):
+    appointment_date: Optional[str] = None
+    appointment_time: Optional[str] = None
+    type: Optional[str] = None
+    notes: Optional[str] = None
 class UserLogin(BaseModel):
     username: str
     password: str
@@ -582,6 +595,258 @@ def create_emergency_request(
     db.commit()
 
     return {"message": "Emergency request created", "id": emergency.id}
+
+@app.get("/appointments")
+def get_appointments(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get all appointments for current user"""
+    appointments = db.query(models.Appointment).filter(
+        models.Appointment.user_id == current_user.id
+    ).order_by(models.Appointment.appointment_date.desc()).all()
+    
+    return [
+        {
+            "id": a.id,
+            "doctor_id": a.doctor_id,
+            "doctor_name": a.doctor.name if a.doctor else "Unknown",
+            "doctor_specialty": a.doctor.specialty if a.doctor else "",
+            "date": a.appointment_date.isoformat() if a.appointment_date else None,
+            "time": a.appointment_time,
+            "type": a.type,
+            "location": a.location,
+            "status": a.status,
+            "notes": a.notes,
+            "can_reschedule": a.can_reschedule
+        }
+        for a in appointments
+    ]
+
+
+@app.post("/appointments")
+def create_appointment(
+    appointment: AppointmentCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Create a new appointment"""
+    # Verify doctor exists
+    doctor = db.query(models.Doctor).filter(
+        models.Doctor.id == appointment.doctor_id
+    ).first()
+    
+    if not doctor:
+        raise HTTPException(404, "Doctor not found")
+    
+    # Parse date
+    try:
+        appt_date = datetime.strptime(appointment.appointment_date, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(400, "Invalid date format. Use YYYY-MM-DD")
+    
+    # Check if slot is available (basic check)
+    existing = db.query(models.Appointment).filter(
+        models.Appointment.doctor_id == appointment.doctor_id,
+        models.Appointment.appointment_date == appt_date,
+        models.Appointment.appointment_time == appointment.appointment_time,
+        models.Appointment.status != "cancelled"
+    ).first()
+    
+    if existing:
+        raise HTTPException(400, "This time slot is already booked")
+    
+    # Create appointment
+    db_appointment = models.Appointment(
+        user_id=current_user.id,
+        doctor_id=appointment.doctor_id,
+        appointment_date=appt_date,
+        appointment_time=appointment.appointment_time,
+        type=appointment.type,
+        location=f"Campus Health Center, Room {doctor.id}01",
+        notes=appointment.notes,
+        status="upcoming",
+        can_reschedule=True
+    )
+    
+    db.add(db_appointment)
+    db.commit()
+    db.refresh(db_appointment)
+    
+    return {
+        "message": "Appointment created successfully",
+        "id": db_appointment.id,
+        "date": db_appointment.appointment_date.isoformat(),
+        "time": db_appointment.appointment_time,
+        "doctor": doctor.name
+    }
+
+
+@app.put("/appointments/{appointment_id}")
+def update_appointment(
+    appointment_id: int,
+    updates: AppointmentUpdate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Reschedule an appointment"""
+    appointment = db.query(models.Appointment).filter(
+        models.Appointment.id == appointment_id,
+        models.Appointment.user_id == current_user.id
+    ).first()
+    
+    if not appointment:
+        raise HTTPException(404, "Appointment not found")
+    
+    if appointment.status == "cancelled":
+        raise HTTPException(400, "Cannot modify a cancelled appointment")
+    
+    # Check 12-hour rule
+    if appointment.appointment_date:
+        hours_until = (appointment.appointment_date - datetime.now()).total_seconds() / 3600
+        if hours_until < 12:
+            raise HTTPException(400, "Cannot reschedule within 12 hours of appointment")
+    
+    # Update fields
+    if updates.appointment_date:
+        appointment.appointment_date = datetime.strptime(updates.appointment_date, "%Y-%m-%d")
+    if updates.appointment_time:
+        appointment.appointment_time = updates.appointment_time
+    if updates.type:
+        appointment.type = updates.type
+    if updates.notes:
+        appointment.notes = updates.notes
+    
+    db.commit()
+    
+    return {"message": "Appointment updated successfully"}
+
+
+@app.delete("/appointments/{appointment_id}")
+def cancel_appointment(
+    appointment_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Cancel an appointment"""
+    appointment = db.query(models.Appointment).filter(
+        models.Appointment.id == appointment_id,
+        models.Appointment.user_id == current_user.id
+    ).first()
+    
+    if not appointment:
+        raise HTTPException(404, "Appointment not found")
+    
+    appointment.status = "cancelled"
+    appointment.can_reschedule = False
+    db.commit()
+    
+    return {"message": "Appointment cancelled successfully"}
+
+
+# ---------------------------------------------------------
+# ENDPOINT POUR SUPPRIMER DÉFINITIVEMENT UN RECORD MÉDICAL
+# ---------------------------------------------------------
+@app.delete("/medical-records/{entry_id}/permanent")
+def permanently_delete_medical_entry(
+    entry_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Permanently delete a medical entry"""
+    entry = db.query(models.MedicalRecord).filter(
+        models.MedicalRecord.id == entry_id,
+        models.MedicalRecord.user_id == current_user.id,
+    ).first()
+
+    if not entry:
+        raise HTTPException(404, "Entry not found")
+
+    db.delete(entry)
+    db.commit()
+    return {"message": "Entry permanently deleted"}
+
+
+# ---------------------------------------------------------
+# ENDPOINT POUR LES VISITES (DOCTOR DASHBOARD)
+# ---------------------------------------------------------
+@app.get("/doctor/patients")
+def get_doctor_patients(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get patients for a doctor"""
+    if current_user.role != "doctor":
+        raise HTTPException(403, "Access denied. Doctors only.")
+    
+    # Get doctor record
+    doctor = db.query(models.Doctor).filter(
+        models.Doctor.user_id == current_user.id
+    ).first()
+    
+    if not doctor:
+        raise HTTPException(404, "Doctor profile not found")
+    
+    # Get today's appointments
+    today = datetime.now().date()
+    appointments = db.query(models.Appointment).filter(
+        models.Appointment.doctor_id == doctor.id,
+        models.Appointment.appointment_date == today,
+        models.Appointment.status == "upcoming"
+    ).all()
+    
+    return [
+        {
+            "id": a.id,
+            "patient_name": a.user.full_name if a.user else "Unknown",
+            "patient_id": a.user.student_id if a.user else "N/A",
+            "time": a.appointment_time,
+            "type": a.type,
+            "notes": a.notes
+        }
+        for a in appointments
+    ]
+
+
+@app.get("/doctor/schedule")
+def get_doctor_schedule(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get doctor's schedule"""
+    if current_user.role != "doctor":
+        raise HTTPException(403, "Access denied. Doctors only.")
+    
+    doctor = db.query(models.Doctor).filter(
+        models.Doctor.user_id == current_user.id
+    ).first()
+    
+    if not doctor:
+        raise HTTPException(404, "Doctor profile not found")
+    
+    # Get all upcoming appointments
+    appointments = db.query(models.Appointment).filter(
+        models.Appointment.doctor_id == doctor.id,
+        models.Appointment.status == "upcoming"
+    ).order_by(models.Appointment.appointment_date).all()
+    
+    return {
+        "doctor_name": doctor.name,
+        "specialty": doctor.specialty,
+        "appointments": [
+            {
+                "id": a.id,
+                "patient_name": a.user.full_name if a.user else "Unknown",
+                "date": a.appointment_date.isoformat() if a.appointment_date else None,
+                "time": a.appointment_time,
+                "type": a.type,
+                "status": a.status
+            }
+            for a in appointments
+        ]
+    }
+
+
 
 
 # ---------------------------------------------------------

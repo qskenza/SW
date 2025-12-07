@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CareConnect - Student Profile</title>
-    <script src="common.js"></script>
     <style>
         * {
             margin: 0;
@@ -75,6 +74,17 @@
             justify-content: center;
             color: white;
             font-weight: bold;
+        }
+
+        .logout-btn {
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            background: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
         }
 
         /* Main Container */
@@ -346,6 +356,38 @@
             transform: translateY(-2px);
         }
 
+        .emergency-contact-box {
+            background: #f8fff8;
+            padding: 1.8rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+        }
+
+        .emergency-contact-box h3 {
+            color: #2e7d32;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .emergency-contact-info {
+            font-size: 1rem;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 1.5rem;
+            color: #888;
+            font-style: italic;
+        }
+
         /* Responsive */
         @media (max-width: 1200px) {
             .profile-layout {
@@ -402,11 +444,9 @@
                 </ul>
             </nav>
             <div class="user-info">
-                <div class="user-avatar">AM</div>
-                <span>Alexandra Miller</span>
-                <button onclick="logout()" style="margin-left: 1rem; padding: 0.5rem 1rem; background: #d32f2f; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">
-                    Logout
-                </button>
+                <div class="user-avatar" id="headerAvatar">--</div>
+                <span id="headerUserName">Loading...</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
         </div>
     </header>
@@ -424,28 +464,28 @@
                 <div class="card student-profile-card">
                     <h2 class="card-title" style="color: white; border-color: white;">Student Profile</h2>
                     <div class="profile-header">
-                        <div class="profile-avatar">AM</div>
+                        <div class="profile-avatar" id="profileAvatar">--</div>
                         <div class="profile-info">
-                            <h2>Alexandra Miller</h2>
-                            <p>Student ID: 2023001</p>
+                            <h2 id="profileName">Loading...</h2>
+                            <p>Student ID: <span id="profileStudentId">----</span></p>
                         </div>
                     </div>
                     <div class="profile-details">
                         <div class="detail-item">
                             <span class="detail-label">Institution:</span>
-                            <span>Al Akhawayn University</span>
+                            <span id="profileInstitution">Loading...</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Department:</span>
-                            <span>SSE</span>
+                            <span id="profileDepartment">---</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Major:</span>
-                            <span>Computer Science</span>
+                            <span id="profileMajor">Loading...</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Academic Year:</span>
-                            <span>2025/2026</span>
+                            <span id="profileAcademicYear">----/----</span>
                         </div>
                     </div>
                     <button class="edit-profile-btn" onclick="window.location.href='EditProfile.html'">Edit Profile</button>
@@ -454,35 +494,8 @@
                 <!-- Medical Information -->
                 <div class="card">
                     <h2 class="card-title">Medical Information</h2>
-                    <div class="medical-info-card">
-                        <div class="medical-section">
-                            <h3 class="medical-section-title">
-                                Allergies <span class="medical-count">2</span>
-                            </h3>
-                            <ul class="medical-list">
-                                <li>Peanuts</li>
-                                <li>Penicillin</li>
-                            </ul>
-                        </div>
-
-                        <div class="medical-section">
-                            <h3 class="medical-section-title">
-                                Medications <span class="medical-count">1</span>
-                            </h3>
-                            <ul class="medical-list">
-                                <li>Inhaler (Albuterol) - As needed</li>
-                            </ul>
-                        </div>
-
-                        <div class="medical-section">
-                            <h3 class="medical-section-title">
-                                Chronic Conditions <span class="medical-count">2</span>
-                            </h3>
-                            <ul class="medical-list">
-                                <li>Asthma</li>
-                                <li>Seasonal Allergies</li>
-                            </ul>
-                        </div>
+                    <div class="medical-info-card" id="medicalInfoCard">
+                        <div class="loading">Loading medical records...</div>
                     </div>
                 </div>
             </div>
@@ -491,88 +504,62 @@
             <div class="right-column">
                 <div class="card">
                     <h2 class="card-title">Personal Information</h2>
-                    <div class="info-grid">
+                    <div class="info-grid" id="personalInfoGrid">
                         <div class="info-item">
                             <div class="info-label">Student ID</div>
-                            <div class="info-value">2023001</div>
+                            <div class="info-value" id="infoStudentId">Loading...</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Full Name</div>
-                            <div class="info-value">Alexandra Miller</div>
+                            <div class="info-value" id="infoFullName">Loading...</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Date of Birth</div>
-                            <div class="info-value">May 10, 2002</div>
+                            <div class="info-value" id="infoDOB">Loading...</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Gender</div>
-                            <div class="info-value">Female</div>
+                            <div class="info-value" id="infoGender">Loading...</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Email</div>
-                            <div class="info-value">alexandra.miller@aui.ma</div>
+                            <div class="info-value" id="infoEmail">Loading...</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Phone</div>
-                            <div class="info-value">+212 612-345678</div>
+                            <div class="info-value" id="infoPhone">Loading...</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Department</div>
-                            <div class="info-value">SSE</div>
+                            <div class="info-value" id="infoDepartment">Loading...</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Major</div>
-                            <div class="info-value">Computer Science</div>
+                            <div class="info-value" id="infoMajor">Loading...</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Academic Year</div>
-                            <div class="info-value">2025/2026</div>
+                            <div class="info-value" id="infoAcademicYear">Loading...</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Year Level</div>
-                            <div class="info-value">Junior</div>
+                            <div class="info-value" id="infoYearLevel">Loading...</div>
                         </div>
                     </div>
                     
-                    <div style="background: #f8fff8; padding: 1.8rem; border-radius: 12px; margin-top: 1.5rem;">
-                        <h3 style="color: #2e7d32; margin-bottom: 1rem; font-size: 1.2rem;">Emergency Contact</h3>
-                        <div style="font-size: 1rem; color: #555; line-height: 1.8;">
-                            <strong>Jane Miller (Mother)</strong><br>
-                            Phone: +1 555-123-4567<br>
-                            Email: jane.miller@example.com<br>
-                            Relationship: Parent
+                    <div class="emergency-contact-box" id="emergencyContactBox">
+                        <h3>Emergency Contact</h3>
+                        <div class="emergency-contact-info" id="emergencyContactInfo">
+                            Loading emergency contact...
                         </div>
                     </div>
                 </div>
 
                 <div class="card">
                     <h2 class="card-title">Recent Visits</h2>
-                    <table class="visits-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Diagnosis</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="visit-date">2024-03-01</td>
-                                <td class="visit-diagnosis">Routine Check-up</td>
-                                <td><span class="visit-status status-resolved">Completed</span></td>
-                            </tr>
-                            <tr>
-                                <td class="visit-date">2024-01-20</td>
-                                <td class="visit-diagnosis">Ankle Sprain</td>
-                                <td><span class="visit-status status-resolved">Resolved</span></td>
-                            </tr>
-                            <tr>
-                                <td class="visit-date">2023-11-15</td>
-                                <td class="visit-diagnosis">Seasonal Allergies</td>
-                                <td><span class="visit-status status-resolved">Resolved</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div id="visitsContainer">
+                        <div class="loading">Loading visit history...</div>
+                    </div>
                     <button class="view-all-btn" onclick="window.location.href='VisitHistory.html'">
                         View All Visit History
                     </button>
@@ -583,33 +570,267 @@
 
     <script>
         const API_URL = 'http://localhost:8000';
-    </script>
+        
+        // ============================================
+        // INITIALISATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', async function() {
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'Login.html';
+                return;
+            }
+            
+            await Promise.all([
+                loadUserProfile(),
+                loadMedicalRecords(),
+                loadVisitHistory()
+            ]);
+        });
 
-    <!-- CHATBOT -->
-    <style>
-        #chatbot-widget{position:fixed;bottom:20px;right:20px;z-index:1000;font-family:'Segoe UI',Arial,sans-serif}#chat-button{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#2e7d32 0%,#4caf50 100%);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(46,125,50,0.4);display:flex;align-items:center;justify-content:center;transition:all .3s ease}#chat-button:hover{transform:scale(1.1)}#chat-button svg{width:30px;height:30px;fill:white}#chat-window{display:none;position:fixed;bottom:90px;right:20px;width:380px;height:550px;background:white;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,0.2);flex-direction:column;overflow:hidden}#chat-window.open{display:flex}.chat-header{background:linear-gradient(135deg,#2e7d32 0%,#4caf50 100%);color:white;padding:20px;display:flex;justify-content:space-between;align-items:center}.chat-header h3{margin:0;font-size:1.3rem}.chat-header p{margin:5px 0 0 0;opacity:0.9;font-size:0.9rem}#close-chat{background:none;border:none;color:white;font-size:1.5rem;cursor:pointer}#chat-messages{flex:1;overflow-y:auto;padding:20px;background:#f8fff8}.message{margin-bottom:15px;display:flex;flex-direction:column}.message.user{align-items:flex-end}.message.bot{align-items:flex-start}.message-content{max-width:80%;padding:12px 16px;border-radius:12px;word-wrap:break-word}.message.user .message-content{background:#2e7d32;color:white}.message.bot .message-content{background:white;color:#333;border:1px solid #e8f5e8}.message-time{font-size:0.75rem;color:#999;margin-top:5px}.chat-input-container{padding:15px;background:white;border-top:1px solid #e8f5e8;display:flex;gap:10px}#chat-input{flex:1;padding:12px 15px;border:2px solid #e8f5e8;border-radius:25px;font-size:0.95rem;outline:none}#chat-input:focus{border-color:#4caf50}#send-button{background:#4caf50;color:white;border:none;width:45px;height:45px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}#send-button:hover{background:#388e3c}.quick-actions{padding:10px 20px;background:white;border-top:1px solid #e8f5e8;display:flex;gap:8px;flex-wrap:wrap}.quick-action-btn{padding:8px 12px;background:#e8f5e8;color:#2e7d32;border:none;border-radius:15px;font-size:0.85rem;cursor:pointer}.quick-action-btn:hover{background:#4caf50;color:white}
-    </style>
+        // ============================================
+        // CHARGER LE PROFIL
+        // ============================================
+        async function loadUserProfile() {
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        sessionStorage.clear();
+                        window.location.href = 'Login.html';
+                        return;
+                    }
+                    throw new Error('Failed to load profile');
+                }
+                
+                const data = await response.json();
+                displayProfile(data);
+                
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
 
-    <div id="chatbot-widget">
-        <button id="chat-button"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg></button>
-        <div id="chat-window">
-            <div class="chat-header"><div><h3>CareConnect Assistant</h3><p>Ask me anything</p></div><button id="close-chat">×</button></div>
-            <div class="quick-actions">
-                <button class="quick-action-btn" data-msg="Book an appointment">📅 Appointment</button>
-                <button class="quick-action-btn" data-msg="I need emergency help">🚨 Emergency</button>
-            </div>
-            <div id="chat-messages">
-                <div class="message bot"><div class="message-content">Hello! How can I help you today?</div></div>
-            </div>
-            <div class="chat-input-container">
-                <input type="text" id="chat-input" placeholder="Type your message..." />
-                <button id="send-button"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
-            </div>
-        </div>
-    </div>
+        function displayProfile(data) {
+            const initials = getInitials(data.full_name);
+            
+            // Header
+            document.getElementById('headerAvatar').textContent = initials;
+            document.getElementById('headerUserName').textContent = data.full_name;
+            
+            // Profile Card
+            document.getElementById('profileAvatar').textContent = initials;
+            document.getElementById('profileName').textContent = data.full_name;
+            document.getElementById('profileStudentId').textContent = data.student_id || 'N/A';
+            document.getElementById('profileInstitution').textContent = 'Al Akhawayn University';
+            document.getElementById('profileDepartment').textContent = data.department || 'N/A';
+            document.getElementById('profileMajor').textContent = data.major || 'N/A';
+            document.getElementById('profileAcademicYear').textContent = '2025/2026';
+            
+            // Personal Information Grid
+            document.getElementById('infoStudentId').textContent = data.student_id || 'N/A';
+            document.getElementById('infoFullName').textContent = data.full_name;
+            document.getElementById('infoDOB').textContent = data.date_of_birth ? formatDate(data.date_of_birth) : 'Not set';
+            document.getElementById('infoGender').textContent = capitalizeFirst(data.gender) || 'Not set';
+            document.getElementById('infoEmail').textContent = data.email || 'N/A';
+            document.getElementById('infoPhone').textContent = data.phone || 'Not set';
+            document.getElementById('infoDepartment').textContent = data.department || 'N/A';
+            document.getElementById('infoMajor').textContent = data.major || 'N/A';
+            document.getElementById('infoAcademicYear').textContent = '2025/2026';
+            document.getElementById('infoYearLevel').textContent = capitalizeFirst(data.year_level) || 'Not set';
+            
+            // Emergency Contact
+            if (data.emergency_contact) {
+                document.getElementById('emergencyContactInfo').innerHTML = `
+                    <strong>${data.emergency_contact.name} (${data.emergency_contact.relationship})</strong><br>
+                    Phone: ${data.emergency_contact.phone}<br>
+                    ${data.emergency_contact.email ? `Email: ${data.emergency_contact.email}` : ''}
+                `;
+            } else {
+                document.getElementById('emergencyContactInfo').innerHTML = `
+                    <span class="empty-state">No emergency contact set</span>
+                    <br><br>
+                    <a href="EditProfile.html" style="color: #2e7d32;">Add emergency contact →</a>
+                `;
+            }
+        }
 
-    <script>
-    let conversationId=null,userContext=null;const chatButton=document.getElementById('chat-button'),chatWindow=document.getElementById('chat-window'),closeChat=document.getElementById('close-chat'),chatMessages=document.getElementById('chat-messages'),chatInput=document.getElementById('chat-input'),sendButton=document.getElementById('send-button');chatButton.addEventListener('click',()=>{chatWindow.classList.toggle('open');chatWindow.classList.contains('open')&&chatInput.focus()});closeChat.addEventListener('click',()=>chatWindow.classList.remove('open'));async function sendMessage(msg){if(!msg.trim())return;addMessage(msg,'user');chatInput.value='';sendButton.disabled=true;showTypingIndicator();try{const res=await fetch(`${API_URL}/chat/`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,conversation_id:conversationId,user_context:userContext})});const data=await res.json();hideTypingIndicator();conversationId=data.conversation_id;addMessage(data.reply,'bot')}catch(e){hideTypingIndicator();addMessage('Sorry, error occurred.',  'bot');console.error(e)}finally{sendButton.disabled=false}}function addMessage(text,type){const msgDiv=document.createElement('div');msgDiv.className=`message ${type}`;const contentDiv=document.createElement('div');contentDiv.className='message-content';contentDiv.textContent=text;const timeDiv=document.createElement('div');timeDiv.className='message-time';timeDiv.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});msgDiv.appendChild(contentDiv);msgDiv.appendChild(timeDiv);chatMessages.appendChild(msgDiv);chatMessages.scrollTop=chatMessages.scrollHeight}function showTypingIndicator(){const indicator=document.createElement('div');indicator.className='message bot';indicator.id='typing-indicator';indicator.innerHTML='<div style="padding:12px;background:white;border:1px solid #e8f5e8;border-radius:12px"><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;margin-right:4px;animation:typing 1.4s infinite"></span><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;margin-right:4px;animation:typing 1.4s infinite 0.2s"></span><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;animation:typing 1.4s infinite 0.4s"></span></div>';chatMessages.appendChild(indicator);chatMessages.scrollTop=chatMessages.scrollHeight}function hideTypingIndicator(){const indicator=document.getElementById('typing-indicator');indicator&&indicator.remove()}sendButton.addEventListener('click',()=>sendMessage(chatInput.value));chatInput.addEventListener('keypress',e=>{e.key==='Enter'&&sendMessage(chatInput.value)});document.querySelectorAll('.quick-action-btn').forEach(btn=>btn.addEventListener('click',()=>sendMessage(btn.dataset.msg)));function loadUserContext(){const username=sessionStorage.getItem('username'),fullName=sessionStorage.getItem('fullName'),studentId=sessionStorage.getItem('studentId');username&&(userContext={name:fullName||username,student_id:studentId||'N/A'})}loadUserContext();const style=document.createElement('style');style.textContent='@keyframes typing{0%,60%,100%{opacity:0.3}30%{opacity:1}}';document.head.appendChild(style);
+        // ============================================
+        // CHARGER LES DONNÉES MÉDICALES
+        // ============================================
+        async function loadMedicalRecords() {
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/medical-records`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('Failed to load medical records');
+                
+                const data = await response.json();
+                displayMedicalRecords(data);
+                
+            } catch (error) {
+                console.error('Error loading medical records:', error);
+                document.getElementById('medicalInfoCard').innerHTML = `
+                    <div class="empty-state">Unable to load medical records</div>
+                `;
+            }
+        }
+
+        function displayMedicalRecords(data) {
+            const container = document.getElementById('medicalInfoCard');
+            
+            let html = '';
+            
+            // Allergies
+            const allergiesCount = data.allergies?.length || 0;
+            html += `
+                <div class="medical-section">
+                    <h3 class="medical-section-title">
+                        Allergies <span class="medical-count">${allergiesCount}</span>
+                    </h3>
+                    <ul class="medical-list">
+            `;
+            if (allergiesCount > 0) {
+                data.allergies.forEach(a => {
+                    html += `<li>${a.name}${a.severity ? ` (${a.severity})` : ''}</li>`;
+                });
+            } else {
+                html += `<li class="empty-state">No allergies recorded</li>`;
+            }
+            html += `</ul></div>`;
+            
+            // Medications
+            const medsCount = data.medications?.length || 0;
+            html += `
+                <div class="medical-section">
+                    <h3 class="medical-section-title">
+                        Medications <span class="medical-count">${medsCount}</span>
+                    </h3>
+                    <ul class="medical-list">
+            `;
+            if (medsCount > 0) {
+                data.medications.forEach(m => {
+                    html += `<li>${m.name}${m.description ? ` - ${m.description}` : ''}</li>`;
+                });
+            } else {
+                html += `<li class="empty-state">No medications recorded</li>`;
+            }
+            html += `</ul></div>`;
+            
+            // Conditions
+            const conditionsCount = data.conditions?.length || 0;
+            html += `
+                <div class="medical-section">
+                    <h3 class="medical-section-title">
+                        Chronic Conditions <span class="medical-count">${conditionsCount}</span>
+                    </h3>
+                    <ul class="medical-list">
+            `;
+            if (conditionsCount > 0) {
+                data.conditions.forEach(c => {
+                    html += `<li>${c.name}${c.severity ? ` (${c.severity})` : ''}</li>`;
+                });
+            } else {
+                html += `<li class="empty-state">No conditions recorded</li>`;
+            }
+            html += `</ul></div>`;
+            
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // CHARGER LES VISITES
+        // ============================================
+        async function loadVisitHistory() {
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/visits/all`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('Failed to load visits');
+                
+                const data = await response.json();
+                displayVisits(data.visits || []);
+                
+            } catch (error) {
+                console.error('Error loading visits:', error);
+                document.getElementById('visitsContainer').innerHTML = `
+                    <div class="empty-state">No visit history available</div>
+                `;
+            }
+        }
+
+        function displayVisits(visits) {
+            const container = document.getElementById('visitsContainer');
+            
+            if (!visits || visits.length === 0) {
+                container.innerHTML = `<div class="empty-state">No visit history yet</div>`;
+                return;
+            }
+            
+            const recentVisits = visits.slice(0, 3);
+            
+            let html = `
+                <table class="visits-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Diagnosis</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            recentVisits.forEach(visit => {
+                const statusClass = visit.status === 'completed' ? 'status-resolved' : 'status-active';
+                html += `
+                    <tr>
+                        <td class="visit-date">${visit.date}</td>
+                        <td class="visit-diagnosis">${visit.diagnosis || 'N/A'}</td>
+                        <td><span class="visit-status ${statusClass}">${capitalizeFirst(visit.status)}</span></td>
+                    </tr>
+                `;
+            });
+            
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // UTILITAIRES
+        // ============================================
+        function getInitials(fullName) {
+            if (!fullName) return '--';
+            const names = fullName.trim().split(' ');
+            if (names.length >= 2) {
+                return (names[0][0] + names[names.length - 1][0]).toUpperCase();
+            }
+            return fullName.substring(0, 2).toUpperCase();
+        }
+
+        function capitalizeFirst(str) {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'Login.html';
+        }
     </script>
 </body>
 </html>

@@ -451,3 +451,156 @@ def check_rate_limit(conversation_id: str, limit: int = 50) -> bool:
         return False
     
     return True
+
+
+def get_health_advice(symptom: str) -> str:
+    """
+    Provide general health advice based on symptoms.
+    This is NOT a medical diagnosis - always recommend professional help.
+    """
+    symptom_lower = symptom.lower()
+    
+    # Common symptom advice
+    advice_database = {
+        "headache": """
+🩺 Headache Guidance:
+• Rest in a quiet, dark room
+• Stay hydrated - drink water
+• Avoid screen time
+• Try a cold compress on forehead
+
+⚠️ Seek immediate help if:
+• Sudden severe headache
+• Fever with stiff neck
+• Confusion or vision changes
+• After head injury
+
+📍 Visit Health Center if persists >24 hours
+""",
+        
+        "fever": """
+🌡️ Fever Guidance:
+• Rest and stay hydrated
+• Take temperature regularly
+• Light clothing to help cool down
+• Over-the-counter fever reducers (if no allergies)
+
+⚠️ Seek immediate help if:
+• Temperature >39.4°C (103°F)
+• Fever lasting >3 days
+• Difficulty breathing
+• Severe headache or stiff neck
+
+📍 Call Health Center: 0535-86-0104
+""",
+        
+        "cold": """
+🤧 Cold/Flu Guidance:
+• Rest as much as possible
+• Drink plenty of fluids
+• Warm liquids (tea, soup) can help
+• Saltwater gargle for sore throat
+
+⚠️ Seek help if:
+• Symptoms worsen after a week
+• High fever develops
+• Difficulty breathing
+• Chest pain
+
+📍 Schedule appointment if needed
+""",
+        
+        "stomach": """
+🤢 Stomach Issues Guidance:
+• Stay hydrated with small sips
+• BRAT diet (Banana, Rice, Applesauce, Toast)
+• Avoid dairy, caffeine, alcohol
+• Rest your stomach
+
+⚠️ Seek immediate help if:
+• Severe abdominal pain
+• Blood in vomit or stool
+• Signs of dehydration
+• Fever >38.5°C
+
+📍 Health Center available for consultation
+""",
+        
+        "anxiety": """
+💭 Anxiety/Stress Guidance:
+• Deep breathing exercises (4-7-8 technique)
+• Take a short walk
+• Talk to someone you trust
+• Limit caffeine intake
+
+📞 Support Resources:
+• Campus Counseling Services
+• 24/7 Hotline: 0535 86 2222
+• Health Center can refer to specialists
+
+Remember: It's okay to ask for help! 💚
+""",
+        
+        "injury": """
+🩹 Minor Injury Guidance:
+• RICE: Rest, Ice, Compression, Elevation
+• Clean any wounds with water
+• Apply antiseptic if available
+• Monitor for swelling/infection
+
+⚠️ Seek IMMEDIATE help if:
+• Heavy bleeding
+• Possible fracture
+• Head/neck/spine injury
+• Loss of consciousness
+
+🚨 Emergency: 2222
+📍 Health Center: 0535-86-0104
+""",
+        
+        "allergic": """
+🌸 Allergy Guidance:
+• Identify and avoid triggers
+• Antihistamines may help (check with doctor first)
+• Cool compress for itchy eyes
+• Nasal rinse for congestion
+
+⚠️ EMERGENCY - Call 2222 if:
+• Difficulty breathing
+• Swelling of face/throat
+• Dizziness or fainting
+• This could be anaphylaxis!
+
+📍 Update your allergy info in your profile
+"""
+    }
+    
+    # Find matching advice
+    for keyword, advice in advice_database.items():
+        if keyword in symptom_lower:
+            return advice
+    
+    # Default response
+    return f"""
+🩺 Health Guidance for: "{symptom}"
+
+I can provide general wellness information, but I'm not able to diagnose medical conditions.
+
+**General Recommendations:**
+• Monitor your symptoms
+• Rest and stay hydrated
+• Keep track of when symptoms started
+
+**When to Seek Help:**
+• Symptoms worsen or persist
+• You're concerned about your health
+• Any emergency symptoms
+
+📍 **Health Center:** 0535-86-0104
+🚨 **Emergency:** 2222
+
+Would you like me to help you:
+1. Book an appointment?
+2. Find emergency contacts?
+3. Update your medical records?
+"""

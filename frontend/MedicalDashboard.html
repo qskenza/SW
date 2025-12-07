@@ -77,6 +77,21 @@
             font-weight: bold;
         }
 
+        .logout-btn {
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            background: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .logout-btn:hover {
+            background: #b71c1c;
+        }
+
         /* Main Container */
         .container {
             max-width: 1200px;
@@ -177,7 +192,7 @@
             opacity: 0.8;
         }
 
-        /* Medical Information Card - Updated */
+        /* Medical Information Card */
         .medical-info-card {
             background: #f8fff8;
             border-radius: 12px;
@@ -213,6 +228,9 @@
             padding: 0.6rem 0;
             color: #555;
             border-bottom: 1px solid #e8f5e8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .medical-list li:last-child {
@@ -227,6 +245,43 @@
             font-size: 0.85rem;
             font-weight: 600;
             margin-left: 0.5rem;
+        }
+
+        .severity-badge {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .severity-mild {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .severity-moderate {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .severity-severe {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #d32f2f;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: #ffebee;
         }
 
         .add-entry-btn {
@@ -403,6 +458,61 @@
             color: #666;
         }
 
+        .no-appointment {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .no-appointment-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .book-now-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .book-now-btn:hover {
+            background: #388e3c;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .loading-spinner {
+            border: 3px solid #e8f5e8;
+            border-top: 3px solid #4caf50;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 1.5rem;
+            color: #888;
+            font-style: italic;
+        }
+
         /* Responsive */
         @media (max-width: 1100px) {
             .dashboard-layout {
@@ -445,11 +555,9 @@
                 </ul>
             </nav>
             <div class="user-info">
-                <div class="user-avatar">AM</div>
-                <span>Loading...</span>
-                <button onclick="logout()" style="margin-left: 1rem; padding: 0.5rem 1rem; background: #d32f2f; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">
-                    Logout
-                </button>
+                <div class="user-avatar" id="headerAvatar">--</div>
+                <span id="headerUserName">Loading...</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
         </div>
     </header>
@@ -465,28 +573,28 @@
                 <div class="card profile-card">
                     <h2 class="card-title" style="color: white; border-color: white;">Student Information</h2>
                     <div class="profile-header">
-                        <div class="profile-avatar">AM</div>
+                        <div class="profile-avatar" id="profileAvatar">--</div>
                         <div class="profile-info">
-                            <h2>Alexandra Miller</h2>
-                            <p>Student ID: 2023001</p>
+                            <h2 id="profileName">Loading...</h2>
+                            <p>Student ID: <span id="profileStudentId">----</span></p>
                         </div>
                     </div>
                     <div class="profile-details">
                         <div class="detail-item">
                             <span class="detail-label">Institution:</span>
-                            <span>Al Akhawayn University</span>
+                            <span id="profileInstitution">Loading...</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Department:</span>
-                            <span>SSE</span>
+                            <span id="profileDepartment">---</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Major:</span>
-                            <span>Computer Science</span>
+                            <span id="profileMajor">Loading...</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Academic Year:</span>
-                            <span>2025/2026</span>
+                            <span id="profileAcademicYear">----/----</span>
                         </div>
                     </div>
                 </div>
@@ -494,44 +602,10 @@
                 <!-- Medical Information -->
                 <div class="card">
                     <h2 class="card-title">Medical Information</h2>
-                    <div class="medical-info-card">
-                        <div class="medical-section">
-                            <h3 class="medical-section-title">
-                                Allergies <span class="medical-count">2</span>
-                            </h3>
-                            <ul class="medical-list">
-                                <li>Peanuts</li>
-                                <li>Penicillin</li>
-                            </ul>
-                        </div>
-
-                        <div class="medical-section">
-                            <h3 class="medical-section-title">
-                                Current Medications <span class="medical-count">1</span>
-                            </h3>
-                            <ul class="medical-list">
-                                <li>Inhaler (Albuterol) - As needed</li>
-                            </ul>
-                        </div>
-
-                        <div class="medical-section">
-                            <h3 class="medical-section-title">
-                                Chronic Conditions <span class="medical-count">2</span>
-                            </h3>
-                            <ul class="medical-list">
-                                <li>Asthma</li>
-                                <li>Seasonal Allergies</li>
-                            </ul>
-                        </div>
-
-                        <div class="medical-section">
-                            <h3 class="medical-section-title">
-                                Total Visits (2024) <span class="medical-count">3</span>
-                            </h3>
-                            <ul class="medical-list">
-                                <li>Last visit: March 1, 2024</li>
-                                <li>Upcoming: October 26, 2024</li>
-                            </ul>
+                    <div class="medical-info-card" id="medicalInfoCard">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            <p>Loading medical records...</p>
                         </div>
                     </div>
                     <button class="add-entry-btn" onclick="window.location.href='AddMedicalEntry.html'">
@@ -544,36 +618,12 @@
             <div class="middle-column">
                 <div class="card">
                     <h2 class="card-title">Recent Medical Visits</h2>
-                    <table class="visits-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Diagnosis</th>
-                                <th>Doctor</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="visit-date">2024-03-01</td>
-                                <td>Routine Check-up</td>
-                                <td class="visit-doctor">Dr. Elena Rodriguez</td>
-                                <td><span class="visit-status status-completed">Completed</span></td>
-                            </tr>
-                            <tr>
-                                <td class="visit-date">2024-01-20</td>
-                                <td>Minor Sprain (Active)</td>
-                                <td class="visit-doctor">Dr. Alice Smith</td>
-                                <td><span class="visit-status status-completed">Completed</span></td>
-                            </tr>
-                            <tr>
-                                <td class="visit-date">2023-11-15</td>
-                                <td>Seasonal Allergies</td>
-                                <td class="visit-doctor">Dr. Bob Johnston</td>
-                                <td><span class="visit-status status-completed">Completed</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div id="visitsContainer">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            <p>Loading visits...</p>
+                        </div>
+                    </div>
                     <button class="view-all-btn" onclick="window.location.href='VisitHistory.html'">
                         View All Visit History
                     </button>
@@ -594,22 +644,10 @@
             <div class="right-column">
                 <div class="card">
                     <h2 class="card-title">Upcoming Appointment</h2>
-                    <div class="appointment-card" data-appointment-date="2024-10-26T10:00:00">
-                        <div class="appointment-header">
-                            <div class="appointment-date">Wednesday, Oct 26</div>
-                            <div class="appointment-time">10:00 AM</div>
-                        </div>
-                        <div class="appointment-details">
-                            <h3>Dr. Alice Smith</h3>
-                            <p>General Practitioner</p>
-                            <p>Campus Health Center, Room 101</p>
-                        </div>
-                        <div class="appointment-actions">
-                            <button class="appointment-btn reschedule-btn" id="rescheduleBtn">Reschedule</button>
-                            <button class="appointment-btn cancel-btn">Cancel</button>
-                        </div>
-                        <div class="reschedule-notice" id="rescheduleNotice" style="display: none;">
-                            ⚠️ Rescheduling is only available up to 12 hours before the appointment time.
+                    <div id="appointmentContainer">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            <p>Loading appointments...</p>
                         </div>
                     </div>
                 </div>
@@ -618,63 +656,496 @@
     </div>
 
     <script>
-        // Check if reschedule is allowed (12 hours before appointment)
-        function checkRescheduleAvailability() {
-            const appointmentCard = document.querySelector('[data-appointment-date]');
-            const appointmentDateStr = appointmentCard.getAttribute('data-appointment-date');
-            const appointmentDate = new Date(appointmentDateStr);
-            const now = new Date();
-            const hoursUntilAppointment = (appointmentDate - now) / (1000 * 60 * 60);
+        const API_URL = 'http://localhost:8000';
+        
+        // ============================================
+        // INITIALISATION AU CHARGEMENT DE LA PAGE
+        // ============================================
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Vérifier l'authentification
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'Login.html';
+                return;
+            }
             
-            const rescheduleBtn = document.getElementById('rescheduleBtn');
-            const rescheduleNotice = document.getElementById('rescheduleNotice');
-            
-            if (hoursUntilAppointment < 12) {
-                rescheduleBtn.disabled = true;
-                rescheduleNotice.style.display = 'block';
-                rescheduleBtn.title = 'Cannot reschedule within 12 hours of appointment';
-            } else {
-                rescheduleBtn.disabled = false;
-                rescheduleNotice.style.display = 'none';
+            // Charger toutes les données
+            await Promise.all([
+                loadUserProfile(),
+                loadMedicalRecords(),
+                loadVisitHistory(),
+                loadAppointments()
+            ]);
+        });
+
+        // ============================================
+        // CHARGER LE PROFIL UTILISATEUR
+        // ============================================
+        async function loadUserProfile() {
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        sessionStorage.clear();
+                        window.location.href = 'Login.html';
+                        return;
+                    }
+                    throw new Error('Failed to load profile');
+                }
+                
+                const userData = await response.json();
+                
+                // Mettre à jour le header
+                const initials = getInitials(userData.full_name);
+                document.getElementById('headerAvatar').textContent = initials;
+                document.getElementById('headerUserName').textContent = userData.full_name;
+                
+                // Mettre à jour la carte profil
+                document.getElementById('profileAvatar').textContent = initials;
+                document.getElementById('profileName').textContent = userData.full_name;
+                document.getElementById('profileStudentId').textContent = userData.student_id || 'N/A';
+                document.getElementById('profileInstitution').textContent = 'Al Akhawayn University';
+                document.getElementById('profileDepartment').textContent = userData.department || 'N/A';
+                document.getElementById('profileMajor').textContent = userData.major || 'N/A';
+                document.getElementById('profileAcademicYear').textContent = '2025/2026';
+                
+                // Stocker pour utilisation ultérieure
+                sessionStorage.setItem('fullName', userData.full_name);
+                sessionStorage.setItem('studentId', userData.student_id);
+                
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                document.getElementById('profileName').textContent = 'Error loading profile';
             }
         }
 
-        // Appointment Reschedule Button
-        document.getElementById('rescheduleBtn').addEventListener('click', function() {
-            if (!this.disabled) {
-                // Redirect to appointment booking page with pre-selected date section
-                window.location.href = 'AppointmentBooking.html#datetime-selection';
+        // ============================================
+        // CHARGER LES DONNÉES MÉDICALES
+        // ============================================
+        async function loadMedicalRecords() {
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/medical-records`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load medical records');
+                }
+                
+                const data = await response.json();
+                displayMedicalRecords(data);
+                
+            } catch (error) {
+                console.error('Error loading medical records:', error);
+                document.getElementById('medicalInfoCard').innerHTML = `
+                    <div class="empty-state">
+                        <p>Unable to load medical records</p>
+                    </div>
+                `;
             }
-        });
+        }
 
-        // Appointment Cancel Button
-        document.querySelector('.cancel-btn').addEventListener('click', function() {
-            const confirmCancel = confirm('Are you sure you want to cancel your appointment with Dr. Alice Smith?\n\nDate: October 26, 2024\nTime: 10:00 AM');
-            if (confirmCancel) {
-                alert('Appointment cancelled successfully.\n\nYou will receive a confirmation email shortly.');
+        function displayMedicalRecords(data) {
+            const container = document.getElementById('medicalInfoCard');
+            
+            const allergiesCount = data.allergies?.length || 0;
+            const medicationsCount = data.medications?.length || 0;
+            const conditionsCount = data.conditions?.length || 0;
+            
+            let html = '';
+            
+            // Section Allergies
+            html += `
+                <div class="medical-section">
+                    <h3 class="medical-section-title">
+                        Allergies <span class="medical-count">${allergiesCount}</span>
+                    </h3>
+                    <ul class="medical-list">
+            `;
+            
+            if (allergiesCount > 0) {
+                data.allergies.forEach(allergy => {
+                    const severityClass = allergy.severity ? `severity-${allergy.severity}` : '';
+                    html += `
+                        <li>
+                            <span>${allergy.name} ${allergy.severity ? `<span class="severity-badge ${severityClass}">${allergy.severity}</span>` : ''}</span>
+                            <button class="delete-btn" onclick="deleteMedicalEntry(${allergy.id}, 'allergy')" title="Delete">×</button>
+                        </li>
+                    `;
+                });
+            } else {
+                html += `<li class="empty-state">No allergies recorded</li>`;
             }
-        });
+            
+            html += `</ul></div>`;
+            
+            // Section Medications
+            html += `
+                <div class="medical-section">
+                    <h3 class="medical-section-title">
+                        Current Medications <span class="medical-count">${medicationsCount}</span>
+                    </h3>
+                    <ul class="medical-list">
+            `;
+            
+            if (medicationsCount > 0) {
+                data.medications.forEach(med => {
+                    html += `
+                        <li>
+                            <span>${med.name}${med.description ? ` - ${med.description}` : ''}</span>
+                            <button class="delete-btn" onclick="deleteMedicalEntry(${med.id}, 'medication')" title="Delete">×</button>
+                        </li>
+                    `;
+                });
+            } else {
+                html += `<li class="empty-state">No medications recorded</li>`;
+            }
+            
+            html += `</ul></div>`;
+            
+            // Section Conditions
+            html += `
+                <div class="medical-section">
+                    <h3 class="medical-section-title">
+                        Chronic Conditions <span class="medical-count">${conditionsCount}</span>
+                    </h3>
+                    <ul class="medical-list">
+            `;
+            
+            if (conditionsCount > 0) {
+                data.conditions.forEach(condition => {
+                    const severityClass = condition.severity ? `severity-${condition.severity}` : '';
+                    html += `
+                        <li>
+                            <span>${condition.name} ${condition.severity ? `<span class="severity-badge ${severityClass}">${condition.severity}</span>` : ''}</span>
+                            <button class="delete-btn" onclick="deleteMedicalEntry(${condition.id}, 'condition')" title="Delete">×</button>
+                        </li>
+                    `;
+                });
+            } else {
+                html += `<li class="empty-state">No conditions recorded</li>`;
+            }
+            
+            html += `</ul></div>`;
+            
+            container.innerHTML = html;
+        }
 
-        // Initialize reschedule check
-        checkRescheduleAvailability();
-        
-        // Check every minute
-        setInterval(checkRescheduleAvailability, 60000);
-    </script>
-    <script>
-    const API_URL = 'http://localhost:8000';
-    // Le code du widget est dans ChatbotWidget.html
+        // ============================================
+        // CHARGER L'HISTORIQUE DES VISITES
+        // ============================================
+        async function loadVisitHistory() {
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/visits/all`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load visits');
+                }
+                
+                const data = await response.json();
+                displayVisits(data.visits || []);
+                
+            } catch (error) {
+                console.error('Error loading visits:', error);
+                document.getElementById('visitsContainer').innerHTML = `
+                    <div class="empty-state">
+                        <p>No visit history available</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayVisits(visits) {
+            const container = document.getElementById('visitsContainer');
+            
+            if (!visits || visits.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>No visit history yet</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Afficher les 3 dernières visites
+            const recentVisits = visits.slice(0, 3);
+            
+            let html = `
+                <table class="visits-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Diagnosis</th>
+                            <th>Doctor</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            recentVisits.forEach(visit => {
+                const statusClass = visit.status === 'completed' ? 'status-completed' : 'status-upcoming';
+                html += `
+                    <tr>
+                        <td class="visit-date">${visit.date}</td>
+                        <td>${visit.diagnosis || 'N/A'}</td>
+                        <td class="visit-doctor">${visit.doctor_name}</td>
+                        <td><span class="visit-status ${statusClass}">${capitalizeFirst(visit.status)}</span></td>
+                    </tr>
+                `;
+            });
+            
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // CHARGER LES RENDEZ-VOUS
+        // ============================================
+        async function loadAppointments() {
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/appointments`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    // Si l'endpoint n'existe pas encore, afficher un message
+                    if (response.status === 404) {
+                        displayNoAppointment();
+                        return;
+                    }
+                    throw new Error('Failed to load appointments');
+                }
+                
+                const appointments = await response.json();
+                const upcomingAppointments = appointments.filter(a => a.status === 'upcoming');
+                
+                if (upcomingAppointments.length > 0) {
+                    displayAppointment(upcomingAppointments[0]);
+                } else {
+                    displayNoAppointment();
+                }
+                
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+                displayNoAppointment();
+            }
+        }
+
+        function displayAppointment(appointment) {
+            const container = document.getElementById('appointmentContainer');
+            
+            // Calculer si on peut reprogrammer (12h avant)
+            const appointmentDate = new Date(appointment.date + 'T' + convertTimeTo24h(appointment.time));
+            const now = new Date();
+            const hoursUntil = (appointmentDate - now) / (1000 * 60 * 60);
+            const canReschedule = hoursUntil >= 12;
+            
+            container.innerHTML = `
+                <div class="appointment-card" data-appointment-id="${appointment.id}">
+                    <div class="appointment-header">
+                        <div class="appointment-date">${formatDateNice(appointment.date)}</div>
+                        <div class="appointment-time">${appointment.time}</div>
+                    </div>
+                    <div class="appointment-details">
+                        <h3>${appointment.doctor_name}</h3>
+                        <p>${appointment.doctor_specialty || 'General Practitioner'}</p>
+                        <p>${appointment.location || 'Campus Health Center'}</p>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="appointment-btn reschedule-btn" 
+                                onclick="rescheduleAppointment(${appointment.id})"
+                                ${!canReschedule ? 'disabled' : ''}>
+                            Reschedule
+                        </button>
+                        <button class="appointment-btn cancel-btn" onclick="cancelAppointment(${appointment.id})">
+                            Cancel
+                        </button>
+                    </div>
+                    ${!canReschedule ? `
+                        <div class="reschedule-notice">
+                            ⚠️ Rescheduling is only available up to 12 hours before the appointment time.
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function displayNoAppointment() {
+            const container = document.getElementById('appointmentContainer');
+            container.innerHTML = `
+                <div class="no-appointment">
+                    <div class="no-appointment-icon">📅</div>
+                    <p>No upcoming appointments</p>
+                    <button class="book-now-btn" onclick="window.location.href='AppointmentBooking.html'">
+                        Book an Appointment
+                    </button>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // ACTIONS
+        // ============================================
+        async function deleteMedicalEntry(entryId, type) {
+            if (!confirm(`Are you sure you want to delete this ${type}?`)) {
+                return;
+            }
+            
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/medical-records/${entryId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('Entry deleted successfully');
+                    loadMedicalRecords(); // Recharger
+                } else {
+                    alert('Failed to delete entry');
+                }
+            } catch (error) {
+                console.error('Error deleting entry:', error);
+                alert('Error deleting entry');
+            }
+        }
+
+        async function cancelAppointment(appointmentId) {
+            if (!confirm('Are you sure you want to cancel this appointment?')) {
+                return;
+            }
+            
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/appointments/${appointmentId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('Appointment cancelled successfully');
+                    loadAppointments(); // Recharger
+                } else {
+                    const data = await response.json();
+                    alert(data.detail || 'Failed to cancel appointment');
+                }
+            } catch (error) {
+                console.error('Error cancelling appointment:', error);
+                alert('Error cancelling appointment');
+            }
+        }
+
+        function rescheduleAppointment(appointmentId) {
+            // Rediriger vers la page de réservation avec l'ID
+            window.location.href = `AppointmentBooking.html?reschedule=${appointmentId}`;
+        }
+
+        // ============================================
+        // FONCTIONS UTILITAIRES
+        // ============================================
+        function getInitials(fullName) {
+            if (!fullName) return '--';
+            const names = fullName.trim().split(' ');
+            if (names.length >= 2) {
+                return (names[0][0] + names[names.length - 1][0]).toUpperCase();
+            }
+            return fullName.substring(0, 2).toUpperCase();
+        }
+
+        function capitalizeFirst(str) {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function formatDateNice(dateStr) {
+            const date = new Date(dateStr);
+            const options = { weekday: 'long', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        function convertTimeTo24h(time12h) {
+            if (!time12h) return '00:00';
+            const [time, modifier] = time12h.split(' ');
+            let [hours, minutes] = time.split(':');
+            if (hours === '12') {
+                hours = '00';
+            }
+            if (modifier === 'PM') {
+                hours = parseInt(hours, 10) + 12;
+            }
+            return `${hours}:${minutes}`;
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'Login.html';
+        }
     </script>
 
-    <!-- CHATBOT - Add before </body> in ALL pages -->
+    <!-- CHATBOT WIDGET -->
     <style>
-        #chatbot-widget{position:fixed;bottom:20px;right:20px;z-index:1000;font-family:'Segoe UI',Arial,sans-serif}#chat-button{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#2e7d32 0%,#4caf50 100%);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(46,125,50,0.4);display:flex;align-items:center;justify-content:center;transition:all .3s ease}#chat-button:hover{transform:scale(1.1)}#chat-button svg{width:30px;height:30px;fill:white}#chat-window{display:none;position:fixed;bottom:90px;right:20px;width:380px;height:550px;background:white;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,0.2);flex-direction:column;overflow:hidden}#chat-window.open{display:flex}.chat-header{background:linear-gradient(135deg,#2e7d32 0%,#4caf50 100%);color:white;padding:20px;display:flex;justify-content:space-between;align-items:center}.chat-header h3{margin:0;font-size:1.3rem}.chat-header p{margin:5px 0 0 0;opacity:0.9;font-size:0.9rem}#close-chat{background:none;border:none;color:white;font-size:1.5rem;cursor:pointer}#chat-messages{flex:1;overflow-y:auto;padding:20px;background:#f8fff8}.message{margin-bottom:15px;display:flex;flex-direction:column}.message.user{align-items:flex-end}.message.bot{align-items:flex-start}.message-content{max-width:80%;padding:12px 16px;border-radius:12px;word-wrap:break-word}.message.user .message-content{background:#2e7d32;color:white}.message.bot .message-content{background:white;color:#333;border:1px solid #e8f5e8}.message-time{font-size:0.75rem;color:#999;margin-top:5px}.chat-input-container{padding:15px;background:white;border-top:1px solid #e8f5e8;display:flex;gap:10px}#chat-input{flex:1;padding:12px 15px;border:2px solid #e8f5e8;border-radius:25px;font-size:0.95rem;outline:none}#chat-input:focus{border-color:#4caf50}#send-button{background:#4caf50;color:white;border:none;width:45px;height:45px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}#send-button:hover{background:#388e3c}.quick-actions{padding:10px 20px;background:white;border-top:1px solid #e8f5e8;display:flex;gap:8px;flex-wrap:wrap}.quick-action-btn{padding:8px 12px;background:#e8f5e8;color:#2e7d32;border:none;border-radius:15px;font-size:0.85rem;cursor:pointer}.quick-action-btn:hover{background:#4caf50;color:white}
+        #chatbot-widget{position:fixed;bottom:20px;right:20px;z-index:1000;font-family:'Segoe UI',Arial,sans-serif}
+        #chat-button{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#2e7d32 0%,#4caf50 100%);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(46,125,50,0.4);display:flex;align-items:center;justify-content:center;transition:all .3s ease}
+        #chat-button:hover{transform:scale(1.1)}
+        #chat-button svg{width:30px;height:30px;fill:white}
+        #chat-window{display:none;position:fixed;bottom:90px;right:20px;width:380px;height:550px;background:white;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,0.2);flex-direction:column;overflow:hidden}
+        #chat-window.open{display:flex}
+        .chat-header{background:linear-gradient(135deg,#2e7d32 0%,#4caf50 100%);color:white;padding:20px;display:flex;justify-content:space-between;align-items:center}
+        .chat-header h3{margin:0;font-size:1.3rem}
+        .chat-header p{margin:5px 0 0 0;opacity:0.9;font-size:0.9rem}
+        #close-chat{background:none;border:none;color:white;font-size:1.5rem;cursor:pointer}
+        #chat-messages{flex:1;overflow-y:auto;padding:20px;background:#f8fff8}
+        .message{margin-bottom:15px;display:flex;flex-direction:column}
+        .message.user{align-items:flex-end}
+        .message.bot{align-items:flex-start}
+        .message-content{max-width:80%;padding:12px 16px;border-radius:12px;word-wrap:break-word}
+        .message.user .message-content{background:#2e7d32;color:white}
+        .message.bot .message-content{background:white;color:#333;border:1px solid #e8f5e8}
+        .message-time{font-size:0.75rem;color:#999;margin-top:5px}
+        .chat-input-container{padding:15px;background:white;border-top:1px solid #e8f5e8;display:flex;gap:10px}
+        #chat-input{flex:1;padding:12px 15px;border:2px solid #e8f5e8;border-radius:25px;font-size:0.95rem;outline:none}
+        #chat-input:focus{border-color:#4caf50}
+        #send-button{background:#4caf50;color:white;border:none;width:45px;height:45px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+        #send-button:hover{background:#388e3c}
+        .quick-actions{padding:10px 20px;background:white;border-top:1px solid #e8f5e8;display:flex;gap:8px;flex-wrap:wrap}
+        .quick-action-btn{padding:8px 12px;background:#e8f5e8;color:#2e7d32;border:none;border-radius:15px;font-size:0.85rem;cursor:pointer}
+        .quick-action-btn:hover{background:#4caf50;color:white}
     </style>
 
     <div id="chatbot-widget">
-        <button id="chat-button"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg></button>
+        <button id="chat-button">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+        </button>
         <div id="chat-window">
-            <div class="chat-header"><div><h3>CareConnect Assistant</h3><p>Ask me anything</p></div><button id="close-chat">×</button></div>
+            <div class="chat-header">
+                <div>
+                    <h3>CareConnect Assistant</h3>
+                    <p>Ask me anything</p>
+                </div>
+                <button id="close-chat">×</button>
+            </div>
             <div class="quick-actions">
                 <button class="quick-action-btn" data-msg="Book an appointment">📅 Appointment</button>
                 <button class="quick-action-btn" data-msg="I need emergency help">🚨 Emergency</button>
@@ -684,13 +1155,91 @@
             </div>
             <div class="chat-input-container">
                 <input type="text" id="chat-input" placeholder="Type your message..." />
-                <button id="send-button"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+                <button id="send-button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-    let conversationId=null,userContext=null;const chatButton=document.getElementById('chat-button'),chatWindow=document.getElementById('chat-window'),closeChat=document.getElementById('close-chat'),chatMessages=document.getElementById('chat-messages'),chatInput=document.getElementById('chat-input'),sendButton=document.getElementById('send-button');chatButton.addEventListener('click',()=>{chatWindow.classList.toggle('open');chatWindow.classList.contains('open')&&chatInput.focus()});closeChat.addEventListener('click',()=>chatWindow.classList.remove('open'));async function sendMessage(msg){if(!msg.trim())return;addMessage(msg,'user');chatInput.value='';sendButton.disabled=true;showTypingIndicator();try{const res=await fetch(`${API_URL}/chat/`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,conversation_id:conversationId,user_context:userContext})});const data=await res.json();hideTypingIndicator();conversationId=data.conversation_id;addMessage(data.reply,'bot')}catch(e){hideTypingIndicator();addMessage('Sorry, error occurred.',  'bot');console.error(e)}finally{sendButton.disabled=false}}function addMessage(text,type){const msgDiv=document.createElement('div');msgDiv.className=`message ${type}`;const contentDiv=document.createElement('div');contentDiv.className='message-content';contentDiv.textContent=text;const timeDiv=document.createElement('div');timeDiv.className='message-time';timeDiv.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});msgDiv.appendChild(contentDiv);msgDiv.appendChild(timeDiv);chatMessages.appendChild(msgDiv);chatMessages.scrollTop=chatMessages.scrollHeight}function showTypingIndicator(){const indicator=document.createElement('div');indicator.className='message bot';indicator.id='typing-indicator';indicator.innerHTML='<div style="padding:12px;background:white;border:1px solid #e8f5e8;border-radius:12px"><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;margin-right:4px;animation:typing 1.4s infinite"></span><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;margin-right:4px;animation:typing 1.4s infinite 0.2s"></span><span style="height:8px;width:8px;background:#4caf50;border-radius:50%;display:inline-block;animation:typing 1.4s infinite 0.4s"></span></div>';chatMessages.appendChild(indicator);chatMessages.scrollTop=chatMessages.scrollHeight}function hideTypingIndicator(){const indicator=document.getElementById('typing-indicator');indicator&&indicator.remove()}sendButton.addEventListener('click',()=>sendMessage(chatInput.value));chatInput.addEventListener('keypress',e=>{e.key==='Enter'&&sendMessage(chatInput.value)});document.querySelectorAll('.quick-action-btn').forEach(btn=>btn.addEventListener('click',()=>sendMessage(btn.dataset.msg)));function loadUserContext(){const username=sessionStorage.getItem('username'),fullName=sessionStorage.getItem('fullName'),studentId=sessionStorage.getItem('studentId');username&&(userContext={name:fullName||username,student_id:studentId||'N/A'})}loadUserContext();const style=document.createElement('style');style.textContent='@keyframes typing{0%,60%,100%{opacity:0.3}30%{opacity:1}}';document.head.appendChild(style);
+        // Chatbot
+        let conversationId = null;
+        const chatButton = document.getElementById('chat-button');
+        const chatWindow = document.getElementById('chat-window');
+        const closeChat = document.getElementById('close-chat');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendButton = document.getElementById('send-button');
+
+        chatButton.addEventListener('click', () => {
+            chatWindow.classList.toggle('open');
+            if (chatWindow.classList.contains('open')) chatInput.focus();
+        });
+
+        closeChat.addEventListener('click', () => chatWindow.classList.remove('open'));
+
+        async function sendChatMessage(msg) {
+            if (!msg.trim()) return;
+            
+            addChatMessage(msg, 'user');
+            chatInput.value = '';
+            sendButton.disabled = true;
+            
+            // Get user context
+            const userContext = {
+                name: sessionStorage.getItem('fullName') || 'User',
+                student_id: sessionStorage.getItem('studentId') || 'N/A'
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/chat/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: msg,
+                        conversation_id: conversationId,
+                        user_context: userContext
+                    })
+                });
+                
+                const data = await response.json();
+                conversationId = data.conversation_id;
+                addChatMessage(data.reply, 'bot');
+            } catch (e) {
+                addChatMessage('Sorry, an error occurred. Please try again.', 'bot');
+                console.error(e);
+            } finally {
+                sendButton.disabled = false;
+            }
+        }
+
+        function addChatMessage(text, type) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${type}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = text;
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+            
+            msgDiv.appendChild(contentDiv);
+            msgDiv.appendChild(timeDiv);
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        sendButton.addEventListener('click', () => sendChatMessage(chatInput.value));
+        chatInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') sendChatMessage(chatInput.value);
+        });
+
+        document.querySelectorAll('.quick-action-btn').forEach(btn => {
+            btn.addEventListener('click', () => sendChatMessage(btn.dataset.msg));
+        });
     </script>
 </body>
 </html>
