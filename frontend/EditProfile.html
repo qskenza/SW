@@ -182,6 +182,12 @@
             transform: translateY(-2px);
         }
 
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .cancel-btn {
             flex: 1;
             background: white;
@@ -206,6 +212,12 @@
             border-radius: 4px;
             margin-top: 0.5rem;
             font-size: 0.9rem;
+            color: #666;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
             color: #666;
         }
 
@@ -245,8 +257,8 @@
                 </ul>
             </nav>
             <div class="user-info">
-                <div class="user-avatar">AM</div>
-                <span>Alexandra Miller</span>
+                <div class="user-avatar" id="headerAvatar">--</div>
+                <span id="headerUserName">Loading...</span>
                 <button onclick="logout()" style="margin-left: 1rem; padding: 0.5rem 1rem; background: #d32f2f; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">
                     Logout
                 </button>
@@ -260,237 +272,360 @@
             <p class="page-subtitle">Update Your Personal Information</p>
         </div>
 
-        <div class="form-card">
-            <form id="editProfileForm">
-                <div class="form-section">
-                    <h2 class="section-title">Personal Information</h2>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="fullName" class="form-label">Full Name *</label>
-                            <input 
-                                type="text" 
-                                id="fullName" 
-                                class="form-input" 
-                                value="Alexandra Miller"
-                                required
-                            >
-                        </div>
-                        <div class="form-group">
-                            <label for="studentId" class="form-label">Student ID</label>
-                            <input 
-                                type="text" 
-                                id="studentId" 
-                                class="form-input" 
-                                value="2023001"
-                                disabled
-                            >
-                            <div class="info-note">Student ID cannot be changed</div>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="email" class="form-label">Email *</label>
-                            <input 
-                                type="email" 
-                                id="email" 
-                                class="form-input" 
-                                value="alexandra.miller@aui.ma"
-                                required
-                            >
-                        </div>
-                        <div class="form-group">
-                            <label for="phone" class="form-label">Phone Number</label>
-                            <input 
-                                type="tel" 
-                                id="phone" 
-                                class="form-input" 
-                                placeholder="+212 XXX-XXXXXX"
-                            >
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="dateOfBirth" class="form-label">Date of Birth</label>
-                            <input 
-                                type="date" 
-                                id="dateOfBirth" 
-                                class="form-input"
-                                value="2002-05-10"
-                            >
-                        </div>
-                        <div class="form-group">
-                            <label for="gender" class="form-label">Gender</label>
-                            <select id="gender" class="form-select">
-                                <option value="">Select gender</option>
-                                <option value="female" selected>Female</option>
-                                <option value="male">Male</option>
-                                <option value="other">Other</option>
-                                <option value="prefer-not">Prefer not to say</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h2 class="section-title">Academic Information</h2>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="department" class="form-label">Department *</label>
-                            <select id="department" class="form-select" required>
-                                <option value="">Select department</option>
-                                <option value="SSE" selected>SSE - School of Science and Engineering</option>
-                                <option value="SBA">SBA - School of Business Administration</option>
-                                <option value="SSAH">SSAH - School of Social Sciences and Humanities</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="major" class="form-label">Major *</label>
-                            <input 
-                                type="text" 
-                                id="major" 
-                                class="form-input" 
-                                value="Computer Science"
-                                required
-                            >
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="academicYear" class="form-label">Academic Year</label>
-                            <input 
-                                type="text" 
-                                id="academicYear" 
-                                class="form-input" 
-                                value="2025/2026"
-                                disabled
-                            >
-                            <div class="info-note">Academic year is set by the system</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="yearLevel" class="form-label">Year Level</label>
-                            <select id="yearLevel" class="form-select">
-                                <option value="">Select year</option>
-                                <option value="freshman">Freshman</option>
-                                <option value="sophomore">Sophomore</option>
-                                <option value="junior" selected>Junior</option>
-                                <option value="senior">Senior</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h2 class="section-title">Emergency Contact</h2>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="emergencyName" class="form-label">Contact Name *</label>
-                            <input 
-                                type="text" 
-                                id="emergencyName" 
-                                class="form-input" 
-                                placeholder="Full name of emergency contact"
-                                required
-                            >
-                        </div>
-                        <div class="form-group">
-                            <label for="emergencyRelation" class="form-label">Relationship *</label>
-                            <input 
-                                type="text" 
-                                id="emergencyRelation" 
-                                class="form-input" 
-                                placeholder="e.g., Parent, Guardian, Sibling"
-                                required
-                            >
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="emergencyPhone" class="form-label">Emergency Phone *</label>
-                            <input 
-                                type="tel" 
-                                id="emergencyPhone" 
-                                class="form-input" 
-                                placeholder="+212 XXX-XXXXXX"
-                                required
-                            >
-                        </div>
-                        <div class="form-group">
-                            <label for="emergencyEmail" class="form-label">Emergency Email</label>
-                            <input 
-                                type="email" 
-                                id="emergencyEmail" 
-                                class="form-input" 
-                                placeholder="email@example.com"
-                            >
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="cancel-btn" onclick="window.location.href='StudentProfile.html'">
-                        Cancel
-                    </button>
-                    <button type="submit" class="submit-btn">
-                        Save Changes
-                    </button>
-                </div>
-            </form>
+        <div class="form-card" id="formCard">
+            <div class="loading">Loading your profile...</div>
         </div>
     </div>
 
     <script>
-        const API_URL = 'http://localhost:8000';
+        // API_URL is already defined in common.js
+        let currentUserData = null;
 
         // Load user data on page load
         window.addEventListener('load', async function() {
-            try {
-                const token = sessionStorage.getItem('access_token');
-                const response = await fetch(`${API_URL}/profile`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+            console.log('=== EditProfile.html Loading ===');
+            console.log('SessionStorage contents:', {
+                token: sessionStorage.getItem('token') ? 'exists' : 'missing',
+                fullName: sessionStorage.getItem('fullName'),
+                studentId: sessionStorage.getItem('studentId'),
+                email: sessionStorage.getItem('email'),
+                department: sessionStorage.getItem('department'),
+                major: sessionStorage.getItem('major')
+            });
+            
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                console.log('No token found, redirecting to login');
+                alert('Session expired. Please login again.');
+                window.location.href = 'Login.html';
+                return;
+            }
+
+            // Try to get data from sessionStorage first (immediate display)
+            const cachedData = {
+                full_name: sessionStorage.getItem('fullName'),
+                student_id: sessionStorage.getItem('studentId'),
+                email: sessionStorage.getItem('email'),
+                department: sessionStorage.getItem('department'),
+                major: sessionStorage.getItem('major'),
+                role: sessionStorage.getItem('role'),
+                phone: '',
+                date_of_birth: '',
+                gender: '',
+                year_level: '',
+                emergency_contact: null
+            };
+
+            // If we have basic cached data, display it immediately
+            if (cachedData.full_name && cachedData.email) {
+                console.log('Using cached data from sessionStorage');
+                currentUserData = cachedData;
+                displayEditForm(currentUserData);
                 
-                if (response.ok) {
-                    const userData = await response.json();
-                    document.getElementById('fullName').value = userData.full_name || '';
-                    document.getElementById('email').value = userData.email || '';
-                    // Load other fields as needed
+                // Then try to fetch fresh data in the background
+                try {
+                    console.log('Fetching fresh data from API...');
+                    const response = await fetch(`${API_URL}/profile`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    
+                    if (response.ok) {
+                        const freshData = await response.json();
+                        console.log('Got fresh data from API:', freshData);
+                        currentUserData = freshData;
+                        displayEditForm(freshData); // Update with fresh data
+                    } else {
+                        console.warn('API call failed, but already displaying cached data');
+                    }
+                } catch (error) {
+                    console.warn('Background API fetch failed:', error);
+                    // Already displaying cached data, so just log the error
                 }
-            } catch (error) {
-                console.error('Error loading profile:', error);
+            } else {
+                // No cached data, must fetch from API
+                console.log('No cached data, must fetch from API');
+                try {
+                    const response = await fetch(`${API_URL}/profile`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    
+                    console.log('API Response status:', response.status);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('API Error:', errorText);
+                        throw new Error(`API returned ${response.status}: ${errorText}`);
+                    }
+
+                    currentUserData = await response.json();
+                    console.log('Loaded user data from API:', currentUserData);
+                    displayEditForm(currentUserData);
+                } catch (error) {
+                    console.error('Fatal error loading profile:', error);
+                    
+                    document.getElementById('formCard').innerHTML = `
+                        <div style="text-align: center; padding: 2rem;">
+                            <p style="color: #d32f2f; font-size: 1.2rem; margin-bottom: 1rem;">❌ Cannot Load Profile</p>
+                            <p style="color: #666; margin-bottom: 0.5rem;">Error: ${error.message}</p>
+                            <p style="color: #888; font-size: 0.9rem; margin-bottom: 1.5rem;">
+                                Please check:<br>
+                                1. Backend server is running on http://localhost:8000<br>
+                                2. Your session is valid<br>
+                                3. Browser console (F12) for detailed errors
+                            </p>
+                            <button onclick="window.location.href='Login.html'" style="padding: 0.8rem 1.5rem; background: #4caf50; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                Login Again
+                            </button>
+                            <button onclick="window.location.href='MedicalDashboard.html'" style="padding: 0.8rem 1.5rem; background: white; color: #2e7d32; border: 2px solid #4caf50; border-radius: 8px; cursor: pointer; font-weight: 600; margin-left: 1rem;">
+                                Back to Dashboard
+                            </button>
+                        </div>
+                    `;
+                }
             }
         });
 
-        document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
+        function displayEditForm(userData) {
+            const formCard = document.getElementById('formCard');
+            
+            formCard.innerHTML = `
+                <form id="editProfileForm">
+                    <div class="form-section">
+                        <h2 class="section-title">Personal Information</h2>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fullName" class="form-label">Full Name *</label>
+                                <input 
+                                    type="text" 
+                                    id="fullName" 
+                                    class="form-input" 
+                                    value="${userData.full_name || ''}"
+                                    required
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="studentId" class="form-label">Student ID</label>
+                                <input 
+                                    type="text" 
+                                    id="studentId" 
+                                    class="form-input" 
+                                    value="${userData.student_id || ''}"
+                                    disabled
+                                >
+                                <div class="info-note">Student ID cannot be changed</div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email *</label>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    class="form-input" 
+                                    value="${userData.email || ''}"
+                                    required
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input 
+                                    type="tel" 
+                                    id="phone" 
+                                    class="form-input" 
+                                    placeholder="+212 XXX-XXXXXX"
+                                    value="${userData.phone || ''}"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="dateOfBirth" class="form-label">Date of Birth</label>
+                                <input 
+                                    type="date" 
+                                    id="dateOfBirth" 
+                                    class="form-input"
+                                    value="${userData.date_of_birth || ''}"
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="gender" class="form-label">Gender</label>
+                                <select id="gender" class="form-select">
+                                    <option value="">Select gender</option>
+                                    <option value="female" ${userData.gender === 'female' ? 'selected' : ''}>Female</option>
+                                    <option value="male" ${userData.gender === 'male' ? 'selected' : ''}>Male</option>
+                                    <option value="other" ${userData.gender === 'other' ? 'selected' : ''}>Other</option>
+                                    <option value="prefer-not" ${userData.gender === 'prefer-not' ? 'selected' : ''}>Prefer not to say</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h2 class="section-title">Academic Information</h2>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="department" class="form-label">Department *</label>
+                                <select id="department" class="form-select" required>
+                                    <option value="">Select department</option>
+                                    <option value="SSE" ${userData.department === 'SSE' ? 'selected' : ''}>SSE - School of Science and Engineering</option>
+                                    <option value="SBA" ${userData.department === 'SBA' ? 'selected' : ''}>SBA - School of Business Administration</option>
+                                    <option value="SSAH" ${userData.department === 'SSAH' ? 'selected' : ''}>SSAH - School of Social Sciences and Humanities</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="major" class="form-label">Major *</label>
+                                <input 
+                                    type="text" 
+                                    id="major" 
+                                    class="form-input" 
+                                    value="${userData.major || ''}"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="academicYear" class="form-label">Academic Year</label>
+                                <input 
+                                    type="text" 
+                                    id="academicYear" 
+                                    class="form-input" 
+                                    value="2025/2026"
+                                    disabled
+                                >
+                                <div class="info-note">Academic year is set by the system</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="yearLevel" class="form-label">Year Level</label>
+                                <select id="yearLevel" class="form-select">
+                                    <option value="">Select year</option>
+                                    <option value="freshman" ${userData.year_level === 'freshman' ? 'selected' : ''}>Freshman</option>
+                                    <option value="sophomore" ${userData.year_level === 'sophomore' ? 'selected' : ''}>Sophomore</option>
+                                    <option value="junior" ${userData.year_level === 'junior' ? 'selected' : ''}>Junior</option>
+                                    <option value="senior" ${userData.year_level === 'senior' ? 'selected' : ''}>Senior</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h2 class="section-title">Emergency Contact</h2>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="emergencyName" class="form-label">Contact Name *</label>
+                                <input 
+                                    type="text" 
+                                    id="emergencyName" 
+                                    class="form-input" 
+                                    placeholder="Full name of emergency contact"
+                                    value="${userData.emergency_contact?.name || ''}"
+                                    required
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="emergencyRelation" class="form-label">Relationship *</label>
+                                <input 
+                                    type="text" 
+                                    id="emergencyRelation" 
+                                    class="form-input" 
+                                    placeholder="e.g., Parent, Guardian, Sibling"
+                                    value="${userData.emergency_contact?.relationship || ''}"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="emergencyPhone" class="form-label">Emergency Phone *</label>
+                                <input 
+                                    type="tel" 
+                                    id="emergencyPhone" 
+                                    class="form-input" 
+                                    placeholder="+212 XXX-XXXXXX"
+                                    value="${userData.emergency_contact?.phone || ''}"
+                                    required
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="emergencyEmail" class="form-label">Emergency Email</label>
+                                <input 
+                                    type="email" 
+                                    id="emergencyEmail" 
+                                    class="form-input" 
+                                    placeholder="email@example.com"
+                                    value="${userData.emergency_contact?.email || ''}"
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" onclick="window.location.href='StudentProfile.html'">
+                            Cancel
+                        </button>
+                        <button type="submit" class="submit-btn" id="submitBtn">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            `;
+
+            // Add form submit handler
+            document.getElementById('editProfileForm').addEventListener('submit', handleSubmit);
+        }
+
+        async function handleSubmit(e) {
             e.preventDefault();
             
-            const formData = {
-                full_name: document.getElementById('fullName').value,
-                email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                date_of_birth: document.getElementById('dateOfBirth').value,
-                gender: document.getElementById('gender').value,
-                department: document.getElementById('department').value,
-                major: document.getElementById('major').value,
-                year_level: document.getElementById('yearLevel').value,
-                emergency_contact: {
-                    name: document.getElementById('emergencyName').value,
-                    relationship: document.getElementById('emergencyRelation').value,
-                    phone: document.getElementById('emergencyPhone').value,
-                    email: document.getElementById('emergencyEmail').value
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+            
+            // Build emergency contact object - only include if fields are filled
+            const emergencyName = document.getElementById('emergencyName').value.trim();
+            const emergencyRelation = document.getElementById('emergencyRelation').value.trim();
+            const emergencyPhone = document.getElementById('emergencyPhone').value.trim();
+            const emergencyEmail = document.getElementById('emergencyEmail').value.trim();
+            
+            let emergencyContact = null;
+            if (emergencyName && emergencyRelation && emergencyPhone) {
+                emergencyContact = {
+                    name: emergencyName,
+                    relationship: emergencyRelation,
+                    phone: emergencyPhone
+                };
+                // Only add email if provided
+                if (emergencyEmail) {
+                    emergencyContact.email = emergencyEmail;
                 }
+            }
+            
+            const formData = {
+                full_name: document.getElementById('fullName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim() || null,
+                date_of_birth: document.getElementById('dateOfBirth').value || null,
+                gender: document.getElementById('gender').value || null,
+                department: document.getElementById('department').value,
+                major: document.getElementById('major').value.trim(),
+                year_level: document.getElementById('yearLevel').value || null,
+                emergency_contact: emergencyContact
             };
             
+            console.log('=== SUBMITTING FORM DATA ===');
+            console.log('Full formData object:', JSON.stringify(formData, null, 2));
+            console.log('Emergency contact specifically:', emergencyContact);
+            
             try {
-                const token = sessionStorage.getItem('access_token');
+                const token = sessionStorage.getItem('token');
                 const response = await fetch(`${API_URL}/profile/update`, {
                     method: 'PUT',
                     headers: {
@@ -500,17 +635,32 @@
                     body: JSON.stringify(formData)
                 });
                 
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+                
                 if (response.ok) {
+                    // Update sessionStorage with new data
+                    sessionStorage.setItem('fullName', formData.full_name);
+                    sessionStorage.setItem('email', formData.email);
+                    sessionStorage.setItem('department', formData.department);
+                    sessionStorage.setItem('major', formData.major);
+                    
                     alert('✅ Profile updated successfully!');
                     window.location.href = 'StudentProfile.html';
                 } else {
-                    alert('❌ Failed to update profile. Please try again.');
+                    console.error('Update failed:', data);
+                    alert(`❌ Failed to update profile: ${data.detail || 'Unknown error'}`);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
                 }
             } catch (error) {
                 console.error('Error:', error);
                 alert('❌ Network error. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
             }
-        });
+        }
     </script>
 </body>
 </html>

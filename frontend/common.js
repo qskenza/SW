@@ -2,7 +2,6 @@
 const API_URL = 'http://localhost:8000';
 
 // Vérification d'authentification
-// ⚠️ CORRECTION: Utiliser 'token' au lieu de 'access_token' pour correspondre au Login.html
 function checkAuth() {
     const token = sessionStorage.getItem('token');
     if (!token) {
@@ -59,6 +58,8 @@ async function loadUserInfo() {
         sessionStorage.setItem('studentId', data.student_id);
         sessionStorage.setItem('email', data.email);
         sessionStorage.setItem('role', data.role);
+        sessionStorage.setItem('department', data.department || '');
+        sessionStorage.setItem('major', data.major || '');
         
         // Mettre à jour l'affichage
         updateUserDisplay(data);
@@ -84,6 +85,21 @@ function updateUserDisplay(userData) {
             ? userData.full_name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
             : userData.username.substring(0, 2).toUpperCase();
         userAvatarElement.textContent = initials;
+    }
+    
+    // Update header avatar and name if they exist with specific IDs
+    const headerAvatar = document.getElementById('headerAvatar');
+    const headerUserName = document.getElementById('headerUserName');
+    
+    if (headerAvatar && userData) {
+        const initials = userData.full_name
+            ? userData.full_name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
+            : userData.username.substring(0, 2).toUpperCase();
+        headerAvatar.textContent = initials;
+    }
+    
+    if (headerUserName && userData) {
+        headerUserName.textContent = userData.full_name || userData.username;
     }
 }
 
