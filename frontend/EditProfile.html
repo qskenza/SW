@@ -608,25 +608,26 @@
                 }
             }
             
+            // ✅ FIXED: Remove emergency_contact from profile data
             const formData = {
                 full_name: document.getElementById('fullName').value.trim(),
-                email: document.getElementById('email').value.trim(),
                 phone: document.getElementById('phone').value.trim() || null,
                 date_of_birth: document.getElementById('dateOfBirth').value || null,
                 gender: document.getElementById('gender').value || null,
                 department: document.getElementById('department').value,
                 major: document.getElementById('major').value.trim(),
-                year_level: document.getElementById('yearLevel').value || null,
-                emergency_contact: emergencyContact
+                year_level: document.getElementById('yearLevel').value || null
             };
             
             console.log('=== SUBMITTING FORM DATA ===');
-            console.log('Full formData object:', JSON.stringify(formData, null, 2));
-            console.log('Emergency contact specifically:', emergencyContact);
+            console.log('Profile data:', JSON.stringify(formData, null, 2));
+            console.log('Emergency contact:', emergencyContact);
             
             try {
                 const token = sessionStorage.getItem('token');
-                const response = await fetch(`${API_URL}/profile/update`, {
+                
+                // ✅ STEP 1: Update profile
+                const profileResponse = await fetch(`${API_URL}/profile/update`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -635,28 +636,49 @@
                     body: JSON.stringify(formData)
                 });
                 
-                console.log('Response status:', response.status);
-                const data = await response.json();
-                console.log('Response data:', data);
+                console.log('Profile response status:', profileResponse.status);
+                const profileData = await profileResponse.json();
+                console.log('Profile response data:', profileData);
                 
-                if (response.ok) {
-                    // Update sessionStorage with new data
-                    sessionStorage.setItem('fullName', formData.full_name);
-                    sessionStorage.setItem('email', formData.email);
-                    sessionStorage.setItem('department', formData.department);
-                    sessionStorage.setItem('major', formData.major);
-                    
-                    alert('✅ Profile updated successfully!');
-                    window.location.href = 'StudentProfile.html';
-                } else {
-                    console.error('Update failed:', data);
-                    alert(`❌ Failed to update profile: ${data.detail || 'Unknown error'}`);
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = originalText;
+                if (!profileResponse.ok) {
+                    throw new Error(profileData.detail || 'Failed to update profile');
                 }
+                
+                // ✅ STEP 2: Update emergency contact separately (if provided)
+                if (emergencyContact) {
+                    console.log('Updating emergency contact...');
+                    const emergencyResponse = await fetch(`${API_URL}/profile/emergency-contact`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(emergencyContact)
+                    });
+                    
+                    console.log('Emergency contact response status:', emergencyResponse.status);
+                    const emergencyData = await emergencyResponse.json();
+                    console.log('Emergency contact response data:', emergencyData);
+                    
+                    if (!emergencyResponse.ok) {
+                        console.error('Emergency contact update failed:', emergencyData);
+                        // Don't throw - profile was saved, just warn user
+                        alert('⚠️ Profile updated but emergency contact save failed. Please try updating emergency contact again.');
+                    }
+                }
+                
+                // Update sessionStorage with new data
+                sessionStorage.setItem('fullName', formData.full_name);
+                sessionStorage.setItem('email', profileData.email); // Use email from response
+                sessionStorage.setItem('department', formData.department);
+                sessionStorage.setItem('major', formData.major);
+                
+                alert('✅ Profile updated successfully!');
+                window.location.href = 'StudentProfile.html';
+                
             } catch (error) {
                 console.error('Error:', error);
-                alert('❌ Network error. Please try again.');
+                alert(`❌ Failed to update profile: ${error.message}`);
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
             }

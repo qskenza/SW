@@ -379,26 +379,40 @@
             e.preventDefault();
             
             const entryType = document.querySelector('input[name="entryType"]:checked').value;
-            const entryName = document.getElementById('entryName').value;
+            const entryName = document.getElementById('entryName').value.trim();
             const severity = document.getElementById('severity').value;
-            const dosage = document.getElementById('dosage').value;
+            const dosage = document.getElementById('dosage').value.trim();
             const diagnosedDate = document.getElementById('diagnosedDate').value;
-            const description = document.getElementById('description').value;
+            const description = document.getElementById('description').value.trim();
             
-            // Build description with all details
-            let fullDescription = description;
-            if (severity) fullDescription += `\nSeverity: ${severity}`;
-            if (dosage) fullDescription += `\nDosage: ${dosage}`;
-            if (diagnosedDate) fullDescription += `\nDate: ${diagnosedDate}`;
+            // Build description based on entry type
+            let fullDescription = '';
+            
+            if (entryType === 'medication' && dosage) {
+                fullDescription = `Dosage: ${dosage}`;
+                if (description) fullDescription += `\n${description}`;
+            } else if (description) {
+                fullDescription = description;
+            }
             
             const data = {
                 type: entryType,
                 name: entryName,
-                description: fullDescription
+                description: fullDescription || null,
+                severity: (entryType !== 'medication' && severity) ? severity : null,
+                diagnosed_date: diagnosedDate || null
             };
             
+            console.log('Submitting medical entry:', data);
+            
             try {
-                const token = sessionStorage.getItem('access_token');
+                const token = sessionStorage.getItem('token');
+                if (!token) {
+                    alert('❌ Session expired. Please login again.');
+                    window.location.href = 'Login.html';
+                    return;
+                }
+                
                 const response = await fetch(`${API_URL}/medical-records/entry`, {
                     method: 'POST',
                     headers: {
@@ -408,15 +422,19 @@
                     body: JSON.stringify(data)
                 });
                 
+                console.log('Response status:', response.status);
+                const result = await response.json();
+                console.log('Response data:', result);
+                
                 if (response.ok) {
-                    alert('✅ Medical entry added successfully!');
+                    alert(`✅ ${entryType.charAt(0).toUpperCase() + entryType.slice(1)} "${entryName}" added successfully!`);
                     window.location.href = 'MedicalDashboard.html';
                 } else {
-                    alert('❌ Failed to add entry. Please try again.');
+                    alert(`❌ Failed to add entry: ${result.detail || 'Unknown error'}`);
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('❌ Network error. Please try again.');
+                alert('❌ Network error. Please check if the backend is running.');
             }
         });
     </script>
