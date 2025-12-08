@@ -805,6 +805,121 @@ def cancel_appointment(
     
     return {"message": "Appointment cancelled successfully"}
 
+# Add this to backend/main.py after the appointments endpoints
+
+@app.get("/appointments/upcoming")
+def get_upcoming_appointments(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get upcoming appointments (future appointments that are not cancelled)"""
+    today = datetime.now().date()
+    
+    appointments = db.query(models.Appointment).filter(
+        models.Appointment.user_id == current_user.id,
+        models.Appointment.appointment_date >= today,
+        models.Appointment.status != "cancelled"
+    ).order_by(models.Appointment.appointment_date.asc()).all()
+    
+    result = []
+    for a in appointments:
+        # Calculate if can reschedule (12 hour rule)
+        appointment_datetime = datetime.combine(a.appointment_date, datetime.min.time())
+        hours_until = (appointment_datetime - datetime.now()).total_seconds() / 3600
+        can_reschedule = hours_until > 12
+        
+        result.append({
+            "id": a.id,
+            "doctor_id": a.doctor_id,
+            "doctor_name": a.doctor.name if a.doctor else "Unknown",
+            "doctor_specialty": a.doctor.specialty if a.doctor else "",
+            "date": a.appointment_date.isoformat() if a.appointment_date else None,
+            "time": a.appointment_time,
+            "type": a.type,
+            "location": a.location,
+            "status": a.status,
+            "notes": a.notes,
+            "can_reschedule": can_reschedule,
+            "hours_until": hours_until
+        })
+    
+    return result
+
+
+@app.post("/appointments/{appointment_id}/complete")
+def complete_appointment(
+    appointment_id: int,
+    diagnosis: str = None,
+    notes: str = None,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Mark an appointment as completed and create a visit record.
+    This should be called by doctors or automatically after the appointment time.
+    """
+    appointment = db.query(models.Appointment).filter(
+        models.Appointment.id == appointment_id
+    ).first()
+    
+    if not appointment:
+        raise HTTPException(404, "Appointment not found")
+    
+    # Update appointment status
+    appointment.status = "completed"
+    
+    # Create a visit record from the completed appointment
+    visit = models.Visit(
+        user_id=appointment.user_id,
+        doctor_id=appointment.doctor_id,
+        visit_date=appointment.appointment_date,
+        time_start=appointment.appointment_time,
+        time_end=appointment.appointment_time,  # You can calculate end time
+        diagnosis=diagnosis or "General Consultation",
+        type=appointment.type,
+        location=appointment.location,
+        notes=notes or appointment.notes or "Appointment completed",
+        status="completed"
+    )
+    
+    db.add(visit)
+    db.commit()
+    db.refresh(visit)
+    
+    return {
+        "message": "Appointment completed and added to visit history",
+        "visit_id": visit.id,
+        "appointment_id": appointment.id
+    }
+
+
+@app.get("/visits/recent")
+def get_recent_visits(
+    limit: int = 3,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get recent completed visits"""
+    visits = db.query(models.Visit).filter(
+        models.Visit.user_id == current_user.id,
+        models.Visit.status == "completed"
+    ).order_by(models.Visit.visit_date.desc()).limit(limit).all()
+    
+    return [
+        {
+            "id": v.id,
+            "date": v.visit_date.isoformat(),
+            "time_start": v.time_start,
+            "time_end": v.time_end,
+            "doctor_name": v.doctor.name if v.doctor else "Unknown",
+            "diagnosis": v.diagnosis,
+            "type": v.type,
+            "location": v.location,
+            "notes": v.notes,
+            "status": v.status
+        }
+        for v in visits
+    ]
 
 # ---------------------------------------------------------
 # PERMANENT DELETE MEDICAL RECORD

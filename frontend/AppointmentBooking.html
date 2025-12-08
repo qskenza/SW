@@ -1384,6 +1384,96 @@
             }
         }
 
+        <!-- Add this to AppointmentBooking.html - Replace the rescheduleAppointment function -->
+
+        
+        async function rescheduleAppointment(appointmentId) {
+            try {
+                // First, get appointment details to check 12-hour rule
+                const response = await fetch(`${API_URL}/appointments`, {
+                    headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+                });
+                
+                if (!response.ok) {
+                    alert('❌ Failed to load appointment details');
+                    return;
+                }
+                
+                const appointments = await response.json();
+                const appointment = appointments.find(a => a.id === appointmentId);
+                
+                if (!appointment) {
+                    alert('❌ Appointment not found');
+                    return;
+                }
+                
+                // Check if can reschedule (12-hour rule)
+                if (!appointment.can_reschedule) {
+                    alert(`⚠️ Cannot Reschedule\n\nYou can only reschedule appointments that are more than 12 hours away.\n\nThis appointment is scheduled for:\n${appointment.date} at ${appointment.time}\n\nPlease contact the health center directly for urgent changes:\n📞 Phone: 0535-86-0104`);
+                    return;
+                }
+                
+                // Show reschedule dialog
+                const newDate = prompt(`Reschedule Appointment\n\nCurrent appointment:\n${appointment.date} at ${appointment.time}\nDoctor: ${appointment.doctor_name}\n\nEnter new date (YYYY-MM-DD):`);
+                
+                if (!newDate) return; // User cancelled
+                
+                const newTime = prompt(`Enter new time (HH:MM AM/PM):\n\nExample: 10:00 AM`);
+                
+                if (!newTime) return; // User cancelled
+                
+                // Update appointment
+                const updateResponse = await fetch(`${API_URL}/appointments/${appointmentId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${sessionStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        appointment_date: newDate,
+                        appointment_time: newTime
+                    })
+                });
+                
+                if (updateResponse.ok) {
+                    alert(`✅ Appointment Rescheduled!\n\nNew date: ${newDate}\nNew time: ${newTime}\n\nYou will receive a confirmation email.`);
+                    location.reload(); // Refresh to show updated appointment
+                } else {
+                    const error = await updateResponse.json();
+                    alert(`❌ Failed to reschedule: ${error.detail || 'Unknown error'}`);
+                }
+                
+            } catch (error) {
+                console.error('Error rescheduling appointment:', error);
+                alert('❌ Network error. Please try again.');
+            }
+        }
+
+        // Add this function to cancel appointment
+        async function cancelAppointment(appointmentId) {
+            const confirmCancel = confirm('Are you sure you want to cancel this appointment?\n\nThis action cannot be undone.');
+            
+            if (!confirmCancel) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/appointments/${appointmentId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+                });
+                
+                if (response.ok) {
+                    alert('✅ Appointment cancelled successfully');
+                    location.reload();
+                } else {
+                    const error = await response.json();
+                    alert(`❌ Failed to cancel: ${error.detail || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error cancelling appointment:', error);
+                alert('❌ Network error. Please try again.');
+            }
+        }
+
         function resetBookingForm() {
             // Reset comment section
             document.getElementById('appointmentComment').value = '';
