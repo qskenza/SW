@@ -87,7 +87,6 @@
             font-weight: 600;
         }
 
-        /* Main Container */
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -110,14 +109,12 @@
             color: #666;
         }
 
-        /* Main Layout */
         .profile-layout {
             display: grid;
             grid-template-columns: 350px 1fr;
             gap: 2.5rem;
         }
 
-        /* Cards */
         .card {
             background: white;
             border-radius: 15px;
@@ -135,7 +132,6 @@
             font-weight: 600;
         }
 
-        /* Student Profile Card */
         .student-profile-card {
             background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
             color: white;
@@ -209,7 +205,6 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         }
 
-        /* Medical Information */
         .medical-info-card {
             background: #f8fff8;
             border-radius: 12px;
@@ -261,7 +256,6 @@
             margin-left: 0.5rem;
         }
 
-        /* Student Information */
         .info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -291,7 +285,6 @@
             overflow-wrap: break-word;
         }
 
-        /* Visit History */
         .visits-table {
             width: 100%;
             border-collapse: collapse;
@@ -388,7 +381,6 @@
             font-style: italic;
         }
 
-        /* Responsive */
         @media (max-width: 1200px) {
             .profile-layout {
                 grid-template-columns: 1fr;
@@ -431,7 +423,6 @@
 </head>
 
 <body>
-    <!-- Header -->
     <header class="main-header">
         <div class="header-content">
             <div class="logo">CareConnect</div>
@@ -451,7 +442,6 @@
         </div>
     </header>
 
-    <!-- Main Container -->
     <div class="container">
         <div class="page-header">
             <h1 class="page-title">Student Profile</h1>
@@ -459,7 +449,7 @@
         </div>
 
         <div class="profile-layout">
-            <!-- Left Column - Student Profile -->
+            <!-- Left Column -->
             <div class="left-column">
                 <div class="card student-profile-card">
                     <h2 class="card-title" style="color: white; border-color: white;">Student Profile</h2>
@@ -491,7 +481,6 @@
                     <button class="edit-profile-btn" onclick="window.location.href='EditProfile.html'">Edit Profile</button>
                 </div>
 
-                <!-- Medical Information -->
                 <div class="card">
                     <h2 class="card-title">Medical Information</h2>
                     <div class="medical-info-card" id="medicalInfoCard">
@@ -501,8 +490,9 @@
                         ➕ Add Medical Entry
                     </button>
                 </div>
+            </div>
 
-            <!-- Right Column - Student Information & Visit History -->
+            <!-- Right Column -->
             <div class="right-column">
                 <div class="card">
                     <h2 class="card-title">Personal Information</h2>
@@ -573,9 +563,6 @@
     <script>
         const API_URL = 'http://localhost:8000';
         
-        // ============================================
-        // INITIALISATION
-        // ============================================
         document.addEventListener('DOMContentLoaded', async function() {
             const token = sessionStorage.getItem('token');
             if (!token) {
@@ -590,9 +577,6 @@
             ]);
         });
 
-        // ============================================
-        // CHARGER LE PROFIL
-        // ============================================
         async function loadUserProfile() {
             try {
                 const token = sessionStorage.getItem('token');
@@ -620,11 +604,8 @@
         function displayProfile(data) {
             const initials = getInitials(data.full_name);
             
-            // Header
             document.getElementById('headerAvatar').textContent = initials;
             document.getElementById('headerUserName').textContent = data.full_name;
-            
-            // Profile Card
             document.getElementById('profileAvatar').textContent = initials;
             document.getElementById('profileName').textContent = data.full_name;
             document.getElementById('profileStudentId').textContent = data.student_id || 'N/A';
@@ -633,7 +614,6 @@
             document.getElementById('profileMajor').textContent = data.major || 'N/A';
             document.getElementById('profileAcademicYear').textContent = '2025/2026';
             
-            // Personal Information Grid
             document.getElementById('infoStudentId').textContent = data.student_id || 'N/A';
             document.getElementById('infoFullName').textContent = data.full_name;
             document.getElementById('infoDOB').textContent = data.date_of_birth ? formatDate(data.date_of_birth) : 'Not set';
@@ -645,7 +625,6 @@
             document.getElementById('infoAcademicYear').textContent = '2025/2026';
             document.getElementById('infoYearLevel').textContent = capitalizeFirst(data.year_level) || 'Not set';
             
-            // Emergency Contact
             if (data.emergency_contact) {
                 document.getElementById('emergencyContactInfo').innerHTML = `
                     <strong>${data.emergency_contact.name} (${data.emergency_contact.relationship})</strong><br>
@@ -661,9 +640,6 @@
             }
         }
 
-        // ============================================
-        // CHARGER LES DONNÉES MÉDICALES
-        // ============================================
         async function loadMedicalRecords() {
             try {
                 const token = sessionStorage.getItem('token');
@@ -689,7 +665,6 @@
             
             let html = '';
             
-            // Allergies
             const allergiesCount = data.allergies?.length || 0;
             html += `
                 <div class="medical-section">
@@ -707,7 +682,6 @@
             }
             html += `</ul></div>`;
             
-            // Medications
             const medsCount = data.medications?.length || 0;
             html += `
                 <div class="medical-section">
@@ -725,7 +699,6 @@
             }
             html += `</ul></div>`;
             
-            // Conditions
             const conditionsCount = data.conditions?.length || 0;
             html += `
                 <div class="medical-section">
@@ -746,9 +719,6 @@
             container.innerHTML = html;
         }
 
-        // ============================================
-        // CHARGER LES VISITES
-        // ============================================
         async function loadVisitHistory() {
             try {
                 const token = sessionStorage.getItem('token');
@@ -806,9 +776,6 @@
             container.innerHTML = html;
         }
 
-        // ============================================
-        // UTILITAIRES
-        // ============================================
         function getInitials(fullName) {
             if (!fullName) return '--';
             const names = fullName.trim().split(' ');
