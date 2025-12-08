@@ -4,257 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CareConnect - Add Medical Entry</title>
-    <script src="common.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%); min-height: 100vh; padding: 20px; }
+        
+        .main-header { background: white; box-shadow: 0 2px 20px rgba(0,0,0,0.1); padding: 1rem 0; border-radius: 15px; margin-bottom: 30px; }
+        .header-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem; }
+        .logo { font-size: 2rem; font-weight: bold; color: #2e7d32; }
+        .nav-links { display: flex; list-style: none; gap: 2rem; }
+        .nav-links a { text-decoration: none; color: #388e3c; font-weight: 500; }
+        .nav-links a:hover { color: #1b5e20; }
+        .user-info { display: flex; align-items: center; gap: 1rem; }
+        .user-avatar { width: 40px; height: 40px; background: #4caf50; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+        .logout-btn { margin-left: 1rem; padding: 0.5rem 1rem; background: #d32f2f; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; }
 
-        body {
-            background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+        .container { max-width: 900px; margin: 0 auto; }
+        .page-header { text-align: center; margin-bottom: 3rem; }
+        .page-title { font-size: 2.5rem; color: #2e7d32; margin-bottom: 0.5rem; font-weight: 700; }
+        .page-subtitle { font-size: 1.2rem; color: #666; }
 
-        .main-header {
-            background: white;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-            padding: 1rem 0;
-            border-radius: 15px;
-            margin-bottom: 30px;
-        }
+        .form-card { background: white; border-radius: 15px; padding: 2.5rem; box-shadow: 0 5px 25px rgba(0,0,0,0.08); }
+        .form-section { margin-bottom: 2.5rem; }
+        .section-title { font-size: 1.3rem; color: #2e7d32; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 3px solid #4caf50; font-weight: 600; }
+        .form-group { margin-bottom: 1.8rem; }
+        .form-label { display: block; color: #2e7d32; font-weight: 600; margin-bottom: 0.5rem; font-size: 1rem; }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 0.9rem 1.2rem; border: 2px solid #e8f5e8; border-radius: 8px; font-size: 1rem; transition: all 0.3s ease; font-family: 'Segoe UI', Arial, sans-serif; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #4caf50; box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1); }
+        .form-textarea { min-height: 120px; resize: vertical; }
 
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 2rem;
-        }
+        .radio-group { display: flex; gap: 2rem; margin-top: 0.5rem; }
+        .radio-option { display: flex; align-items: center; gap: 0.5rem; }
+        .radio-option input[type="radio"] { width: 20px; height: 20px; accent-color: #4caf50; cursor: pointer; }
+        .radio-option label { cursor: pointer; color: #555; }
 
-        .logo {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #2e7d32;
-        }
+        .form-actions { display: flex; gap: 1.5rem; margin-top: 2.5rem; }
+        .submit-btn { flex: 1; background: #4caf50; color: white; border: none; padding: 1.2rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+        .submit-btn:hover { background: #388e3c; transform: translateY(-2px); }
+        .submit-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+        .cancel-btn { flex: 1; background: white; color: #2e7d32; border: 2px solid #4caf50; padding: 1.2rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
+        .cancel-btn:hover { background: #e8f5e8; }
 
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
-        }
+        .info-box { background: #e8f5e8; border-left: 4px solid #4caf50; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; }
+        .info-box p { color: #555; line-height: 1.6; margin: 0; }
 
-        .nav-links a {
-            text-decoration: none;
-            color: #388e3c;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: #1b5e20;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            background: #4caf50;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .page-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .page-title {
-            font-size: 2.5rem;
-            color: #2e7d32;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
-
-        .page-subtitle {
-            font-size: 1.2rem;
-            color: #666;
-        }
-
-        .form-card {
-            background: white;
-            border-radius: 15px;
-            padding: 2.5rem;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
-        }
-
-        .form-section {
-            margin-bottom: 2.5rem;
-        }
-
-        .section-title {
-            font-size: 1.3rem;
-            color: #2e7d32;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 3px solid #4caf50;
-            font-weight: 600;
-        }
-
-        .form-group {
-            margin-bottom: 1.8rem;
-        }
-
-        .form-label {
-            display: block;
-            color: #2e7d32;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-        }
-
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 0.9rem 1.2rem;
-            border: 2px solid #e8f5e8;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
-
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none;
-            border-color: #4caf50;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-        }
-
-        .form-textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .radio-group {
-            display: flex;
-            gap: 2rem;
-            margin-top: 0.5rem;
-        }
-
-        .radio-option {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .radio-option input[type="radio"] {
-            width: 20px;
-            height: 20px;
-            accent-color: #4caf50;
-            cursor: pointer;
-        }
-
-        .radio-option label {
-            cursor: pointer;
-            color: #555;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 1.5rem;
-            margin-top: 2.5rem;
-        }
-
-        .submit-btn {
-            flex: 1;
-            background: #4caf50;
-            color: white;
-            border: none;
-            padding: 1.2rem 2rem;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .submit-btn:hover {
-            background: #388e3c;
-            transform: translateY(-2px);
-        }
-
-        .cancel-btn {
-            flex: 1;
-            background: white;
-            color: #2e7d32;
-            border: 2px solid #4caf50;
-            padding: 1.2rem 2rem;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .cancel-btn:hover {
-            background: #e8f5e8;
-        }
-
-        .info-box {
-            background: #e8f5e8;
-            border-left: 4px solid #4caf50;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-        }
-
-        .info-box p {
-            color: #555;
-            line-height: 1.6;
-            margin: 0;
-        }
+        .status-message { padding: 1rem 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; display: none; }
+        .status-message.show { display: block; }
+        .status-message.success { background: #e8f5e8; border: 2px solid #4caf50; color: #2e7d32; }
+        .status-message.error { background: #ffebee; border: 2px solid #d32f2f; color: #c62828; }
 
         @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .nav-links {
-                gap: 1rem;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            
-            .form-actions {
-                flex-direction: column;
-            }
-            
-            .radio-group {
-                flex-direction: column;
-                gap: 1rem;
-            }
+            .header-content { flex-direction: column; gap: 1rem; }
+            .nav-links { gap: 1rem; flex-wrap: wrap; justify-content: center; }
+            .form-actions { flex-direction: column; }
+            .radio-group { flex-direction: column; gap: 1rem; }
         }
     </style>
 </head>
-
 <body>
     <header class="main-header">
         <div class="header-content">
@@ -268,11 +73,9 @@
                 </ul>
             </nav>
             <div class="user-info">
-                <div class="user-avatar">AM</div>
-                <span>Alexandra Miller</span>
-                <button onclick="logout()" style="margin-left: 1rem; padding: 0.5rem 1rem; background: #d32f2f; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">
-                    Logout
-                </button>
+                <div class="user-avatar" id="headerAvatar">--</div>
+                <span id="headerUserName">Loading...</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
         </div>
     </header>
@@ -282,6 +85,8 @@
             <h1 class="page-title">Add Medical Entry</h1>
             <p class="page-subtitle">Update Your Medical Information</p>
         </div>
+
+        <div class="status-message" id="statusMessage"></div>
 
         <div class="info-box">
             <p>Please provide accurate information about your medical conditions, allergies, or medications. This information will help healthcare providers give you the best possible care.</p>
@@ -312,16 +117,10 @@
                     
                     <div class="form-group">
                         <label for="entryName" class="form-label">Name *</label>
-                        <input 
-                            type="text" 
-                            id="entryName" 
-                            class="form-input" 
-                            placeholder="e.g., Penicillin, Asthma, Ibuprofen"
-                            required
-                        >
+                        <input type="text" id="entryName" class="form-input" placeholder="e.g., Penicillin, Asthma, Ibuprofen" required>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" id="severityGroup">
                         <label for="severity" class="form-label">Severity (for allergies/conditions)</label>
                         <select id="severity" class="form-select">
                             <option value="">Select severity</option>
@@ -331,42 +130,25 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" id="dosageGroup" style="display: none;">
                         <label for="dosage" class="form-label">Dosage/Frequency (for medications)</label>
-                        <input 
-                            type="text" 
-                            id="dosage" 
-                            class="form-input" 
-                            placeholder="e.g., 500mg twice daily, As needed"
-                        >
+                        <input type="text" id="dosage" class="form-input" placeholder="e.g., 500mg twice daily, As needed">
                     </div>
 
                     <div class="form-group">
                         <label for="diagnosedDate" class="form-label">Diagnosed/Started Date</label>
-                        <input 
-                            type="date" 
-                            id="diagnosedDate" 
-                            class="form-input"
-                        >
+                        <input type="date" id="diagnosedDate" class="form-input">
                     </div>
 
                     <div class="form-group">
                         <label for="description" class="form-label">Additional Notes/Description</label>
-                        <textarea 
-                            id="description" 
-                            class="form-textarea" 
-                            placeholder="Provide any additional information about reactions, symptoms, or special instructions..."
-                        ></textarea>
+                        <textarea id="description" class="form-textarea" placeholder="Provide any additional information..."></textarea>
                     </div>
                 </div>
 
                 <div class="form-actions">
-                    <button type="button" class="cancel-btn" onclick="window.location.href='MedicalDashboard.html'">
-                        Cancel
-                    </button>
-                    <button type="submit" class="submit-btn">
-                        Add Entry
-                    </button>
+                    <button type="button" class="cancel-btn" onclick="window.location.href='MedicalDashboard.html'">Cancel</button>
+                    <button type="submit" class="submit-btn" id="submitBtn">Add Entry</button>
                 </div>
             </form>
         </div>
@@ -375,68 +157,83 @@
     <script>
         const API_URL = 'http://localhost:8000';
 
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = sessionStorage.getItem('token');
+            if (!token) { window.location.href = 'Login.html'; return; }
+            loadUserInfo();
+            document.querySelectorAll('input[name="entryType"]').forEach(r => r.addEventListener('change', toggleFields));
+        });
+
+        async function loadUserInfo() {
+            try {
+                const response = await fetch(`${API_URL}/profile`, { headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` } });
+                if (response.ok) {
+                    const data = await response.json();
+                    const initials = data.full_name ? (data.full_name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0,2)) : '--';
+                    document.getElementById('headerAvatar').textContent = initials;
+                    document.getElementById('headerUserName').textContent = data.full_name;
+                }
+            } catch (e) { console.error('Error:', e); }
+        }
+
+        function toggleFields() {
+            const type = document.querySelector('input[name="entryType"]:checked').value;
+            document.getElementById('severityGroup').style.display = type === 'medication' ? 'none' : 'block';
+            document.getElementById('dosageGroup').style.display = type === 'medication' ? 'block' : 'none';
+        }
+
+        function showStatus(msg, type) {
+            const el = document.getElementById('statusMessage');
+            el.textContent = msg;
+            el.className = `status-message show ${type}`;
+        }
+
         document.getElementById('medicalEntryForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const entryType = document.querySelector('input[name="entryType"]:checked').value;
-            const entryName = document.getElementById('entryName').value.trim();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Adding...';
+            
+            const type = document.querySelector('input[name="entryType"]:checked').value;
+            const name = document.getElementById('entryName').value.trim();
             const severity = document.getElementById('severity').value;
             const dosage = document.getElementById('dosage').value.trim();
-            const diagnosedDate = document.getElementById('diagnosedDate').value;
-            const description = document.getElementById('description').value.trim();
+            const date = document.getElementById('diagnosedDate').value;
+            const desc = document.getElementById('description').value.trim();
             
-            // Build description based on entry type
-            let fullDescription = '';
-            
-            if (entryType === 'medication' && dosage) {
-                fullDescription = `Dosage: ${dosage}`;
-                if (description) fullDescription += `\n${description}`;
-            } else if (description) {
-                fullDescription = description;
-            }
-            
-            const data = {
-                type: entryType,
-                name: entryName,
-                description: fullDescription || null,
-                severity: (entryType !== 'medication' && severity) ? severity : null,
-                diagnosed_date: diagnosedDate || null
-            };
-            
-            console.log('Submitting medical entry:', data);
-            
+            if (!name) { showStatus('Please enter a name', 'error'); btn.disabled = false; btn.textContent = 'Add Entry'; return; }
+
+            const data = { type, name };
+            if (type === 'medication' && dosage) data.description = `Dosage: ${dosage}${desc ? '\n' + desc : ''}`;
+            else if (desc) data.description = desc;
+            if (type !== 'medication' && severity) data.severity = severity;
+            if (date) data.diagnosed_date = date;
+
             try {
-                const token = sessionStorage.getItem('token');
-                if (!token) {
-                    alert('❌ Session expired. Please login again.');
-                    window.location.href = 'Login.html';
-                    return;
-                }
-                
                 const response = await fetch(`${API_URL}/medical-records/entry`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
                 
-                console.log('Response status:', response.status);
-                const result = await response.json();
-                console.log('Response data:', result);
-                
                 if (response.ok) {
-                    alert(`✅ ${entryType.charAt(0).toUpperCase() + entryType.slice(1)} "${entryName}" added successfully!`);
-                    window.location.href = 'MedicalDashboard.html';
+                    showStatus(`✅ ${type} "${name}" added successfully!`, 'success');
+                    setTimeout(() => window.location.href = 'MedicalDashboard.html', 1500);
                 } else {
-                    alert(`❌ Failed to add entry: ${result.detail || 'Unknown error'}`);
+                    const err = await response.json();
+                    showStatus(`❌ Error: ${err.detail || 'Failed to add entry'}`, 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Add Entry';
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('❌ Network error. Please check if the backend is running.');
+            } catch (e) {
+                showStatus(`❌ Network error: ${e.message}`, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Add Entry';
             }
         });
+
+        function logout() { sessionStorage.clear(); window.location.href = 'Login.html'; }
     </script>
 </body>
 </html>
