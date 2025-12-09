@@ -1136,6 +1136,11 @@
         }
 
         async function updateTimeSlots() {
+            console.log('=== updateTimeSlots START ===');
+            console.log('selectedDoctorId:', selectedDoctorId);
+            console.log('selectedDate:', selectedDate);
+            console.log('typeof getAvailableSlots:', typeof getAvailableSlots);
+
             const timeslotsGrid = document.getElementById('timeslotsGrid');
 
             // Define all possible time slots
@@ -1150,30 +1155,41 @@
 
             // Only try to fetch from API if we have a doctor and date selected
             if (selectedDoctorId && selectedDate) {
+                console.log('Condition met: doctor and date selected');
                 try {
                     timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center;">Loading available time slots...</div>';
+                    console.log('Loading message set');
 
                     // Format date to YYYY-MM-DD for API
                     const formattedDate = selectedDate.toISOString().split('T')[0];
-                    console.log('Fetching slots for doctor', selectedDoctorId, 'on', formattedDate);
+                    console.log('Formatted date:', formattedDate);
+                    console.log('About to call getAvailableSlots...');
 
                     // Fetch available slots from API
                     const slotsData = await getAvailableSlots(selectedDoctorId, formattedDate);
-                    console.log('Received slots data:', slotsData);
+                    console.log('API call completed. Received slots data:', slotsData);
 
                     // Get booked slots from API response
                     if (slotsData && slotsData.booked_slots) {
                         bookedSlots = slotsData.booked_slots;
+                        console.log('Booked slots extracted:', bookedSlots);
                     }
                 } catch (error) {
-                    console.error('Error loading time slots from API:', error);
+                    console.error('!!! CAUGHT ERROR in API call:', error);
+                    console.error('Error type:', error.name);
+                    console.error('Error message:', error.message);
+                    console.error('Error stack:', error.stack);
                     console.warn('Falling back to showing all slots as available');
                     // Continue with empty bookedSlots array (all slots available)
                 }
+            } else {
+                console.log('Condition not met - doctor or date missing');
             }
 
+            console.log('About to render slots...');
             // Clear and rebuild the time slots grid
             timeslotsGrid.innerHTML = '';
+            console.log('Grid cleared');
 
             allSlots.forEach(time => {
                 const slot = document.createElement('div');
@@ -1200,10 +1216,16 @@
                 timeslotsGrid.appendChild(slot);
             });
 
+            console.log('Slots rendered successfully');
+            console.log('Total slots:', allSlots.length, 'Booked:', bookedSlots.length);
+
             // Show message if all slots are booked
             if (bookedSlots.length === allSlots.length) {
                 timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc3545;">All time slots are booked for this date. Please select another date.</div>';
+                console.log('All slots booked message displayed');
             }
+
+            console.log('=== updateTimeSlots END ===');
         }
 
         function selectTime(time) {
