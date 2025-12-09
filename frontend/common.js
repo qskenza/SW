@@ -174,11 +174,27 @@ async function cancelAppointment(appointmentId) {
         const response = await authenticatedFetch(`${API_URL}/appointments/${appointmentId}`, {
             method: 'DELETE'
         });
-        
+
         if (!response) return null;
         return await response.json();
     } catch (error) {
         console.error('Error cancelling appointment:', error);
+        throw error;
+    }
+}
+
+// Get available time slots for a doctor on a specific date
+async function getAvailableSlots(doctorId, date) {
+    try {
+        const response = await fetch(`${API_URL}/doctors/${doctorId}/available-slots?date=${date}`);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch available slots');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching available slots:', error);
         throw error;
     }
 }

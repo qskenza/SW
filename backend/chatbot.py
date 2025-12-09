@@ -322,25 +322,47 @@ def ai_reply(message: str, conversation_id: str = "default", user_context: Dict 
     
     except Exception as e:
         print(f"❌ Gemini API error: {e}")
-        
-        # Fallback error response
-        error_reply = "I apologize, but I'm having trouble connecting right now. "
-        
-        # Still try to help based on keywords
+        print(f"⚠️ Falling back to keyword-based responses")
+
+        # Use the same fallback logic as when AI_AVAILABLE is False
         message_lower = message.lower()
-        if "emergency" in message_lower or "urgent" in message_lower:
-            error_reply += "⚠️ If this is an emergency, please:\n• Use Emergency Request page\n• Call 2222\n• Or call Campus Security: 0535-86-0103"
-        elif "appointment" in message_lower:
-            error_reply += "For appointments, go to the 'Appointments' page in the navigation."
-        elif "profile" in message_lower:
-            error_reply += "To edit your profile, go to 'Student Profile' → 'Edit Profile'."
-        else:
-            error_reply += "Please try rephrasing your question, or contact the health center directly."
-        
+
+        fallback_responses = {
+            "hello": "Hello! I'm the CareConnect assistant. I can help you understand how to use our health center features. How can I guide you today?",
+            "hi": "Hi! I'm here to guide you through CareConnect's features. What would you like to know about?",
+            "appointment": "To book an appointment:\n1. Click 'Appointments' in the navigation\n2. Select a doctor\n3. Choose date and time\n4. Click 'Book Appointment'\n\nThe system will save it to the database!",
+            "book": "I can't book appointments for you, but I'll guide you! Go to the 'Appointments' section and follow the booking steps. Need help understanding any part?",
+            "emergency": "⚠️ FOR EMERGENCIES:\n• Click 'Emergency Request' in navigation\n• Or call 2222 immediately\n• Campus Security: 0535-86-0103\n\nIs this urgent?",
+            "urgent": "⚠️ If this is a medical emergency:\n1. Use the Emergency Request page NOW\n2. Or call 2222\n3. For life-threatening: Call campus security\n\nDon't delay - get help immediately!",
+            "add": "I can't add entries for you, but here's how:\n1. Go to Dashboard\n2. Click 'Add Medical Entry'\n3. Fill in the details\n4. Click Save\n\nWhat type of entry do you need to add?",
+            "profile": "To edit your profile:\n1. Go to 'Student Profile'\n2. Click 'Edit Profile'\n3. Update the fields\n4. Click 'Save Changes'\n\nYour AUI email will auto-update if you change your name!",
+            "help": "I can guide you with:\n• How to book appointments\n• How to add medical records\n• How to update your profile\n• How to use emergency features\n• General health information\n\nWhat would you like to know about?",
+            "records": "To access medical records:\n1. Go to 'Medical Dashboard'\n2. Scroll to 'Medical Information'\n3. View or click 'Add Medical Entry' to add new ones\n\nAll changes save to the database instantly!",
+            "doctor": "To see a doctor:\n1. Go to 'Appointments'\n2. Browse available doctors\n3. Select one and choose time\n4. Book the appointment\n\nWould you like to know about our doctors?",
+            "visit": "To view your visit history:\n1. Go to 'Visit History' from the navigation\n2. View all your past medical visits\n3. Filter by status (upcoming/completed/cancelled)\n4. Click 'View Full Report' for details",
+            "email": "AUI email format: (first letter).(lastname)@aui.ma\n\nExample: Alexandra Miller → a.miller@aui.ma\n\nYour email auto-updates when you change your name in Edit Profile!",
+            "thanks": "You're welcome! Is there anything else I can help you with?",
+            "thank": "You're welcome! Feel free to ask if you need more help!",
+            "bye": "Goodbye! Stay healthy! Feel free to chat anytime you need guidance. 👋",
+            "default": "I'm here to guide you through CareConnect! I can explain:\n• How to use appointments\n• How to manage medical records\n• How to update your profile\n• Emergency procedures\n\nWhat would you like to know?"
+        }
+
+        reply = fallback_responses["default"]
+
+        # Match keywords to responses
+        for keyword, response in fallback_responses.items():
+            if keyword in message_lower:
+                reply = response
+                break
+
+        # Check for action intent
+        action_check = detect_action_intent(message)
+        if action_check["is_action_request"]:
+            reply += "\n\n💡 Note: I can guide you through the process, but I can't perform actions for you. I'll show you exactly how to do it yourself!"
+
         return {
-            "reply": error_reply,
+            "reply": reply,
             "conversation_id": conversation_id,
-            "error": str(e),
             "mode": "error_fallback"
         }
 

@@ -982,8 +982,16 @@
         let selectedDate = new Date(2025, 12, 10); // December 10 2025
         let selectedTime = "03:00 PM";
         let selectedDoctor = "sarah"; // Default to Sarah Chen
+        let selectedDoctorId = 1; // Default to Dr. Sarah Chen (ID 1 in database)
         let appointmentComment = "";
-        
+
+        // Mapping between frontend doctor keys and database IDs
+        const doctorIdMap = {
+            "sarah": 1,    // Dr. Sarah Chen
+            "emily": 2,    // Dr. Emily Carter
+            "james": 3     // Dr. James Rodriguez
+        };
+
         // Doctor data
         const doctors = {
             "sarah": {
@@ -1127,42 +1135,97 @@
             updateTimeSlots();
         }
 
-        function updateTimeSlots() {
+        async function updateTimeSlots() {
+            console.log('=== updateTimeSlots START ===');
+            console.log('selectedDoctorId:', selectedDoctorId);
+            console.log('selectedDate:', selectedDate);
+            console.log('typeof getAvailableSlots:', typeof getAvailableSlots);
+
             const timeslotsGrid = document.getElementById('timeslotsGrid');
-            timeslotsGrid.innerHTML = '';
-            
-            // Generate time slots for the selected date
-            const timeSlots = [
+
+            // Define all possible time slots
+            const allSlots = [
                 '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM',
                 '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM',
                 '02:00 PM', '02:30 PM', '03:00 PM', '03:30 PM',
                 '04:00 PM', '04:30 PM', '05:00 PM'
             ];
-            
-            timeSlots.forEach(time => {
+
+            let bookedSlots = [];
+
+            // Only try to fetch from API if we have a doctor and date selected
+            if (selectedDoctorId && selectedDate) {
+                console.log('Condition met: doctor and date selected');
+                try {
+                    timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center;">Loading available time slots...</div>';
+                    console.log('Loading message set');
+
+                    // Format date to YYYY-MM-DD for API
+                    const formattedDate = selectedDate.toISOString().split('T')[0];
+                    console.log('Formatted date:', formattedDate);
+                    console.log('About to call getAvailableSlots...');
+
+                    // Fetch available slots from API
+                    const slotsData = await getAvailableSlots(selectedDoctorId, formattedDate);
+                    console.log('API call completed. Received slots data:', slotsData);
+
+                    // Get booked slots from API response
+                    if (slotsData && slotsData.booked_slots) {
+                        bookedSlots = slotsData.booked_slots;
+                        console.log('Booked slots extracted:', bookedSlots);
+                    }
+                } catch (error) {
+                    console.error('!!! CAUGHT ERROR in API call:', error);
+                    console.error('Error type:', error.name);
+                    console.error('Error message:', error.message);
+                    console.error('Error stack:', error.stack);
+                    console.warn('Falling back to showing all slots as available');
+                    // Continue with empty bookedSlots array (all slots available)
+                }
+            } else {
+                console.log('Condition not met - doctor or date missing');
+            }
+
+            console.log('About to render slots...');
+            // Clear and rebuild the time slots grid
+            timeslotsGrid.innerHTML = '';
+            console.log('Grid cleared');
+
+            allSlots.forEach(time => {
                 const slot = document.createElement('div');
                 slot.className = 'time-slot';
                 slot.textContent = time;
-                
-                // Mark some slots as unavailable (for demo)
-                if (Math.random() < 0.3) { // 30% chance of being unavailable
+
+                // Check if this slot is booked (unavailable)
+                if (bookedSlots.includes(time)) {
                     slot.classList.add('unavailable');
                 }
-                
+
                 // Check if this is the selected time
                 if (time === selectedTime) {
                     slot.classList.add('selected');
                 }
-                
+
                 // Add click event for available slots
                 if (!slot.classList.contains('unavailable')) {
                     slot.addEventListener('click', function() {
                         selectTime(time);
                     });
                 }
-                
+
                 timeslotsGrid.appendChild(slot);
             });
+
+            console.log('Slots rendered successfully');
+            console.log('Total slots:', allSlots.length, 'Booked:', bookedSlots.length);
+
+            // Show message if all slots are booked
+            if (bookedSlots.length === allSlots.length) {
+                timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc3545;">All time slots are booked for this date. Please select another date.</div>';
+                console.log('All slots booked message displayed');
+            }
+
+            console.log('=== updateTimeSlots END ===');
         }
 
         function selectTime(time) {
@@ -1202,7 +1265,8 @@
         function updateDoctorProfile(doctorId) {
             const doctor = doctors[doctorId];
             selectedDoctor = doctorId;
-            
+            selectedDoctorId = doctorIdMap[doctorId]; // Set the database ID
+
             const profileHTML = `
                 <div class="profile-header">
                     <div class="profile-avatar" style="background: ${doctor.color}">${doctor.avatar}</div>
@@ -1341,46 +1405,79 @@
         }
 
         // Booking Functions
-        function bookAppointment() {
+        async function bookAppointment() {
             const doctor = document.getElementById('summaryDoctor').textContent;
             const date = document.getElementById('summaryDate').textContent;
             const time = document.getElementById('summaryTime').textContent;
             const comment = document.getElementById('appointmentComment').value.trim();
-            
+
+            // Validate selections
+            if (!selectedDoctorId) {
+                alert('❌ Please select a doctor');
+                return;
+            }
+
+            if (!selectedDate) {
+                alert('❌ Please select a date');
+                return;
+            }
+
+            if (!selectedTime) {
+                alert('❌ Please select a time');
+                return;
+            }
+
             let confirmationMessage = `Confirm Appointment Details:\n\nDoctor: ${doctor}\nDate: ${date}\nTime: ${time}\n\nLocation: Campus Health Center, Room 204`;
-            
+
             // Add comment to confirmation if provided
             if (comment) {
                 confirmationMessage += `\n\nReason for Appointment:\n"${comment.substring(0, 200)}${comment.length > 200 ? '...' : ''}"`;
             } else {
                 confirmationMessage += `\n\nReason for Appointment: Not specified`;
             }
-            
+
             confirmationMessage += `\n\nClick OK to confirm.`;
-            
+
             const confirmAppointment = confirm(confirmationMessage);
-            
+
             if (confirmAppointment) {
-                let successMessage = `✅ Appointment Confirmed!\n\nYou have successfully booked an appointment with ${doctor} on ${date} at ${time}.\n\n`;
-                
-                if (comment) {
-                    successMessage += `Your reason for appointment has been noted:\n"${comment.substring(0, 150)}${comment.length > 150 ? '...' : ''}"\n\n`;
+                try {
+                    // Format date to YYYY-MM-DD for API
+                    const formattedDate = selectedDate.toISOString().split('T')[0];
+
+                    // Call the backend API to create appointment
+                    const appointmentData = {
+                        doctor_id: selectedDoctorId,
+                        appointment_date: formattedDate,
+                        appointment_time: selectedTime,
+                        type: "General Consultation",
+                        notes: comment || ""
+                    };
+
+                    console.log('Booking appointment with data:', appointmentData);
+                    const result = await createAppointment(appointmentData);
+                    console.log('Appointment created:', result);
+
+                    if (result) {
+                        let successMessage = `✅ Appointment Confirmed!\n\nYou have successfully booked an appointment with ${doctor} on ${date} at ${time}.\n\n`;
+
+                        if (comment) {
+                            successMessage += `Your reason for appointment has been noted:\n"${comment.substring(0, 150)}${comment.length > 150 ? '...' : ''}"\n\n`;
+                        }
+
+                        successMessage += `A confirmation email has been sent to your registered email address.\n\nYou will receive a reminder 24 hours before your appointment.`;
+
+                        alert(successMessage);
+
+                        // Reset form for next booking
+                        resetBookingForm();
+                    } else {
+                        alert('❌ Failed to book appointment. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error booking appointment:', error);
+                    alert(`❌ Error booking appointment: ${error.message || 'Please try again'}`);
                 }
-                
-                successMessage += `A confirmation email has been sent to your registered email address.\n\nYou will receive a reminder 24 hours before your appointment.`;
-                
-                alert(successMessage);
-                
-                // In a real app, this would send to a backend API
-                console.log('Appointment booked:', { 
-                    doctor, 
-                    date, 
-                    time, 
-                    comment: comment || 'No comment provided' 
-                });
-                
-                // Reset form for next booking
-                resetBookingForm();
             }
         }
 
