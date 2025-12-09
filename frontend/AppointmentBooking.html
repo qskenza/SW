@@ -1127,42 +1127,67 @@
             updateTimeSlots();
         }
 
-        function updateTimeSlots() {
+        async function updateTimeSlots() {
             const timeslotsGrid = document.getElementById('timeslotsGrid');
-            timeslotsGrid.innerHTML = '';
-            
-            // Generate time slots for the selected date
-            const timeSlots = [
-                '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM',
-                '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM',
-                '02:00 PM', '02:30 PM', '03:00 PM', '03:30 PM',
-                '04:00 PM', '04:30 PM', '05:00 PM'
-            ];
-            
-            timeSlots.forEach(time => {
-                const slot = document.createElement('div');
-                slot.className = 'time-slot';
-                slot.textContent = time;
-                
-                // Mark some slots as unavailable (for demo)
-                if (Math.random() < 0.3) { // 30% chance of being unavailable
-                    slot.classList.add('unavailable');
+            timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center;">Loading available time slots...</div>';
+
+            // Validate that doctor and date are selected
+            if (!selectedDoctorId || !selectedDate) {
+                timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center;">Please select a doctor and date first</div>';
+                return;
+            }
+
+            try {
+                // Format date to YYYY-MM-DD for API
+                const formattedDate = selectedDate.toISOString().split('T')[0];
+
+                // Fetch available slots from API
+                const slotsData = await getAvailableSlots(selectedDoctorId, formattedDate);
+
+                // Clear loading message
+                timeslotsGrid.innerHTML = '';
+
+                // Get all time slots (both available and booked)
+                const allSlots = [
+                    '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM',
+                    '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM',
+                    '02:00 PM', '02:30 PM', '03:00 PM', '03:30 PM',
+                    '04:00 PM', '04:30 PM', '05:00 PM'
+                ];
+
+                allSlots.forEach(time => {
+                    const slot = document.createElement('div');
+                    slot.className = 'time-slot';
+                    slot.textContent = time;
+
+                    // Check if this slot is booked (unavailable)
+                    if (slotsData.booked_slots.includes(time)) {
+                        slot.classList.add('unavailable');
+                    }
+
+                    // Check if this is the selected time
+                    if (time === selectedTime) {
+                        slot.classList.add('selected');
+                    }
+
+                    // Add click event for available slots
+                    if (!slot.classList.contains('unavailable')) {
+                        slot.addEventListener('click', function() {
+                            selectTime(time);
+                        });
+                    }
+
+                    timeslotsGrid.appendChild(slot);
+                });
+
+                // Show message if no slots available
+                if (slotsData.available_slots.length === 0) {
+                    timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc3545;">All time slots are booked for this date. Please select another date.</div>';
                 }
-                
-                // Check if this is the selected time
-                if (time === selectedTime) {
-                    slot.classList.add('selected');
-                }
-                
-                // Add click event for available slots
-                if (!slot.classList.contains('unavailable')) {
-                    slot.addEventListener('click', function() {
-                        selectTime(time);
-                    });
-                }
-                
-                timeslotsGrid.appendChild(slot);
-            });
+            } catch (error) {
+                console.error('Error loading time slots:', error);
+                timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc3545;">Failed to load time slots. Please try again.</div>';
+            }
         }
 
         function selectTime(time) {
@@ -1341,46 +1366,77 @@
         }
 
         // Booking Functions
-        function bookAppointment() {
+        async function bookAppointment() {
             const doctor = document.getElementById('summaryDoctor').textContent;
             const date = document.getElementById('summaryDate').textContent;
             const time = document.getElementById('summaryTime').textContent;
             const comment = document.getElementById('appointmentComment').value.trim();
-            
+
+            // Validate selections
+            if (!selectedDoctorId) {
+                alert('❌ Please select a doctor');
+                return;
+            }
+
+            if (!selectedDate) {
+                alert('❌ Please select a date');
+                return;
+            }
+
+            if (!selectedTime) {
+                alert('❌ Please select a time');
+                return;
+            }
+
             let confirmationMessage = `Confirm Appointment Details:\n\nDoctor: ${doctor}\nDate: ${date}\nTime: ${time}\n\nLocation: Campus Health Center, Room 204`;
-            
+
             // Add comment to confirmation if provided
             if (comment) {
                 confirmationMessage += `\n\nReason for Appointment:\n"${comment.substring(0, 200)}${comment.length > 200 ? '...' : ''}"`;
             } else {
                 confirmationMessage += `\n\nReason for Appointment: Not specified`;
             }
-            
+
             confirmationMessage += `\n\nClick OK to confirm.`;
-            
+
             const confirmAppointment = confirm(confirmationMessage);
-            
+
             if (confirmAppointment) {
-                let successMessage = `✅ Appointment Confirmed!\n\nYou have successfully booked an appointment with ${doctor} on ${date} at ${time}.\n\n`;
-                
-                if (comment) {
-                    successMessage += `Your reason for appointment has been noted:\n"${comment.substring(0, 150)}${comment.length > 150 ? '...' : ''}"\n\n`;
+                try {
+                    // Format date to YYYY-MM-DD for API
+                    const formattedDate = selectedDate.toISOString().split('T')[0];
+
+                    // Call the backend API to create appointment
+                    const appointmentData = {
+                        doctor_id: selectedDoctorId,
+                        appointment_date: formattedDate,
+                        appointment_time: selectedTime,
+                        type: "General Consultation",
+                        notes: comment || ""
+                    };
+
+                    const result = await createAppointment(appointmentData);
+
+                    if (result) {
+                        let successMessage = `✅ Appointment Confirmed!\n\nYou have successfully booked an appointment with ${doctor} on ${date} at ${time}.\n\n`;
+
+                        if (comment) {
+                            successMessage += `Your reason for appointment has been noted:\n"${comment.substring(0, 150)}${comment.length > 150 ? '...' : ''}"\n\n`;
+                        }
+
+                        successMessage += `A confirmation email has been sent to your registered email address.\n\nYou will receive a reminder 24 hours before your appointment.`;
+
+                        alert(successMessage);
+
+                        // Reset form for next booking
+                        resetBookingForm();
+                    } else {
+                        alert('❌ Failed to book appointment. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error booking appointment:', error);
+                    alert(`❌ Error booking appointment: ${error.message || 'Please try again'}`);
                 }
-                
-                successMessage += `A confirmation email has been sent to your registered email address.\n\nYou will receive a reminder 24 hours before your appointment.`;
-                
-                alert(successMessage);
-                
-                // In a real app, this would send to a backend API
-                console.log('Appointment booked:', { 
-                    doctor, 
-                    date, 
-                    time, 
-                    comment: comment || 'No comment provided' 
-                });
-                
-                // Reset form for next booking
-                resetBookingForm();
             }
         }
 
