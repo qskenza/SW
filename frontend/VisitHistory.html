@@ -635,6 +635,7 @@
         <div class="page-header">
             <h1 class="page-title">Medical Visit History</h1>
             <p class="page-subtitle">Complete Record of All Medical Consultations</p>
+            <p id="currentUserDisplay" style="margin-top: 10px; color: #666; font-size: 0.9rem;"></p>
         </div>
 
         <!-- Stats Grid -->
@@ -877,6 +878,12 @@
                 if (response.ok) {
                     currentUserProfile = await response.json();
                     console.log('User profile loaded:', currentUserProfile);
+
+                    // Display current user's name
+                    const userDisplay = document.getElementById('currentUserDisplay');
+                    if (userDisplay && currentUserProfile) {
+                        userDisplay.textContent = `Logged in as: ${currentUserProfile.full_name} (${currentUserProfile.student_id})`;
+                    }
                 } else {
                     console.error('Failed to load user profile');
                 }
