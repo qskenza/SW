@@ -1137,68 +1137,72 @@
 
         async function updateTimeSlots() {
             const timeslotsGrid = document.getElementById('timeslotsGrid');
-            timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center;">Loading available time slots...</div>';
 
-            // Validate that doctor and date are selected
-            if (!selectedDoctorId || !selectedDate) {
-                console.log('Doctor or date not selected:', { selectedDoctorId, selectedDate });
-                timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center;">Please select a doctor and date first</div>';
-                return;
+            // Define all possible time slots
+            const allSlots = [
+                '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM',
+                '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM',
+                '02:00 PM', '02:30 PM', '03:00 PM', '03:30 PM',
+                '04:00 PM', '04:30 PM', '05:00 PM'
+            ];
+
+            let bookedSlots = [];
+
+            // Only try to fetch from API if we have a doctor and date selected
+            if (selectedDoctorId && selectedDate) {
+                try {
+                    timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center;">Loading available time slots...</div>';
+
+                    // Format date to YYYY-MM-DD for API
+                    const formattedDate = selectedDate.toISOString().split('T')[0];
+                    console.log('Fetching slots for doctor', selectedDoctorId, 'on', formattedDate);
+
+                    // Fetch available slots from API
+                    const slotsData = await getAvailableSlots(selectedDoctorId, formattedDate);
+                    console.log('Received slots data:', slotsData);
+
+                    // Get booked slots from API response
+                    if (slotsData && slotsData.booked_slots) {
+                        bookedSlots = slotsData.booked_slots;
+                    }
+                } catch (error) {
+                    console.error('Error loading time slots from API:', error);
+                    console.warn('Falling back to showing all slots as available');
+                    // Continue with empty bookedSlots array (all slots available)
+                }
             }
 
-            try {
-                // Format date to YYYY-MM-DD for API
-                const formattedDate = selectedDate.toISOString().split('T')[0];
-                console.log('Fetching slots for doctor', selectedDoctorId, 'on', formattedDate);
+            // Clear and rebuild the time slots grid
+            timeslotsGrid.innerHTML = '';
 
-                // Fetch available slots from API
-                const slotsData = await getAvailableSlots(selectedDoctorId, formattedDate);
-                console.log('Received slots data:', slotsData);
+            allSlots.forEach(time => {
+                const slot = document.createElement('div');
+                slot.className = 'time-slot';
+                slot.textContent = time;
 
-                // Clear loading message
-                timeslotsGrid.innerHTML = '';
-
-                // Get all time slots (both available and booked)
-                const allSlots = [
-                    '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM',
-                    '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM',
-                    '02:00 PM', '02:30 PM', '03:00 PM', '03:30 PM',
-                    '04:00 PM', '04:30 PM', '05:00 PM'
-                ];
-
-                allSlots.forEach(time => {
-                    const slot = document.createElement('div');
-                    slot.className = 'time-slot';
-                    slot.textContent = time;
-
-                    // Check if this slot is booked (unavailable)
-                    if (slotsData.booked_slots && slotsData.booked_slots.includes(time)) {
-                        slot.classList.add('unavailable');
-                    }
-
-                    // Check if this is the selected time
-                    if (time === selectedTime) {
-                        slot.classList.add('selected');
-                    }
-
-                    // Add click event for available slots
-                    if (!slot.classList.contains('unavailable')) {
-                        slot.addEventListener('click', function() {
-                            selectTime(time);
-                        });
-                    }
-
-                    timeslotsGrid.appendChild(slot);
-                });
-
-                // Show message if no slots available
-                if (slotsData.available_slots && slotsData.available_slots.length === 0) {
-                    timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc3545;">All time slots are booked for this date. Please select another date.</div>';
+                // Check if this slot is booked (unavailable)
+                if (bookedSlots.includes(time)) {
+                    slot.classList.add('unavailable');
                 }
-            } catch (error) {
-                console.error('Error loading time slots:', error);
-                console.error('Error details:', error.message, error.stack);
-                timeslotsGrid.innerHTML = `<div style="padding: 20px; text-align: center; color: #dc3545;">Failed to load time slots: ${error.message || 'Please try again.'}</div>`;
+
+                // Check if this is the selected time
+                if (time === selectedTime) {
+                    slot.classList.add('selected');
+                }
+
+                // Add click event for available slots
+                if (!slot.classList.contains('unavailable')) {
+                    slot.addEventListener('click', function() {
+                        selectTime(time);
+                    });
+                }
+
+                timeslotsGrid.appendChild(slot);
+            });
+
+            // Show message if all slots are booked
+            if (bookedSlots.length === allSlots.length) {
+                timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc3545;">All time slots are booked for this date. Please select another date.</div>';
             }
         }
 
