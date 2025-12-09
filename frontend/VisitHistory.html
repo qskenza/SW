@@ -866,6 +866,27 @@
 
     <script>
         let currentTab = 'all';
+        let currentUserProfile = null; // Store current user's profile data
+
+        // Load current user's profile
+        async function loadUserProfile() {
+            try {
+                const response = await fetch(`${API_URL}/profile`, {
+                    headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+                });
+                if (response.ok) {
+                    currentUserProfile = await response.json();
+                    console.log('User profile loaded:', currentUserProfile);
+                } else {
+                    console.error('Failed to load user profile');
+                }
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+            }
+        }
+
+        // Load profile on page load
+        loadUserProfile();
 
         function switchTab(tab) {
             currentTab = tab;
@@ -1008,19 +1029,19 @@
                     <div class="report-info-grid">
                         <div class="report-info-item">
                             <div class="report-label">Patient Name</div>
-                            <div class="report-value">Alexandra Miller</div>
+                            <div class="report-value">${currentUserProfile ? currentUserProfile.full_name : 'N/A'}</div>
                         </div>
                         <div class="report-info-item">
                             <div class="report-label">Student ID</div>
-                            <div class="report-value">2023001</div>
+                            <div class="report-value">${currentUserProfile ? currentUserProfile.student_id : 'N/A'}</div>
                         </div>
                         <div class="report-info-item">
                             <div class="report-label">Department</div>
-                            <div class="report-value">SSE - Computer Science</div>
+                            <div class="report-value">${currentUserProfile ? (currentUserProfile.department + ' - ' + currentUserProfile.major) : 'N/A'}</div>
                         </div>
                         <div class="report-info-item">
                             <div class="report-label">Academic Year</div>
-                            <div class="report-value">2025/2026</div>
+                            <div class="report-value">${currentUserProfile ? currentUserProfile.academic_year : 'N/A'}</div>
                         </div>
                     </div>
                 </div>
