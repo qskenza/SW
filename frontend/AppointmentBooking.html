@@ -982,8 +982,16 @@
         let selectedDate = new Date(2025, 12, 10); // December 10 2025
         let selectedTime = "03:00 PM";
         let selectedDoctor = "sarah"; // Default to Sarah Chen
+        let selectedDoctorId = 1; // Default to Dr. Sarah Chen (ID 1 in database)
         let appointmentComment = "";
-        
+
+        // Mapping between frontend doctor keys and database IDs
+        const doctorIdMap = {
+            "sarah": 1,    // Dr. Sarah Chen
+            "emily": 2,    // Dr. Emily Carter
+            "james": 3     // Dr. James Rodriguez
+        };
+
         // Doctor data
         const doctors = {
             "sarah": {
@@ -1133,6 +1141,7 @@
 
             // Validate that doctor and date are selected
             if (!selectedDoctorId || !selectedDate) {
+                console.log('Doctor or date not selected:', { selectedDoctorId, selectedDate });
                 timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center;">Please select a doctor and date first</div>';
                 return;
             }
@@ -1140,9 +1149,11 @@
             try {
                 // Format date to YYYY-MM-DD for API
                 const formattedDate = selectedDate.toISOString().split('T')[0];
+                console.log('Fetching slots for doctor', selectedDoctorId, 'on', formattedDate);
 
                 // Fetch available slots from API
                 const slotsData = await getAvailableSlots(selectedDoctorId, formattedDate);
+                console.log('Received slots data:', slotsData);
 
                 // Clear loading message
                 timeslotsGrid.innerHTML = '';
@@ -1161,7 +1172,7 @@
                     slot.textContent = time;
 
                     // Check if this slot is booked (unavailable)
-                    if (slotsData.booked_slots.includes(time)) {
+                    if (slotsData.booked_slots && slotsData.booked_slots.includes(time)) {
                         slot.classList.add('unavailable');
                     }
 
@@ -1181,12 +1192,13 @@
                 });
 
                 // Show message if no slots available
-                if (slotsData.available_slots.length === 0) {
+                if (slotsData.available_slots && slotsData.available_slots.length === 0) {
                     timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc3545;">All time slots are booked for this date. Please select another date.</div>';
                 }
             } catch (error) {
                 console.error('Error loading time slots:', error);
-                timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc3545;">Failed to load time slots. Please try again.</div>';
+                console.error('Error details:', error.message, error.stack);
+                timeslotsGrid.innerHTML = `<div style="padding: 20px; text-align: center; color: #dc3545;">Failed to load time slots: ${error.message || 'Please try again.'}</div>`;
             }
         }
 
@@ -1227,7 +1239,8 @@
         function updateDoctorProfile(doctorId) {
             const doctor = doctors[doctorId];
             selectedDoctor = doctorId;
-            
+            selectedDoctorId = doctorIdMap[doctorId]; // Set the database ID
+
             const profileHTML = `
                 <div class="profile-header">
                     <div class="profile-avatar" style="background: ${doctor.color}">${doctor.avatar}</div>
@@ -1415,7 +1428,9 @@
                         notes: comment || ""
                     };
 
+                    console.log('Booking appointment with data:', appointmentData);
                     const result = await createAppointment(appointmentData);
+                    console.log('Appointment created:', result);
 
                     if (result) {
                         let successMessage = `✅ Appointment Confirmed!\n\nYou have successfully booked an appointment with ${doctor} on ${date} at ${time}.\n\n`;
