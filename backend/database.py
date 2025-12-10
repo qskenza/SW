@@ -59,24 +59,24 @@ def seed_db():
         # Create default user - Alexandra Miller
         alexandra = models.User(
             username="alexandra",
-            email="a.miller@aui.ma",  # ✅ CHANGED: AUI email format
+            email="a.miller@aui.ma",
             password_hash=hash_password("password123"),
             full_name="Alexandra Miller",
-            student_id="2023001",  # ✅ CHANGED: Numbers only (removed "S")
-            institution="Al Akhawayn University",  # ✅ CHANGED: AUI
-            department="SSE",  # ✅ ADDED: Department
-            major="Computer Science",  # ✅ CHANGED: From "program" to "major"
-            academic_year="2025/2026",  # ✅ ADDED: Academic year
-            year_level="junior",  # ✅ ADDED: Year level
-            phone="+212 612-345678",  # ✅ ADDED: Phone
-            date_of_birth=date(2002, 5, 10),  # ✅ ADDED: Date of birth
-            gender="female",  # ✅ ADDED: Gender
+            student_id="2023001",
+            institution="Al Akhawayn University",
+            department="SSE",
+            major="Computer Science",
+            academic_year="2025/2026",
+            year_level="junior",
+            phone="+212 612-345678",
+            date_of_birth=date(2002, 5, 10),
+            gender="female",
             role="student"
         )
         db.add(alexandra)
         db.flush()
         
-        # ✅ ADDED: Emergency contact for Alexandra
+        # Emergency contact for Alexandra
         emergency_contact = models.EmergencyContact(
             user_id=alexandra.id,
             name="Jane Miller",
@@ -86,7 +86,7 @@ def seed_db():
         )
         db.add(emergency_contact)
         
-        # ✅ ADDED: Medical records for Alexandra
+        # Medical records for Alexandra
         allergies = [
             models.MedicalRecord(
                 user_id=alexandra.id,
@@ -134,27 +134,27 @@ def seed_db():
             models.Doctor(
                 name="Dr. Sarah Chen",
                 specialty="General Practitioner, Pediatrics",
-                email="sarah.chen@aui.ma",  # ✅ CHANGED: AUI email
-                phone="0535-86-0101",  # ✅ CHANGED: Moroccan format
-                rating=4.8,  # ✅ CHANGED: Decimal rating instead of integer
+                email="sarah.chen@aui.ma",
+                phone="0535-86-0101",
+                rating=4.8,
                 reviews_count=127,
                 avatar="SC"
             ),
             models.Doctor(
                 name="Dr. Emily Carter",
                 specialty="Pediatrician",
-                email="emily.carter@aui.ma",  # ✅ CHANGED: AUI email
-                phone="0535-86-0102",  # ✅ CHANGED: Moroccan format
-                rating=4.9,  # ✅ CHANGED: Decimal rating
+                email="emily.carter@aui.ma",
+                phone="0535-86-0102",
+                rating=4.9,
                 reviews_count=89,
                 avatar="EC"
             ),
             models.Doctor(
                 name="Dr. Elena Rodriguez",
                 specialty="Campus Doctor",
-                email="elena.rodriguez@aui.ma",  # ✅ CHANGED: AUI email
-                phone="0535-86-0103",  # ✅ CHANGED: Moroccan format
-                rating=4.7,  # ✅ CHANGED: Decimal rating
+                email="elena.rodriguez@aui.ma",
+                phone="0535-86-0103",
+                rating=4.7,
                 reviews_count=156,
                 avatar="ER"
             )
@@ -163,7 +163,11 @@ def seed_db():
         for doctor in doctors:
             db.add(doctor)
         
-        # ✅ ADD DEFAULT AVAILABILITY FOR DOCTORS
+        # ✅ FIX: Commit doctors first so they get IDs
+        db.commit()
+        print("✅ Doctors created successfully")
+        
+        # Now create availability schedules with valid doctor IDs
         print("📅 Creating default doctor availability schedules...")
         
         # Dr. Sarah Chen - Available Mon-Fri, 9 AM - 5 PM
@@ -202,9 +206,7 @@ def seed_db():
         db.commit()
         print("✅ Doctor availability schedules created")
         
-        db.flush()
-        
-        # ✅ ADDED: Sample visits for Alexandra
+        # Sample visits for Alexandra
         visits = [
             models.Visit(
                 user_id=alexandra.id,
@@ -250,22 +252,23 @@ def seed_db():
         # Create admin user
         admin = models.User(
             username="admin",
-            email="admin@aui.ma",  # ✅ CHANGED: AUI email
+            email="admin@aui.ma",
             password_hash=hash_password("admin123"),
             full_name="Admin User",
-            student_id="0000000",  # ✅ ADDED: Required field
-            institution="Al Akhawayn University",  # ✅ CHANGED: AUI
+            student_id="0000000",
+            institution="Al Akhawayn University",
             role="admin"
         )
         db.add(admin)
         
         db.commit()
         print("✅ Database seeded successfully")
-        print("📧 Alexandra's email: a.miller@aui.ma")  # ✅ ADDED: Confirmation
+        print("📧 Alexandra's email: a.miller@aui.ma")
         
     except Exception as e:
         print(f"❌ Error seeding database: {e}")
         db.rollback()
+        raise  # Re-raise to see full traceback
     finally:
         db.close()
 

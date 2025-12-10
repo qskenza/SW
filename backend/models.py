@@ -137,7 +137,7 @@ class Appointment(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     doctor_id = Column(Integer, ForeignKey("doctors.id"), nullable=False)
-    appointment_date = Column(DateTime, nullable=False)
+    appointment_date = Column(Date, nullable=False)
     appointment_time = Column(String(10))
     type = Column(String(50), default="General Consultation")
     location = Column(String(100))
