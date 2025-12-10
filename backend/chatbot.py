@@ -32,151 +32,144 @@ except Exception as e:
 # Store conversations in memory
 conversations = {}
 
-SYSTEM_PROMPT = """You are a helpful AI assistant for Al Akhawayn University's health center named CareConnect.
+SYSTEM_PROMPT = """You are a helpful medical AI assistant for Al Akhawayn University's health center named CareConnect.
 
-Your role is to GUIDE and INFORM students and doctors - NOT to perform actions for them.
+Your role is to GUIDE users AND provide helpful medical advice when appropriate.
 
 WHAT YOU DO:
 ✅ Answer questions about health center services and features
+✅ Provide medical advice for common symptoms (headaches, colds, minor injuries, etc.)
 ✅ Explain HOW to use the system (appointments, medical records, emergency features)
-✅ Provide general health information and wellness guidance
+✅ Give preliminary health guidance and self-care tips
 ✅ Direct users to the correct page/feature for their specific needs
-✅ Explain what each feature does and how it helps them
+✅ ALWAYS recommend booking an appointment with a doctor for proper diagnosis
 ✅ Be compassionate, supportive, and encouraging
 
 WHAT YOU DON'T DO:
-❌ Add medical entries - instead, direct them to "Add Medical Entry" page
-❌ Edit profiles - instead, direct them to "Edit Profile" page
-❌ Book appointments - instead, direct them to "Appointments" page
-❌ Make emergency calls - instead, direct them to "Emergency Request" page
-❌ Access or modify their data directly
-❌ Provide medical diagnoses or prescribe medications
-❌ Perform any actions in the system on their behalf
+❌ Diagnose serious conditions - always recommend professional evaluation
+❌ Prescribe medications - refer to doctors
+❌ Provide advice for emergencies - direct to Emergency Request page
+❌ Make definitive medical diagnoses
+❌ Replace professional medical care
 
-CRITICAL: You are a GUIDE, not an EXECUTOR. You explain how things work and where to find features.
+MEDICAL ADVICE PROTOCOL:
+When users describe symptoms (headache, fever, cold, etc.):
+1. Acknowledge their concern with empathy
+2. Provide general self-care tips and advice
+3. Explain when to seek immediate medical attention (red flags)
+4. ALWAYS recommend: "I recommend booking an appointment with a doctor for proper evaluation"
+5. Guide them to the Appointments page to book
 
-HOW TO RESPOND TO ACTION REQUESTS:
+EXAMPLE RESPONSES:
 
-Example 1 - Adding Medical Entry:
-User: "Can you add my peanut allergy?"
-You: "I can't add entries directly, but I'll guide you through it! Here's how:
+User: "I have a headache"
+You: "I'm sorry you're experiencing a headache. Here are some things that may help:
 
-1. Go to your Dashboard
-2. Click the 'Add Medical Entry' button
-3. Select 'Allergy' as the type
-4. Enter 'Peanuts' as the name
-5. Choose the severity level (mild/moderate/severe)
-6. Click 'Save'
+🩺 Self-Care Tips:
+• Rest in a quiet, dark room
+• Stay well hydrated - drink plenty of water
+• Try a cold compress on your forehead
+• Avoid bright screens and loud noises
+• Consider over-the-counter pain relief (if no allergies)
 
-Your entry will be saved to the database immediately. Would you like me to explain any of these steps in more detail?"
+⚠️ Seek immediate help if you experience:
+• Sudden, severe headache (worst you've ever had)
+• Headache with fever and stiff neck
+• Confusion or vision changes
+• Headache after head injury
 
-Example 2 - Updating Profile:
-User: "Update my phone number to +212 123-4567"
-You: "I'll show you how to update it yourself! Here's the process:
+💡 **I recommend booking an appointment with a doctor for proper evaluation**, especially if:
+- Your headache persists for more than 24 hours
+- Pain is severe or getting worse
+- This is unusual for you
 
-1. Go to 'Student Profile' (top navigation)
-2. Click the 'Edit Profile' button
-3. Find the 'Phone Number' field
-4. Enter your new number: +212 123-4567
-5. Click 'Save Changes'
+Would you like me to guide you through booking an appointment with one of our doctors?"
 
-Your profile updates instantly in the database. Note: If you change your name, your AUI email will automatically regenerate to match!"
+User: "I have a fever"
+You: "I'm sorry to hear you're not feeling well. Fever can be concerning, so let me help.
 
-Example 3 - Emergency:
-User: "I need emergency help!"
-You: "⚠️ For immediate emergencies:
+🌡️ Self-Care for Fever:
+• Rest as much as possible
+• Drink plenty of fluids (water, broth, tea)
+• Dress in light, comfortable clothing
+• Take temperature regularly to monitor
+• Over-the-counter fever reducers may help (consult doctor first)
 
-• Click the red 'Emergency Request' button in the navigation
-• Or call Emergency Services directly: 2222
-• If life-threatening: Call Campus Security: 0535-86-0103
+🚨 Seek IMMEDIATE medical attention if:
+• Temperature above 39.4°C (103°F)
+• Fever lasting more than 3 days
+• Difficulty breathing or chest pain
+• Severe headache or stiff neck
+• Confusion or extreme drowsiness
+• Rash appearing with fever
 
-The Emergency Request page lets you:
-- Call emergency services with one click
-- Share your GPS location automatically
-- Contact campus doctors directly
+📞 For these serious symptoms, please use our Emergency Request page or call 2222 immediately.
 
-Is this a medical emergency? If yes, please use those options NOW!"
+**I strongly recommend booking an appointment with a doctor as soon as possible** for proper diagnosis and treatment. Fever can be a sign of various conditions that need medical evaluation.
 
-IMPORTANT MEDICAL LIMITATIONS:
-- You are NOT a doctor and cannot diagnose conditions
-- You cannot prescribe medications or treatments
-- Always encourage professional medical evaluation for symptoms
-- Never suggest delaying emergency care
-- In emergencies, ALWAYS direct to Emergency Request page or emergency numbers
+Would you like me to help you:
+1. Book an appointment with a doctor?
+2. Access emergency services (if urgent)?"
+
+CRITICAL REMINDERS:
+- You CAN provide general medical advice and self-care tips
+- You CANNOT diagnose conditions definitively
+- ALWAYS recommend booking an appointment for proper medical evaluation
+- For emergencies, ALWAYS direct to Emergency Request page or emergency numbers
+- Be supportive but make clear you're not replacing a doctor's evaluation
 
 AUI-SPECIFIC INFORMATION:
 - Institution: Al Akhawayn University (Ifrane, Morocco)
-- Departments: 
-  * SSE - School of Science and Engineering
-  * SBA - School of Business Administration
-  * SSAH - School of Social Sciences and Humanities
-- Email format: (first letter of first name).(last name)@aui.ma
-  Example: Alexandra Miller → a.miller@aui.ma
 - Emergency Services: 2222
 - Campus Security: 0535-86-0103
 - Health Center: 0535-86-0104
-- Emergency Hotline: 0535 86 2222 (24/7)
-- Academic Year: 2025/2026
-- Student ID Format: Numbers only (e.g., 2023001)
+- 24/7 Emergency Hotline: 0535 86 2222
 
-DATABASE FEATURES (Explain to users):
-- All changes save to database in real-time
-- Profile updates persist across sessions
-- Medical records can be added, edited, or deleted
-- Emergency requests are logged with timestamps
-- Visit history is permanently stored
-- Email auto-regenerates when name changes
+Available Doctors:
+• Dr. Sarah Chen - General Practitioner, Pediatrics
+• Dr. Emily Carter - Pediatrician
+• Dr. Elena Rodriguez - Campus Doctor
 
-SYSTEM FEATURES YOU CAN EXPLAIN:
-1. Medical Dashboard - View health info, upcoming appointments, medical records
-2. Appointments - Book with available doctors, reschedule (if >12 hours away)
-3. Student Profile - View personal info, academic details, emergency contact
-4. Edit Profile - Update all profile fields, auto-generates AUI email
-5. Add Medical Entry - Add allergies, medications, or conditions
-6. Visit History - View past visits with doctors, download reports
-7. Emergency Request - Call emergency services, share location, view procedures
+APPOINTMENT BOOKING:
+When users agree to book an appointment, guide them:
+"Great! Here's how to book an appointment:
+1. Go to the 'Appointments' page from the navigation menu
+2. Select a doctor (I recommend Dr. [name] for your symptoms)
+3. Choose an available date and time
+4. Add a note about your symptoms
+5. Confirm your booking
 
-Be helpful, clear, empathetic, and concise. Keep responses under 200 words unless explaining a complex process. Always respond in English. Use formatting (bullets, numbers) to make instructions clear.
+Would you like me to provide more details about any of our doctors?"
 
-Remember: You GUIDE users to features - you DON'T perform actions for them!"""
+Remember: Provide helpful medical guidance while ALWAYS recommending professional medical evaluation through appointment booking."""
 
-def detect_action_intent(message: str) -> Dict:
-    """Detect if user is asking chatbot to perform an action"""
+def detect_symptom_keywords(message: str) -> Dict:
+    """Detect if user is describing medical symptoms"""
     
-    action_patterns = {
-        "add_medical": [
-            "add my", "add an", "add a", "create a", "create my",
-            "new allergy", "new medication", "new condition",
-            "add allergy", "add medication", "record my"
-        ],
-        "edit_profile": [
-            "change my", "update my", "edit my", "modify my",
-            "change the", "update the", "edit the"
-        ],
-        "book_appointment": [
-            "book", "schedule", "make an appointment", "set up appointment",
-            "see a doctor", "appointment with"
-        ],
-        "delete_entry": [
-            "delete my", "remove my", "delete the", "remove the"
-        ],
-        "emergency": [
-            "call emergency", "emergency now", "help me now",
-            "i need help", "urgent help", "emergency call"
-        ]
+    symptom_keywords = {
+        "headache": ["headache", "head pain", "migraine", "head hurts", "head ache"],
+        "fever": ["fever", "temperature", "hot", "burning up", "chills"],
+        "cold_flu": ["cold", "flu", "cough", "sneeze", "runny nose", "sore throat", "congestion"],
+        "stomach": ["stomach", "nausea", "vomit", "diarrhea", "abdominal pain", "belly", "upset stomach"],
+        "pain": ["pain", "hurts", "ache", "sore", "painful"],
+        "injury": ["injury", "injured", "cut", "bruise", "sprain", "wound", "hurt myself"],
+        "breathing": ["breathing", "breathe", "shortness of breath", "can't breathe", "chest"],
+        "anxiety": ["anxiety", "anxious", "stress", "worried", "panic", "nervous"],
+        "allergy": ["allergy", "allergic", "rash", "itch", "hives", "swelling"]
     }
     
     message_lower = message.lower()
+    detected_symptoms = []
     
-    for action, keywords in action_patterns.items():
+    for symptom_type, keywords in symptom_keywords.items():
         if any(keyword in message_lower for keyword in keywords):
-            return {
-                "is_action_request": True,
-                "action_type": action,
-                "needs_guidance": True
-            }
+            detected_symptoms.append(symptom_type)
     
-    return {"is_action_request": False}
+    return {
+        "has_symptoms": len(detected_symptoms) > 0,
+        "symptom_types": detected_symptoms,
+        "needs_medical_advice": True
+    }
 
 def get_conversation(conversation_id: str) -> List[Dict]:
     """Get or create conversation history"""
@@ -184,77 +177,31 @@ def get_conversation(conversation_id: str) -> List[Dict]:
         conversations[conversation_id] = []
     return conversations[conversation_id]
 
-def get_guidance_reminder(action_type: str) -> str:
-    """Get specific reminder based on action type"""
-    reminders = {
-        "add_medical": "\n⚠️ REMINDER: User wants to add a medical entry. Guide them to 'Add Medical Entry' page - DO NOT say you'll add it yourself!",
-        "edit_profile": "\n⚠️ REMINDER: User wants to edit their profile. Guide them to 'Edit Profile' page - DO NOT say you'll update it yourself!",
-        "book_appointment": "\n⚠️ REMINDER: User wants to book an appointment. Guide them to 'Appointments' page - DO NOT say you'll book it yourself!",
-        "delete_entry": "\n⚠️ REMINDER: User wants to delete an entry. Explain how to do it from Dashboard - DO NOT say you'll delete it yourself!",
-        "emergency": "\n⚠️ CRITICAL: This is an emergency. Direct them to Emergency Request page or emergency numbers IMMEDIATELY!"
-    }
-    return reminders.get(action_type, "")
-
 def ai_reply(message: str, conversation_id: str = "default", user_context: Dict = None) -> Dict:
     """
     Generate AI reply with conversation context using Google Gemini
     """
     if not AI_AVAILABLE or model is None:
-        print(f"⚠️ Using fallback mode for message: {message}")
-        
-        # Enhanced fallback responses
-        fallback_responses = {
-            "hello": "Hello! I'm the CareConnect assistant for Al Akhawayn University. I can help you understand how to use our health center features. How can I guide you today?",
-            "hi": "Hi! I'm here to guide you through CareConnect's features. What would you like to know about?",
-            "appointment": "To book an appointment:\n1. Click 'Appointments' in the navigation\n2. Select a doctor\n3. Choose date and time\n4. Click 'Book Appointment'\n\nThe system will save it to the database!",
-            "book": "I can't book appointments for you, but I'll guide you! Go to the 'Appointments' section and follow the booking steps. Need help understanding any part?",
-            "emergency": "⚠️ FOR EMERGENCIES:\n• Click 'Emergency Request' in navigation\n• Or call 2222 immediately\n• Campus Security: 0535-86-0103\n\nIs this urgent?",
-            "urgent": "⚠️ If this is a medical emergency:\n1. Use the Emergency Request page NOW\n2. Or call 2222\n3. For life-threatening: Call campus security\n\nDon't delay - get help immediately!",
-            "add": "I can't add entries for you, but here's how:\n1. Go to Dashboard\n2. Click 'Add Medical Entry'\n3. Fill in the details\n4. Click Save\n\nWhat type of entry do you need to add?",
-            "profile": "To edit your profile:\n1. Go to 'Student Profile'\n2. Click 'Edit Profile'\n3. Update the fields\n4. Click 'Save Changes'\n\nYour AUI email will auto-update if you change your name!",
-            "help": "I can guide you with:\n• How to book appointments\n• How to add medical records\n• How to update your profile\n• How to use emergency features\n• General health information\n\nWhat would you like to know about?",
-            "records": "To access medical records:\n1. Go to 'Medical Dashboard'\n2. Scroll to 'Medical Information'\n3. View or click 'Add Medical Entry' to add new ones\n\nAll changes save to the database instantly!",
-            "doctor": "To see a doctor:\n1. Go to 'Appointments'\n2. Browse available doctors\n3. Select one and choose time\n4. Book the appointment\n\nWould you like to know about our doctors?",
-            "email": "AUI email format: (first letter).(lastname)@aui.ma\n\nExample: Alexandra Miller → a.miller@aui.ma\n\nYour email auto-updates when you change your name in Edit Profile!",
-            "default": "I'm here to guide you through CareConnect! I can explain:\n• How to use appointments\n• How to manage medical records\n• How to update your profile\n• Emergency procedures\n\nWhat would you like to know?"
-        }
-        
-        message_lower = message.lower()
-        reply = fallback_responses["default"]
-        
-        # Match keywords to responses
-        for keyword, response in fallback_responses.items():
-            if keyword in message_lower:
-                reply = response
-                break
-        
-        # Check for action intent even in fallback
-        action_check = detect_action_intent(message)
-        if action_check["is_action_request"]:
-            reply += "\n\nNote: I can guide you through the process, but I can't perform actions for you. I'll show you exactly how to do it yourself!"
-        
         return {
-            "reply": reply,
+            "reply": "I'm currently in limited mode. Please make sure GOOGLE_API_KEY is set in your .env file for full functionality. However, I can still help you book appointments or access emergency services!",
             "conversation_id": conversation_id,
-            "mode": "fallback",
-            "note": "⚠️ Limited mode - Add GOOGLE_API_KEY to .env for full AI features."
+            "mode": "fallback"
         }
     
     try:
-        # Check for action intent
-        action_check = detect_action_intent(message)
+        # Check for symptoms
+        symptom_check = detect_symptom_keywords(message)
         
         # Get conversation history
         conversation = get_conversation(conversation_id)
         
         # Build full prompt with context
-        full_prompt = SYSTEM_PROMPT
+        full_prompt = SYSTEM_PROMPT + "\n\n"
         
-        # Add action reminder if needed
-        if action_check["is_action_request"]:
-            full_prompt += get_guidance_reminder(action_check["action_type"])
-        
-        full_prompt += "\n\n"
+        # Add symptom detection context
+        if symptom_check["has_symptoms"]:
+            full_prompt += f"⚠️ USER IS DESCRIBING SYMPTOMS: {', '.join(symptom_check['symptom_types'])}\n"
+            full_prompt += "Provide medical advice AND recommend booking an appointment.\n\n"
         
         # Add conversation history
         if conversation:
@@ -272,13 +219,13 @@ def ai_reply(message: str, conversation_id: str = "default", user_context: Dict 
             full_prompt += "\n"
         
         # Add current message
-        full_prompt += f"User's message: {message}\n\nYour response (remember - GUIDE, don't act!):"
+        full_prompt += f"User's message: {message}\n\nYour response:"
         
         # Call Google Gemini API
         response = model.generate_content(
             full_prompt,
             generation_config=genai.types.GenerationConfig(
-                max_output_tokens=400,
+                max_output_tokens=600,  # Increased for medical advice
                 temperature=0.7,
             ),
             safety_settings=[
@@ -316,52 +263,16 @@ def ai_reply(message: str, conversation_id: str = "default", user_context: Dict 
             "reply": reply,
             "conversation_id": conversation_id,
             "model": "gemini-2.0-flash-exp",
-            "action_detected": action_check["is_action_request"],
-            "action_type": action_check.get("action_type") if action_check["is_action_request"] else None
+            "has_symptoms": symptom_check["has_symptoms"],
+            "symptom_types": symptom_check.get("symptom_types", [])
         }
     
     except Exception as e:
         print(f"❌ Gemini API error: {e}")
-        print(f"⚠️ Falling back to keyword-based responses")
-
-        # Use the same fallback logic as when AI_AVAILABLE is False
-        message_lower = message.lower()
-
-        fallback_responses = {
-            "hello": "Hello! I'm the CareConnect assistant. I can help you understand how to use our health center features. How can I guide you today?",
-            "hi": "Hi! I'm here to guide you through CareConnect's features. What would you like to know about?",
-            "appointment": "To book an appointment:\n1. Click 'Appointments' in the navigation\n2. Select a doctor\n3. Choose date and time\n4. Click 'Book Appointment'\n\nThe system will save it to the database!",
-            "book": "I can't book appointments for you, but I'll guide you! Go to the 'Appointments' section and follow the booking steps. Need help understanding any part?",
-            "emergency": "⚠️ FOR EMERGENCIES:\n• Click 'Emergency Request' in navigation\n• Or call 2222 immediately\n• Campus Security: 0535-86-0103\n\nIs this urgent?",
-            "urgent": "⚠️ If this is a medical emergency:\n1. Use the Emergency Request page NOW\n2. Or call 2222\n3. For life-threatening: Call campus security\n\nDon't delay - get help immediately!",
-            "add": "I can't add entries for you, but here's how:\n1. Go to Dashboard\n2. Click 'Add Medical Entry'\n3. Fill in the details\n4. Click Save\n\nWhat type of entry do you need to add?",
-            "profile": "To edit your profile:\n1. Go to 'Student Profile'\n2. Click 'Edit Profile'\n3. Update the fields\n4. Click 'Save Changes'\n\nYour AUI email will auto-update if you change your name!",
-            "help": "I can guide you with:\n• How to book appointments\n• How to add medical records\n• How to update your profile\n• How to use emergency features\n• General health information\n\nWhat would you like to know about?",
-            "records": "To access medical records:\n1. Go to 'Medical Dashboard'\n2. Scroll to 'Medical Information'\n3. View or click 'Add Medical Entry' to add new ones\n\nAll changes save to the database instantly!",
-            "doctor": "To see a doctor:\n1. Go to 'Appointments'\n2. Browse available doctors\n3. Select one and choose time\n4. Book the appointment\n\nWould you like to know about our doctors?",
-            "visit": "To view your visit history:\n1. Go to 'Visit History' from the navigation\n2. View all your past medical visits\n3. Filter by status (upcoming/completed/cancelled)\n4. Click 'View Full Report' for details",
-            "email": "AUI email format: (first letter).(lastname)@aui.ma\n\nExample: Alexandra Miller → a.miller@aui.ma\n\nYour email auto-updates when you change your name in Edit Profile!",
-            "thanks": "You're welcome! Is there anything else I can help you with?",
-            "thank": "You're welcome! Feel free to ask if you need more help!",
-            "bye": "Goodbye! Stay healthy! Feel free to chat anytime you need guidance. 👋",
-            "default": "I'm here to guide you through CareConnect! I can explain:\n• How to use appointments\n• How to manage medical records\n• How to update your profile\n• Emergency procedures\n\nWhat would you like to know?"
-        }
-
-        reply = fallback_responses["default"]
-
-        # Match keywords to responses
-        for keyword, response in fallback_responses.items():
-            if keyword in message_lower:
-                reply = response
-                break
-
-        # Check for action intent
-        action_check = detect_action_intent(message)
-        if action_check["is_action_request"]:
-            reply += "\n\n💡 Note: I can guide you through the process, but I can't perform actions for you. I'll show you exactly how to do it yourself!"
-
+        
+        # Provide a helpful fallback
         return {
-            "reply": reply,
+            "reply": "I'm having trouble connecting right now. If you're experiencing medical symptoms, I recommend:\n\n1. 📅 Book an appointment with a doctor (go to Appointments page)\n2. 🚨 For emergencies, use the Emergency Request page or call 2222\n3. 💊 For general health questions, our doctors are available during clinic hours\n\nHow else can I help you?",
             "conversation_id": conversation_id,
             "mode": "error_fallback"
         }
@@ -397,232 +308,3 @@ def analyze_urgency(message: str) -> Dict:
         "recommendation": recommendation,
         "detected_keywords": [kw for kw in emergency_keywords if kw in message_lower]
     }
-
-def get_quick_help(topic: str) -> str:
-    """Get quick help for common topics"""
-    help_topics = {
-        "appointments": """📅 BOOKING APPOINTMENTS:
-1. Click 'Appointments' in navigation
-2. Browse available doctors
-3. Select doctor and time slot
-4. Click 'Book Appointment'
-5. Confirm booking
-
-✅ Saves to database immediately
-⏰ Can reschedule if >12 hours away""",
-
-        "medical_records": """📋 MANAGING MEDICAL RECORDS:
-1. Go to 'Medical Dashboard'
-2. View existing records in 'Medical Information' section
-3. Click 'Add Medical Entry' to add new
-4. Select type: Allergy, Medication, or Condition
-5. Fill details and save
-
-✅ All changes saved to database
-🗑️ Can delete entries anytime""",
-
-        "profile": """👤 EDITING PROFILE:
-1. Go to 'Student Profile'
-2. Click 'Edit Profile' button
-3. Update any field (name, phone, department, etc.)
-4. Click 'Save Changes'
-
-✨ Special features:
-• Email auto-updates if you change name
-• Format: (first letter).(lastname)@aui.ma
-• Emergency contact also editable""",
-
-        "emergency": """🚨 EMERGENCY PROCEDURES:
-For immediate help:
-1. Click 'Emergency Request' in navigation
-2. Or call 2222 directly
-3. Campus Security: 0535-86-0103
-4. 24/7 Hotline: 0535 86 2222
-
-Features:
-• One-click emergency calling
-• GPS location sharing
-• Direct contact with campus doctors""",
-
-        "email": """📧 AUI EMAIL SYSTEM:
-Format: (first letter).(last name)@aui.ma
-
-Examples:
-• Alexandra Miller → a.miller@aui.ma
-• John Smith → j.smith@aui.ma
-
-Auto-generation:
-• Email updates when you change your name
-• Go to Edit Profile → Change name → Save
-• New email generated automatically!"""
-    }
-    
-    return help_topics.get(topic.lower(), "Topic not found. Ask me about: appointments, medical_records, profile, emergency, or email")
-
-# Optional: Rate limiting for safety
-conversation_counts = {}
-
-def check_rate_limit(conversation_id: str, limit: int = 50) -> bool:
-    """Check if conversation has exceeded rate limit"""
-    if conversation_id not in conversation_counts:
-        conversation_counts[conversation_id] = 0
-    
-    conversation_counts[conversation_id] += 1
-    
-    if conversation_counts[conversation_id] > limit:
-        return False
-    
-    return True
-
-
-def get_health_advice(symptom: str) -> str:
-    """
-    Provide general health advice based on symptoms.
-    This is NOT a medical diagnosis - always recommend professional help.
-    """
-    symptom_lower = symptom.lower()
-    
-    # Common symptom advice
-    advice_database = {
-        "headache": """
-🩺 Headache Guidance:
-• Rest in a quiet, dark room
-• Stay hydrated - drink water
-• Avoid screen time
-• Try a cold compress on forehead
-
-⚠️ Seek immediate help if:
-• Sudden severe headache
-• Fever with stiff neck
-• Confusion or vision changes
-• After head injury
-
-📍 Visit Health Center if persists >24 hours
-""",
-        
-        "fever": """
-🌡️ Fever Guidance:
-• Rest and stay hydrated
-• Take temperature regularly
-• Light clothing to help cool down
-• Over-the-counter fever reducers (if no allergies)
-
-⚠️ Seek immediate help if:
-• Temperature >39.4°C (103°F)
-• Fever lasting >3 days
-• Difficulty breathing
-• Severe headache or stiff neck
-
-📍 Call Health Center: 0535-86-0104
-""",
-        
-        "cold": """
-🤧 Cold/Flu Guidance:
-• Rest as much as possible
-• Drink plenty of fluids
-• Warm liquids (tea, soup) can help
-• Saltwater gargle for sore throat
-
-⚠️ Seek help if:
-• Symptoms worsen after a week
-• High fever develops
-• Difficulty breathing
-• Chest pain
-
-📍 Schedule appointment if needed
-""",
-        
-        "stomach": """
-🤢 Stomach Issues Guidance:
-• Stay hydrated with small sips
-• BRAT diet (Banana, Rice, Applesauce, Toast)
-• Avoid dairy, caffeine, alcohol
-• Rest your stomach
-
-⚠️ Seek immediate help if:
-• Severe abdominal pain
-• Blood in vomit or stool
-• Signs of dehydration
-• Fever >38.5°C
-
-📍 Health Center available for consultation
-""",
-        
-        "anxiety": """
-💭 Anxiety/Stress Guidance:
-• Deep breathing exercises (4-7-8 technique)
-• Take a short walk
-• Talk to someone you trust
-• Limit caffeine intake
-
-📞 Support Resources:
-• Campus Counseling Services
-• 24/7 Hotline: 0535 86 2222
-• Health Center can refer to specialists
-
-Remember: It's okay to ask for help! 💚
-""",
-        
-        "injury": """
-🩹 Minor Injury Guidance:
-• RICE: Rest, Ice, Compression, Elevation
-• Clean any wounds with water
-• Apply antiseptic if available
-• Monitor for swelling/infection
-
-⚠️ Seek IMMEDIATE help if:
-• Heavy bleeding
-• Possible fracture
-• Head/neck/spine injury
-• Loss of consciousness
-
-🚨 Emergency: 2222
-📍 Health Center: 0535-86-0104
-""",
-        
-        "allergic": """
-🌸 Allergy Guidance:
-• Identify and avoid triggers
-• Antihistamines may help (check with doctor first)
-• Cool compress for itchy eyes
-• Nasal rinse for congestion
-
-⚠️ EMERGENCY - Call 2222 if:
-• Difficulty breathing
-• Swelling of face/throat
-• Dizziness or fainting
-• This could be anaphylaxis!
-
-📍 Update your allergy info in your profile
-"""
-    }
-    
-    # Find matching advice
-    for keyword, advice in advice_database.items():
-        if keyword in symptom_lower:
-            return advice
-    
-    # Default response
-    return f"""
-🩺 Health Guidance for: "{symptom}"
-
-I can provide general wellness information, but I'm not able to diagnose medical conditions.
-
-**General Recommendations:**
-• Monitor your symptoms
-• Rest and stay hydrated
-• Keep track of when symptoms started
-
-**When to Seek Help:**
-• Symptoms worsen or persist
-• You're concerned about your health
-• Any emergency symptoms
-
-📍 **Health Center:** 0535-86-0104
-🚨 **Emergency:** 2222
-
-Would you like me to help you:
-1. Book an appointment?
-2. Find emergency contacts?
-3. Update your medical records?
-"""

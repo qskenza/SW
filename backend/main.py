@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime, timedelta, date
 import jwt
 from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
@@ -141,6 +141,18 @@ class EmergencyRequestCreate(BaseModel):
     location: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+
+class DoctorAvailabilityCreate(BaseModel):
+    day_of_week: int  # 0=Monday, 6=Sunday
+    start_time: str   # "09:00 AM"
+    end_time: str     # "05:00 PM"
+    slot_duration: int = 30  # minutes
+
+class DoctorAvailabilityUpdate(BaseModel):
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
+    slot_duration: Optional[int] = None
+    is_active: Optional[bool] = None
 
 
 # ---------------------------------------------------------
@@ -1076,6 +1088,307 @@ def get_doctor_schedule(
         ]
     }
 
+@app.get("/doctor/availability")
+def get_doctor_availability(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get doctor's availability schedule"""
+    if current_user.role != 'doctor':
+        raise HTTPException(403, "Access denied. Doctors only.")
+    
+    doctor = db.query(models.Doctor).filter(
+        models.Doctor.user_id == current_user.id
+    ).first()
+    
+    if not doctor:
+        raise HTTPException(404, "Doctor profile not found")
+    
+    availability = db.query(models.DoctorAvailability).filter(
+        models.DoctorAvailability.doctor_id == doctor.id,
+        models.DoctorAvailability.is_active == True
+    ).order_by(models.DoctorAvailability.day_of_week).all()
+    
+    return [
+        {
+            "id": a.id,
+            "day_of_week": a.day_of_week,
+            "day_name": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][a.day_of_week],
+            "start_time": a.start_time,
+            "end_time": a.end_time,
+            "slot_duration": a.slot_duration,
+            "is_active": a.is_active
+        }
+        for a in availability
+    ]
+
+
+@app.post("/doctor/availability")
+def create_doctor_availability(
+    availability: DoctorAvailabilityCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Create new availability slot for doctor"""
+    if current_user.role != 'doctor':
+        raise HTTPException(403, "Access denied. Doctors only.")
+    
+    doctor = db.query(models.Doctor).filter(
+        models.Doctor.user_id == current_user.id
+    ).first()
+    
+    if not doctor:
+        raise HTTPException(404, "Doctor profile not found")
+    
+    # Validate day_of_week
+    if availability.day_of_week < 0 or availability.day_of_week > 6:
+        raise HTTPException(400, "day_of_week must be between 0 (Monday) and 6 (Sunday)")
+    
+    # Check if availability already exists for this day
+    existing = db.query(models.DoctorAvailability).filter(
+        models.DoctorAvailability.doctor_id == doctor.id,
+        models.DoctorAvailability.day_of_week == availability.day_of_week,
+        models.DoctorAvailability.is_active == True
+    ).first()
+    
+    if existing:
+        raise HTTPException(400, f"Availability already exists for this day. Update or delete it first.")
+    
+    # Create new availability
+    db_availability = models.DoctorAvailability(
+        doctor_id=doctor.id,
+        day_of_week=availability.day_of_week,
+        start_time=availability.start_time,
+        end_time=availability.end_time,
+        slot_duration=availability.slot_duration
+    )
+    
+    db.add(db_availability)
+    db.commit()
+    db.refresh(db_availability)
+    
+    return {
+        "message": "Availability created successfully",
+        "id": db_availability.id,
+        "day": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][db_availability.day_of_week]
+    }
+
+
+@app.put("/doctor/availability/{availability_id}")
+def update_doctor_availability(
+    availability_id: int,
+    updates: DoctorAvailabilityUpdate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update doctor availability"""
+    if current_user.role != 'doctor':
+        raise HTTPException(403, "Access denied. Doctors only.")
+    
+    doctor = db.query(models.Doctor).filter(
+        models.Doctor.user_id == current_user.id
+    ).first()
+    
+    if not doctor:
+        raise HTTPException(404, "Doctor profile not found")
+    
+    availability = db.query(models.DoctorAvailability).filter(
+        models.DoctorAvailability.id == availability_id,
+        models.DoctorAvailability.doctor_id == doctor.id
+    ).first()
+    
+    if not availability:
+        raise HTTPException(404, "Availability not found")
+    
+    # Update fields
+    if updates.start_time:
+        availability.start_time = updates.start_time
+    if updates.end_time:
+        availability.end_time = updates.end_time
+    if updates.slot_duration:
+        availability.slot_duration = updates.slot_duration
+    if updates.is_active is not None:
+        availability.is_active = updates.is_active
+    
+    availability.updated_at = datetime.utcnow()
+    db.commit()
+    
+    return {"message": "Availability updated successfully"}
+
+
+@app.delete("/doctor/availability/{availability_id}")
+def delete_doctor_availability(
+    availability_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Delete doctor availability"""
+    if current_user.role != 'doctor':
+        raise HTTPException(403, "Access denied. Doctors only.")
+    
+    doctor = db.query(models.Doctor).filter(
+        models.Doctor.user_id == current_user.id
+    ).first()
+    
+    if not doctor:
+        raise HTTPException(404, "Doctor profile not found")
+    
+    availability = db.query(models.DoctorAvailability).filter(
+        models.DoctorAvailability.id == availability_id,
+        models.DoctorAvailability.doctor_id == doctor.id
+    ).first()
+    
+    if not availability:
+        raise HTTPException(404, "Availability not found")
+    
+    db.delete(availability)
+    db.commit()
+    
+    return {"message": "Availability deleted successfully"}
+
+
+def parse_time_to_minutes(time_str: str) -> int:
+    """Convert time string like '09:00 AM' to minutes since midnight"""
+    try:
+        time_obj = datetime.strptime(time_str, "%I:%M %p")
+        return time_obj.hour * 60 + time_obj.minute
+    except:
+        return 0
+
+
+def minutes_to_time_str(minutes: int) -> str:
+    """Convert minutes since midnight to time string like '09:00 AM'"""
+    hours = minutes // 60
+    mins = minutes % 60
+    period = "AM" if hours < 12 else "PM"
+    display_hours = hours if hours <= 12 else hours - 12
+    if display_hours == 0:
+        display_hours = 12
+    return f"{display_hours:02d}:{mins:02d} {period}"
+
+
+@app.get("/doctors/{doctor_id}/available-slots")
+def get_available_slots(
+    doctor_id: int,
+    date: str,
+    db: Session = Depends(get_db),
+):
+    """Get available time slots for a doctor on a specific date based on their availability schedule"""
+    
+    # Verify doctor exists
+    doctor = db.query(models.Doctor).filter(
+        models.Doctor.id == doctor_id,
+        models.Doctor.is_available == True
+    ).first()
+
+    if not doctor:
+        raise HTTPException(404, "Doctor not found or not available")
+
+    # Parse the date
+    try:
+        appointment_date = datetime.strptime(date, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(400, "Invalid date format. Use YYYY-MM-DD")
+
+    # Get day of week (0=Monday, 6=Sunday)
+    day_of_week = appointment_date.weekday()
+
+    # Get doctor's availability for this day
+    availability = db.query(models.DoctorAvailability).filter(
+        models.DoctorAvailability.doctor_id == doctor_id,
+        models.DoctorAvailability.day_of_week == day_of_week,
+        models.DoctorAvailability.is_active == True
+    ).first()
+
+    if not availability:
+        return {
+            "doctor_id": doctor_id,
+            "doctor_name": doctor.name,
+            "date": date,
+            "available_slots": [],
+            "booked_slots": [],
+            "message": f"Doctor is not available on {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][day_of_week]}"
+        }
+
+    # Generate time slots based on doctor's availability
+    start_minutes = parse_time_to_minutes(availability.start_time)
+    end_minutes = parse_time_to_minutes(availability.end_time)
+    slot_duration = availability.slot_duration
+
+    all_slots = []
+    current_minutes = start_minutes
+    
+    while current_minutes + slot_duration <= end_minutes:
+        slot_time = minutes_to_time_str(current_minutes)
+        all_slots.append(slot_time)
+        current_minutes += slot_duration
+
+    # Get booked appointments for this doctor on this date
+    booked_appointments = db.query(models.Appointment).filter(
+        models.Appointment.doctor_id == doctor_id,
+        models.Appointment.appointment_date == appointment_date,
+        models.Appointment.status != "cancelled"
+    ).all()
+
+    booked_slots = [apt.appointment_time for apt in booked_appointments]
+
+    # Filter out booked slots
+    available_slots = [slot for slot in all_slots if slot not in booked_slots]
+
+    return {
+        "doctor_id": doctor_id,
+        "doctor_name": doctor.name,
+        "date": date,
+        "day_of_week": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][day_of_week],
+        "available_slots": available_slots,
+        "booked_slots": booked_slots,
+        "working_hours": f"{availability.start_time} - {availability.end_time}",
+        "slot_duration": availability.slot_duration
+    }
+
+
+@app.get("/doctors/{doctor_id}/availability-summary")
+def get_doctor_availability_summary(
+    doctor_id: int,
+    db: Session = Depends(get_db),
+):
+    """Get summary of doctor's weekly availability"""
+    
+    doctor = db.query(models.Doctor).filter(
+        models.Doctor.id == doctor_id
+    ).first()
+    
+    if not doctor:
+        raise HTTPException(404, "Doctor not found")
+    
+    availability = db.query(models.DoctorAvailability).filter(
+        models.DoctorAvailability.doctor_id == doctor_id,
+        models.DoctorAvailability.is_active == True
+    ).order_by(models.DoctorAvailability.day_of_week).all()
+    
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    
+    schedule = {}
+    for day_num, day_name in enumerate(days):
+        day_availability = next((a for a in availability if a.day_of_week == day_num), None)
+        if day_availability:
+            schedule[day_name] = {
+                "available": True,
+                "hours": f"{day_availability.start_time} - {day_availability.end_time}",
+                "slot_duration": day_availability.slot_duration
+            }
+        else:
+            schedule[day_name] = {
+                "available": False,
+                "hours": "Not available",
+                "slot_duration": None
+            }
+    
+    return {
+        "doctor_id": doctor_id,
+        "doctor_name": doctor.name,
+        "schedule": schedule
+    }
 
 # ---------------------------------------------------------
 # CHATBOT ENDPOINTS

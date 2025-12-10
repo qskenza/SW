@@ -163,6 +163,45 @@ def seed_db():
         for doctor in doctors:
             db.add(doctor)
         
+        # ✅ ADD DEFAULT AVAILABILITY FOR DOCTORS
+        print("📅 Creating default doctor availability schedules...")
+        
+        # Dr. Sarah Chen - Available Mon-Fri, 9 AM - 5 PM
+        for day in range(5):  # Monday to Friday (0-4)
+            availability = models.DoctorAvailability(
+                doctor_id=doctors[0].id,
+                day_of_week=day,
+                start_time="09:00 AM",
+                end_time="05:00 PM",
+                slot_duration=30
+            )
+            db.add(availability)
+        
+        # Dr. Emily Carter - Available Mon-Thu, 10 AM - 4 PM
+        for day in range(4):  # Monday to Thursday (0-3)
+            availability = models.DoctorAvailability(
+                doctor_id=doctors[1].id,
+                day_of_week=day,
+                start_time="10:00 AM",
+                end_time="04:00 PM",
+                slot_duration=30
+            )
+            db.add(availability)
+        
+        # Dr. Elena Rodriguez - Available Tue-Sat, 8 AM - 3 PM
+        for day in [1, 2, 3, 4, 5]:  # Tuesday to Saturday (1-5)
+            availability = models.DoctorAvailability(
+                doctor_id=doctors[2].id,
+                day_of_week=day,
+                start_time="08:00 AM",
+                end_time="03:00 PM",
+                slot_duration=45  # 45-minute slots
+            )
+            db.add(availability)
+        
+        db.commit()
+        print("✅ Doctor availability schedules created")
+        
         db.flush()
         
         # ✅ ADDED: Sample visits for Alexandra

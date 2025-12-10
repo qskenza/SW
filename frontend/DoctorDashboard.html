@@ -828,43 +828,164 @@
             </div>
 
             <div class="tab-content" id="availability-tab">
-                <h3 class="tab-title">Working Hours & Availability</h3>
+                <h3 class="tab-title">Manage Your Availability</h3>
                 
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Monday</label>
-                        <input type="text" class="form-input" value="9:00 AM - 5:00 PM" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Tuesday</label>
-                        <input type="text" class="form-input" value="9:00 AM - 5:00 PM" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Wednesday</label>
-                        <input type="text" class="form-input" value="9:00 AM - 5:00 PM" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Thursday</label>
-                        <input type="text" class="form-input" value="9:00 AM - 5:00 PM" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Friday</label>
-                        <input type="text" class="form-input" value="9:00 AM - 3:00 PM" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Saturday</label>
-                        <input type="text" class="form-input" value="Emergency Only" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Sunday</label>
-                        <input type="text" class="form-input" value="Emergency Only" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Appointment Duration</label>
-                        <input type="text" class="form-input" value="30 minutes" readonly>
-                    </div>
+                <div class="availability-info-box" style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;">
+                    <p style="margin: 0; color: #1565c0;">
+                        <strong>📅 Set your weekly schedule:</strong> Define when you're available for appointments. 
+                        Students will only be able to book during these times.
+                    </p>
+                </div>
+
+                <!-- Current Schedule Display -->
+                <div id="currentSchedule" style="margin-bottom: 2rem;">
+                    <div class="loading">Loading your schedule...</div>
+                </div>
+
+                <!-- Add Availability Form -->
+                <div class="availability-form-card" style="background: #f8fff8; padding: 2rem; border-radius: 12px; border: 2px solid #e8f5e8; margin-top: 2rem;">
+                    <h4 style="color: #2e7d32; margin-bottom: 1.5rem; font-size: 1.2rem;">Add New Availability</h4>
+                    
+                    <form id="availabilityForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Day of Week *</label>
+                                <select id="dayOfWeek" class="form-select" required>
+                                    <option value="">Select Day</option>
+                                    <option value="0">Monday</option>
+                                    <option value="1">Tuesday</option>
+                                    <option value="2">Wednesday</option>
+                                    <option value="3">Thursday</option>
+                                    <option value="4">Friday</option>
+                                    <option value="5">Saturday</option>
+                                    <option value="6">Sunday</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Slot Duration *</label>
+                                <select id="slotDuration" class="form-select" required>
+                                    <option value="30">30 minutes</option>
+                                    <option value="45">45 minutes</option>
+                                    <option value="60">60 minutes</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Start Time *</label>
+                                <input type="time" id="startTime" class="form-input" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">End Time *</label>
+                                <input type="time" id="endTime" class="form-input" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="submit-btn" style="background: #4caf50; color: white; border: none; padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 1rem;">
+                            Add Availability
+                        </button>
+                    </form>
                 </div>
             </div>
+
+            <style>
+            .schedule-grid {
+                display: grid;
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .schedule-day-card {
+                background: white;
+                border-radius: 10px;
+                padding: 1.5rem;
+                border-left: 4px solid #4caf50;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                transition: all 0.3s ease;
+            }
+
+            .schedule-day-card:hover {
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                transform: translateY(-2px);
+            }
+
+            .schedule-day-card.unavailable {
+                border-left-color: #ccc;
+                opacity: 0.6;
+            }
+
+            .day-info {
+                flex: 1;
+            }
+
+            .day-name {
+                font-size: 1.2rem;
+                font-weight: 600;
+                color: #2e7d32;
+                margin-bottom: 0.3rem;
+            }
+
+            .day-hours {
+                color: #666;
+                font-size: 1rem;
+            }
+
+            .day-hours .status-badge {
+                display: inline-block;
+                padding: 0.3rem 0.8rem;
+                background: #e8f5e8;
+                color: #2e7d32;
+                border-radius: 12px;
+                font-size: 0.85rem;
+                margin-left: 0.5rem;
+                font-weight: 600;
+            }
+
+            .day-actions {
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            .edit-availability-btn,
+            .delete-availability-btn {
+                padding: 0.6rem 1rem;
+                border: none;
+                border-radius: 6px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-size: 0.9rem;
+            }
+
+            .edit-availability-btn {
+                background: #2196f3;
+                color: white;
+            }
+
+            .edit-availability-btn:hover {
+                background: #1976d2;
+            }
+
+            .delete-availability-btn {
+                background: #ffebee;
+                color: #d32f2f;
+                border: 1px solid #ffcdd2;
+            }
+
+            .delete-availability-btn:hover {
+                background: #d32f2f;
+                color: white;
+            }
+
+            .not-available {
+                color: #999;
+                font-style: italic;
+            }
+            </style>
 
             <div class="tab-content" id="quickactions-tab">
                 <h3 class="tab-title">Quick Actions</h3>
@@ -1227,6 +1348,192 @@
             sessionStorage.clear();
             window.location.href = 'Login.html';
         }
+
+    </script>
+    <script>
+        // Add these functions to DoctorDashboard.html
+
+        async function loadDoctorSchedule() {
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/doctor/availability`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load schedule');
+                }
+
+                const availability = await response.json();
+                displaySchedule(availability);
+
+            } catch (error) {
+                console.error('Error loading schedule:', error);
+                document.getElementById('currentSchedule').innerHTML = `
+                    <div style="padding: 1rem; text-align: center; color: #d32f2f;">
+                        Failed to load schedule. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        function displaySchedule(availability) {
+            const container = document.getElementById('currentSchedule');
+            const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+            
+            let html = '<div class="schedule-grid">';
+            
+            days.forEach((dayName, dayNum) => {
+                const dayAvailability = availability.find(a => a.day_of_week === dayNum);
+                
+                if (dayAvailability) {
+                    html += `
+                        <div class="schedule-day-card" data-id="${dayAvailability.id}">
+                            <div class="day-info">
+                                <div class="day-name">${dayName}</div>
+                                <div class="day-hours">
+                                    ${dayAvailability.start_time} - ${dayAvailability.end_time}
+                                    <span class="status-badge">${dayAvailability.slot_duration} min slots</span>
+                                </div>
+                            </div>
+                            <div class="day-actions">
+                                <button class="edit-availability-btn" onclick="editAvailability(${dayAvailability.id}, '${dayName}', '${dayAvailability.start_time}', '${dayAvailability.end_time}', ${dayAvailability.slot_duration})">
+                                    ✏️ Edit
+                                </button>
+                                <button class="delete-availability-btn" onclick="deleteAvailability(${dayAvailability.id}, '${dayName}')">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="schedule-day-card unavailable">
+                            <div class="day-info">
+                                <div class="day-name">${dayName}</div>
+                                <div class="day-hours not-available">Not available</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Handle form submission
+        document.getElementById('availabilityForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const dayOfWeek = parseInt(document.getElementById('dayOfWeek').value);
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const slotDuration = parseInt(document.getElementById('slotDuration').value);
+            
+            if (!startTime || !endTime) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            // Convert 24h to 12h format with AM/PM
+            const startTime12h = convertTo12Hour(startTime);
+            const endTime12h = convertTo12Hour(endTime);
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Adding...';
+            
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/doctor/availability`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        day_of_week: dayOfWeek,
+                        start_time: startTime12h,
+                        end_time: endTime12h,
+                        slot_duration: slotDuration
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert(`✅ Availability added for ${data.day}!`);
+                    
+                    // Reset form
+                    this.reset();
+                    
+                    // Reload schedule
+                    await loadDoctorSchedule();
+                } else {
+                    alert(`❌ Error: ${data.detail || 'Failed to add availability'}`);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Network error. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add Availability';
+            }
+        });
+
+        async function deleteAvailability(availabilityId, dayName) {
+            if (!confirm(`Are you sure you want to remove your availability for ${dayName}?`)) {
+                return;
+            }
+            
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/doctor/availability/${availabilityId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    alert(`✅ Availability removed for ${dayName}`);
+                    await loadDoctorSchedule();
+                } else {
+                    const data = await response.json();
+                    alert(`❌ Error: ${data.detail || 'Failed to delete'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Network error. Please try again.');
+            }
+        }
+
+        function convertTo12Hour(time24) {
+            const [hours, minutes] = time24.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const hour12 = hour % 12 || 12;
+            return `${hour12.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+        }
+
+        function convertTo24Hour(time12) {
+            const [time, period] = time12.split(' ');
+            let [hours, minutes] = time.split(':');
+            hours = parseInt(hours);
+            
+            if (period === 'PM' && hours !== 12) {
+                hours += 12;
+            } else if (period === 'AM' && hours === 12) {
+                hours = 0;
+            }
+            
+            return `${hours.toString().padStart(2, '0')}:${minutes}`;
+        }
+
+        // Load schedule when availability tab is opened
+        document.querySelector('[data-tab="availability"]').addEventListener('click', function() {
+            loadDoctorSchedule();
+        });
     </script>
 </body>
 </html>
