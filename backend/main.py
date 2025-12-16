@@ -6,23 +6,25 @@ from typing import Optional, List
 from datetime import datetime, timedelta, date
 import jwt
 
-# Support multiple PyJWT versions - import from jwt directly (not jwt.exceptions)
+# Support all PyJWT versions - create our own exception classes if needed
 try:
-    # Try importing from jwt package directly (works in most versions)
-    from jwt import InvalidTokenError, ExpiredSignatureError
-except ImportError:
+    from jwt import ExpiredSignatureError
+except (ImportError, AttributeError):
+    # Create our own if not available
+    class ExpiredSignatureError(Exception):
+        """Token has expired"""
+        pass
+
+try:
+    from jwt import InvalidTokenError
+except (ImportError, AttributeError):
     try:
-        # PyJWT < 2.0 uses DecodeError
-        from jwt import DecodeError as InvalidTokenError, ExpiredSignatureError
-    except ImportError:
-        # Fallback: use base PyJWTError
-        from jwt import PyJWTError as InvalidTokenError
-        try:
-            from jwt import ExpiredSignatureError
-        except ImportError:
-            # Create a dummy exception if nothing works
-            class ExpiredSignatureError(Exception):
-                pass
+        from jwt import DecodeError as InvalidTokenError
+    except (ImportError, AttributeError):
+        # Create our own if not available
+        class InvalidTokenError(Exception):
+            """Invalid token error"""
+            pass
 
 import bcrypt
 import os
@@ -207,6 +209,11 @@ def get_current_user(
     except ExpiredSignatureError:
         raise HTTPException(401, "Token expired")
     except InvalidTokenError:
+        raise HTTPException(401, "Invalid token")
+    except Exception as e:
+        # Catch any other JWT-related exceptions
+        if 'expired' in str(e).lower():
+            raise HTTPException(401, "Token expired")
         raise HTTPException(401, "Invalid token")
 
 
