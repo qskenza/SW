@@ -178,6 +178,22 @@ class DoctorAvailabilityUpdate(BaseModel):
     slot_duration: Optional[int] = None
     is_active: Optional[bool] = None
 
+class ProfessionalExperienceCreate(BaseModel):
+    position: str
+    institution: str
+    start_date: str  # Format: "YYYY-MM-DD"
+    end_date: Optional[str] = None  # Format: "YYYY-MM-DD", None if current
+    description: Optional[str] = None
+    is_current: bool = False
+
+class ProfessionalExperienceUpdate(BaseModel):
+    position: Optional[str] = None
+    institution: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    description: Optional[str] = None
+    is_current: Optional[bool] = None
+
 
 # ---------------------------------------------------------
 # TOKEN & AUTH
@@ -684,9 +700,8 @@ def get_all_visits(
 # ---------------------------------------------------------
 @app.get("/doctors")
 def get_doctors(db: Session = Depends(get_db)):
-    doctors = db.query(models.Doctor).filter(
-        models.Doctor.is_available == True
-    ).all()
+    # Get ALL registered doctors, not just available ones
+    doctors = db.query(models.Doctor).all()
 
     return [
         {
@@ -697,10 +712,191 @@ def get_doctors(db: Session = Depends(get_db)):
             "reviews": d.reviews_count,
             "avatar": d.avatar,
             "email": d.email,
-            "phone": d.phone
+            "phone": d.phone,
+            "is_available": d.is_available
         }
         for d in doctors
     ]
+
+
+# ---------------------------------------------------------
+# PROFESSIONAL EXPERIENCE
+# ---------------------------------------------------------
+@app.get("/doctor/professional-experience")
+def get_my_professional_experience(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get current doctor's professional experience"""
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    experiences = db.query(models.ProfessionalExperience).filter(
+        models.ProfessionalExperience.doctor_id == doctor.id
+    ).order_by(models.ProfessionalExperience.is_current.desc(), models.ProfessionalExperience.start_date.desc()).all()
+
+    return [
+        {
+            "id": exp.id,
+            "position": exp.position,
+            "institution": exp.institution,
+            "start_date": exp.start_date.isoformat() if exp.start_date else None,
+            "end_date": exp.end_date.isoformat() if exp.end_date else None,
+            "description": exp.description,
+            "is_current": exp.is_current
+        }
+        for exp in experiences
+    ]
+
+
+@app.get("/doctors/{doctor_id}/professional-experience")
+def get_doctor_professional_experience(doctor_id: int, db: Session = Depends(get_db)):
+    """Get professional experience for a specific doctor (public endpoint for students)"""
+    doctor = db.query(models.Doctor).filter(models.Doctor.id == doctor_id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+
+    experiences = db.query(models.ProfessionalExperience).filter(
+        models.ProfessionalExperience.doctor_id == doctor_id
+    ).order_by(models.ProfessionalExperience.is_current.desc(), models.ProfessionalExperience.start_date.desc()).all()
+
+    return [
+        {
+            "id": exp.id,
+            "position": exp.position,
+            "institution": exp.institution,
+            "start_date": exp.start_date.isoformat() if exp.start_date else None,
+            "end_date": exp.end_date.isoformat() if exp.end_date else None,
+            "description": exp.description,
+            "is_current": exp.is_current
+        }
+        for exp in experiences
+    ]
+
+
+@app.post("/doctor/professional-experience")
+def create_professional_experience(
+    experience_data: ProfessionalExperienceCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new professional experience entry"""
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    # Parse dates
+    try:
+        start_date = datetime.strptime(experience_data.start_date, "%Y-%m-%d").date()
+        end_date = datetime.strptime(experience_data.end_date, "%Y-%m-%d").date() if experience_data.end_date else None
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+
+    experience = models.ProfessionalExperience(
+        doctor_id=doctor.id,
+        position=experience_data.position,
+        institution=experience_data.institution,
+        start_date=start_date,
+        end_date=end_date,
+        description=experience_data.description,
+        is_current=experience_data.is_current
+    )
+
+    db.add(experience)
+    db.commit()
+    db.refresh(experience)
+
+    return {
+        "message": "Professional experience added successfully",
+        "id": experience.id,
+        "position": experience.position,
+        "institution": experience.institution,
+        "start_date": experience.start_date.isoformat(),
+        "end_date": experience.end_date.isoformat() if experience.end_date else None,
+        "description": experience.description,
+        "is_current": experience.is_current
+    }
+
+
+@app.put("/doctor/professional-experience/{experience_id}")
+def update_professional_experience(
+    experience_id: int,
+    experience_data: ProfessionalExperienceUpdate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update a professional experience entry"""
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    experience = db.query(models.ProfessionalExperience).filter(
+        models.ProfessionalExperience.id == experience_id,
+        models.ProfessionalExperience.doctor_id == doctor.id
+    ).first()
+
+    if not experience:
+        raise HTTPException(status_code=404, detail="Professional experience not found")
+
+    # Update fields
+    if experience_data.position is not None:
+        experience.position = experience_data.position
+    if experience_data.institution is not None:
+        experience.institution = experience_data.institution
+    if experience_data.start_date is not None:
+        try:
+            experience.start_date = datetime.strptime(experience_data.start_date, "%Y-%m-%d").date()
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid start_date format. Use YYYY-MM-DD")
+    if experience_data.end_date is not None:
+        try:
+            experience.end_date = datetime.strptime(experience_data.end_date, "%Y-%m-%d").date()
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid end_date format. Use YYYY-MM-DD")
+    if experience_data.description is not None:
+        experience.description = experience_data.description
+    if experience_data.is_current is not None:
+        experience.is_current = experience_data.is_current
+
+    db.commit()
+    db.refresh(experience)
+
+    return {
+        "message": "Professional experience updated successfully",
+        "id": experience.id,
+        "position": experience.position,
+        "institution": experience.institution,
+        "start_date": experience.start_date.isoformat(),
+        "end_date": experience.end_date.isoformat() if experience.end_date else None,
+        "description": experience.description,
+        "is_current": experience.is_current
+    }
+
+
+@app.delete("/doctor/professional-experience/{experience_id}")
+def delete_professional_experience(
+    experience_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a professional experience entry"""
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    experience = db.query(models.ProfessionalExperience).filter(
+        models.ProfessionalExperience.id == experience_id,
+        models.ProfessionalExperience.doctor_id == doctor.id
+    ).first()
+
+    if not experience:
+        raise HTTPException(status_code=404, detail="Professional experience not found")
+
+    db.delete(experience)
+    db.commit()
+
+    return {"message": "Professional experience deleted successfully"}
 
 
 # ---------------------------------------------------------

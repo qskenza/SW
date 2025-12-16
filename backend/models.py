@@ -112,6 +112,7 @@ class Doctor(Base):
     user = orm_relationship("User", back_populates="doctor_profile")
     appointments = orm_relationship("Appointment", back_populates="doctor")
     availability_slots = orm_relationship("DoctorAvailability", back_populates="doctor", cascade="all, delete-orphan")
+    professional_experiences = orm_relationship("ProfessionalExperience", back_populates="doctor", cascade="all, delete-orphan")
 
 
 class Nurse(Base):
@@ -131,6 +132,25 @@ class Nurse(Base):
 
     # Relationships
     user = orm_relationship("User", back_populates="nurse_profile")
+
+
+class ProfessionalExperience(Base):
+    """Doctor's professional experience and work history"""
+    __tablename__ = "professional_experience"
+
+    id = Column(Integer, primary_key=True, index=True)
+    doctor_id = Column(Integer, ForeignKey("doctors.id"), nullable=False)
+    position = Column(String(200), nullable=False)  # e.g., "Senior Cardiologist"
+    institution = Column(String(200), nullable=False)  # e.g., "Johns Hopkins Hospital"
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=True)  # NULL if current position
+    description = Column(Text)  # Detailed description of responsibilities
+    is_current = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    doctor = orm_relationship("Doctor", back_populates="professional_experiences")
 
 
 class DoctorAvailability(Base):

@@ -781,6 +781,7 @@
                 <button class="tab-btn active" data-tab="personal">Profile Information</button>
                 <button class="tab-btn" data-tab="schedule">Today's Schedule</button>
                 <button class="tab-btn" data-tab="availability">Availability</button>
+                <button class="tab-btn" data-tab="experience">Professional Experience</button>
                 <button class="tab-btn" data-tab="quickactions">Quick Actions</button>
             </div>
 
@@ -987,9 +988,76 @@
             }
             </style>
 
+            <div class="tab-content" id="experience-tab">
+                <h3 class="tab-title">Professional Experience</h3>
+
+                <div class="availability-info-box" style="background: #e8f5e8; border-left: 4px solid #4caf50; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;">
+                    <p style="margin: 0; color: #2e7d32;">
+                        <strong>💼 Manage your professional experience:</strong> Add your work history, education, and certifications.
+                        This information will be visible to students viewing your profile.
+                    </p>
+                </div>
+
+                <!-- Current Experience List -->
+                <div id="experienceList" style="margin-bottom: 2rem;">
+                    <div class="loading">Loading your professional experience...</div>
+                </div>
+
+                <!-- Add Experience Form -->
+                <div class="availability-form-card" style="background: #f8fff8; padding: 2rem; border-radius: 12px; border: 2px solid #e8f5e8; margin-top: 2rem;">
+                    <h4 style="color: #2e7d32; margin-bottom: 1.5rem; font-size: 1.2rem;">Add New Experience</h4>
+
+                    <form id="experienceForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Position/Title *</label>
+                                <input type="text" id="expPosition" class="form-input" placeholder="e.g., Senior Cardiologist" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Institution/Organization *</label>
+                                <input type="text" id="expInstitution" class="form-input" placeholder="e.g., Johns Hopkins Hospital" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Start Date *</label>
+                                <input type="date" id="expStartDate" class="form-input" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">End Date</label>
+                                <input type="date" id="expEndDate" class="form-input">
+                                <small style="color: #666;">Leave empty if current position</small>
+                            </div>
+
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="form-label">
+                                    <input type="checkbox" id="expIsCurrent" style="margin-right: 0.5rem;">
+                                    This is my current position
+                                </label>
+                            </div>
+
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="form-label">Description</label>
+                                <textarea id="expDescription" class="form-input" rows="4" placeholder="Describe your responsibilities, achievements, and key activities..."></textarea>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                            <button type="submit" class="add-availability-btn" style="background: #4caf50; color: white; padding: 0.8rem 2rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; flex: 1;">
+                                Add Experience
+                            </button>
+                            <button type="button" id="cancelEditExpBtn" class="add-availability-btn" style="background: #999; color: white; padding: 0.8rem 2rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; flex: 1; display: none;">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <div class="tab-content" id="quickactions-tab">
                 <h3 class="tab-title">Quick Actions</h3>
-                
+
                 <div class="quick-actions-grid">
                     <div class="action-card" data-action="prescription">
                         <div class="action-icon">💊</div>
@@ -1534,6 +1602,215 @@
         document.querySelector('[data-tab="availability"]').addEventListener('click', function() {
             loadDoctorSchedule();
         });
+
+        // ============================================
+        // PROFESSIONAL EXPERIENCE MANAGEMENT
+        // ============================================
+        let editingExperienceId = null;
+
+        // Load professional experience when tab is opened
+        document.querySelector('[data-tab="experience"]').addEventListener('click', function() {
+            loadProfessionalExperience();
+        });
+
+        async function loadProfessionalExperience() {
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/doctor/professional-experience`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load experience');
+
+                const experiences = await response.json();
+                displayExperiences(experiences);
+            } catch (error) {
+                console.error('Error loading experience:', error);
+                document.getElementById('experienceList').innerHTML = '<p style="color: #999;">Failed to load professional experience.</p>';
+            }
+        }
+
+        function displayExperiences(experiences) {
+            const container = document.getElementById('experienceList');
+
+            if (experiences.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No professional experience added yet. Add your first experience below.</p>';
+                return;
+            }
+
+            container.innerHTML = experiences.map(exp => {
+                const startDate = new Date(exp.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+                const endDate = exp.end_date ? new Date(exp.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : 'Present';
+                const currentBadge = exp.is_current ? '<span style="background: #4caf50; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.85rem; margin-left: 0.5rem;">Current</span>' : '';
+
+                return `
+                    <div class="schedule-day-card" style="margin-bottom: 1rem;">
+                        <div class="day-info">
+                            <div class="day-name">${exp.position} ${currentBadge}</div>
+                            <div style="color: #666; margin: 0.5rem 0;">
+                                <strong>${exp.institution}</strong>
+                            </div>
+                            <div style="color: #999; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                ${startDate} - ${endDate}
+                            </div>
+                            ${exp.description ? `<div style="color: #666; margin-top: 0.5rem; font-size: 0.95rem;">${exp.description}</div>` : ''}
+                        </div>
+                        <div class="day-actions">
+                            <button onclick="editExperience(${exp.id})" style="background: #2196f3; color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; margin-right: 0.5rem;">
+                                Edit
+                            </button>
+                            <button onclick="deleteExperience(${exp.id}, '${exp.position}')" style="background: #d32f2f; color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer;">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Handle experience form submission
+        document.getElementById('experienceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const position = document.getElementById('expPosition').value.trim();
+            const institution = document.getElementById('expInstitution').value.trim();
+            const startDate = document.getElementById('expStartDate').value;
+            const endDate = document.getElementById('expEndDate').value;
+            const description = document.getElementById('expDescription').value.trim();
+            const isCurrent = document.getElementById('expIsCurrent').checked;
+
+            if (!position || !institution || !startDate) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const experienceData = {
+                position,
+                institution,
+                start_date: startDate,
+                end_date: endDate || null,
+                description: description || null,
+                is_current: isCurrent
+            };
+
+            try {
+                const token = sessionStorage.getItem('token');
+                const method = editingExperienceId ? 'PUT' : 'POST';
+                const url = editingExperienceId
+                    ? `${API_URL}/doctor/professional-experience/${editingExperienceId}`
+                    : `${API_URL}/doctor/professional-experience`;
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(experienceData)
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.detail || 'Failed to save experience');
+                }
+
+                alert(editingExperienceId ? '✅ Experience updated successfully!' : '✅ Experience added successfully!');
+
+                // Reset form
+                this.reset();
+                editingExperienceId = null;
+                document.getElementById('cancelEditExpBtn').style.display = 'none';
+                document.querySelector('#experienceForm button[type="submit"]').textContent = 'Add Experience';
+
+                // Reload experiences
+                await loadProfessionalExperience();
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`❌ Error: ${error.message}`);
+            }
+        });
+
+        // Handle "is current" checkbox
+        document.getElementById('expIsCurrent').addEventListener('change', function() {
+            const endDateInput = document.getElementById('expEndDate');
+            if (this.checked) {
+                endDateInput.value = '';
+                endDateInput.disabled = true;
+            } else {
+                endDateInput.disabled = false;
+            }
+        });
+
+        // Cancel edit
+        document.getElementById('cancelEditExpBtn').addEventListener('click', function() {
+            document.getElementById('experienceForm').reset();
+            editingExperienceId = null;
+            this.style.display = 'none';
+            document.querySelector('#experienceForm button[type="submit"]').textContent = 'Add Experience';
+        });
+
+        async function editExperience(experienceId) {
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/doctor/professional-experience`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load experience');
+
+                const experiences = await response.json();
+                const experience = experiences.find(exp => exp.id === experienceId);
+
+                if (!experience) throw new Error('Experience not found');
+
+                // Fill form
+                document.getElementById('expPosition').value = experience.position;
+                document.getElementById('expInstitution').value = experience.institution;
+                document.getElementById('expStartDate').value = experience.start_date;
+                document.getElementById('expEndDate').value = experience.end_date || '';
+                document.getElementById('expDescription').value = experience.description || '';
+                document.getElementById('expIsCurrent').checked = experience.is_current;
+
+                if (experience.is_current) {
+                    document.getElementById('expEndDate').disabled = true;
+                }
+
+                editingExperienceId = experienceId;
+                document.getElementById('cancelEditExpBtn').style.display = 'block';
+                document.querySelector('#experienceForm button[type="submit"]').textContent = 'Update Experience';
+
+                // Scroll to form
+                document.querySelector('#experienceForm').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Failed to load experience for editing');
+            }
+        }
+
+        async function deleteExperience(experienceId, position) {
+            if (!confirm(`Are you sure you want to delete "${position}"?`)) {
+                return;
+            }
+
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/doctor/professional-experience/${experienceId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.detail || 'Failed to delete');
+                }
+
+                alert('✅ Experience deleted successfully!');
+                await loadProfessionalExperience();
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
     </script>
 </body>
 </html>
