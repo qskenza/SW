@@ -2040,6 +2040,70 @@ def create_prescription(
     }
 
 
+@app.get("/doctor/prescriptions")
+def get_doctor_prescriptions(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all prescriptions created by the current doctor"""
+    if current_user.role != "doctor":
+        raise HTTPException(status_code=403, detail="Only doctors can access this")
+
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    prescriptions = db.query(models.Prescription).filter(
+        models.Prescription.doctor_id == doctor.id
+    ).order_by(models.Prescription.created_at.desc()).all()
+
+    result = []
+    for presc in prescriptions:
+        patient = db.query(models.User).filter(models.User.id == presc.patient_id).first()
+        result.append({
+            "id": presc.id,
+            "medication": presc.medication,
+            "dosage": presc.dosage,
+            "frequency": presc.frequency,
+            "duration": presc.duration,
+            "instructions": presc.instructions,
+            "status": presc.status,
+            "patient_name": patient.full_name if patient else "Unknown",
+            "patient_id": patient.student_id if patient else "Unknown",
+            "created_at": presc.created_at.isoformat() if presc.created_at else None
+        })
+
+    return result
+
+
+@app.delete("/prescriptions/{prescription_id}")
+def delete_prescription(
+    prescription_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a prescription - only the prescribing doctor can delete"""
+    if current_user.role != "doctor":
+        raise HTTPException(status_code=403, detail="Only doctors can delete prescriptions")
+
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    prescription = db.query(models.Prescription).filter(
+        models.Prescription.id == prescription_id,
+        models.Prescription.doctor_id == doctor.id  # Only allow deletion by prescribing doctor
+    ).first()
+
+    if not prescription:
+        raise HTTPException(status_code=404, detail="Prescription not found or you don't have permission to delete it")
+
+    db.delete(prescription)
+    db.commit()
+
+    return {"message": "Prescription deleted successfully"}
+
+
 @app.post("/referrals")
 def create_referral(
     referral_data: ReferralCreate,

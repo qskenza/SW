@@ -1088,11 +1088,30 @@
                     </button>
                 </div>
             </div>
-            
+
             <div id="patientQueueContainer">
                 <div class="loading">
                     <div class="loading-spinner"></div>
                     <p>Loading patients...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Prescription Management -->
+        <section class="queue-section" style="margin-top: 2rem;">
+            <div class="queue-header">
+                <h2 class="section-title">💊 My Prescriptions</h2>
+                <div class="queue-actions">
+                    <button class="queue-btn refresh-btn" onclick="loadDoctorPrescriptions()">
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div id="doctorPrescriptionsContainer">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading prescriptions...</p>
                 </div>
             </div>
         </section>
@@ -1305,13 +1324,16 @@
             
             // Load doctor profile
             await loadDoctorProfile();
-            
+
             // Load schedule
             await loadSchedule();
-            
+
+            // Load prescriptions
+            await loadDoctorPrescriptions();
+
             // Initialize tabs
             initializeTabs();
-            
+
             // Initialize quick actions
             initializeQuickActions();
         });
@@ -2153,6 +2175,7 @@
 
                 alert('✅ Prescription created successfully!');
                 closePrescriptionModal();
+                await loadDoctorPrescriptions(); // Reload prescriptions list
             } catch (error) {
                 console.error('Error:', error);
                 alert(`❌ Error: ${error.message}`);
@@ -2261,6 +2284,108 @@
                 }
             });
         };
+
+        // ============================================
+        // PRESCRIPTION MANAGEMENT
+        // ============================================
+        async function loadDoctorPrescriptions() {
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/doctor/prescriptions`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load prescriptions');
+
+                const prescriptions = await response.json();
+                displayDoctorPrescriptions(prescriptions);
+            } catch (error) {
+                console.error('Error loading prescriptions:', error);
+                document.getElementById('doctorPrescriptionsContainer').innerHTML =
+                    '<p style="color: #999; text-align: center; padding: 2rem;">Failed to load prescriptions.</p>';
+            }
+        }
+
+        function displayDoctorPrescriptions(prescriptions) {
+            const container = document.getElementById('doctorPrescriptionsContainer');
+
+            if (!prescriptions || prescriptions.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No prescriptions created yet.</p>';
+                return;
+            }
+
+            let html = '<div style="display: grid; gap: 1rem;">';
+
+            prescriptions.forEach(presc => {
+                const date = presc.created_at ? new Date(presc.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                }) : 'N/A';
+                const statusColor = presc.status === 'active' ? '#4caf50' : '#999';
+                const statusBadge = presc.status === 'active' ? '🟢 Active' : '⚪ Completed';
+
+                html += `
+                    <div class="schedule-day-card">
+                        <div class="day-info">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                <div class="day-name" style="flex: 1;">
+                                    💊 ${presc.medication}
+                                    <span style="background: ${statusColor}; color: white; padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.75rem; margin-left: 0.5rem;">${statusBadge}</span>
+                                </div>
+                            </div>
+                            <div style="color: #666; margin-bottom: 0.3rem;">
+                                <strong>Patient:</strong> ${presc.patient_name} (${presc.patient_id})
+                            </div>
+                            <div style="color: #666; margin-bottom: 0.3rem;">
+                                <strong>Dosage:</strong> ${presc.dosage} | <strong>Frequency:</strong> ${presc.frequency}
+                            </div>
+                            <div style="color: #666; margin-bottom: 0.3rem;">
+                                <strong>Duration:</strong> ${presc.duration}
+                            </div>
+                            ${presc.instructions ? `<div style="color: #666; margin-bottom: 0.3rem;"><strong>Instructions:</strong> ${presc.instructions}</div>` : ''}
+                            <div style="color: #999; font-size: 0.85rem; margin-top: 0.5rem;">
+                                Prescribed on ${date}
+                            </div>
+                        </div>
+                        <div class="day-actions">
+                            <button onclick="deletePrescription(${presc.id}, '${presc.medication}', '${presc.patient_name}')"
+                                    style="background: #d32f2f; color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer;">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        async function deletePrescription(prescriptionId, medication, patientName) {
+            if (!confirm(`Are you sure you want to delete the prescription for "${medication}" prescribed to ${patientName}?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/prescriptions/${prescriptionId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.detail || 'Failed to delete prescription');
+                }
+
+                alert('✅ Prescription deleted successfully!');
+                await loadDoctorPrescriptions(); // Reload the list
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
     </script>
 </body>
 </html>
