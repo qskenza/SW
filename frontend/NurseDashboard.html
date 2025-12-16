@@ -1072,15 +1072,15 @@
                 window.location.href = 'Login.html';
                 return;
             }
-            
-            if (role !== 'doctor') {
-                alert('Access denied. This page is for doctors only.');
+
+            if (role !== 'nurse') {
+                alert('Access denied. This page is for nurses only.');
                 window.location.href = 'MedicalDashboard.html';
                 return;
             }
-            
-            // Load doctor profile
-            await loadDoctorProfile();
+
+            // Load nurse profile
+            await loadDoctorProfile(); // TODO: Change to loadNurseProfile()
             
             // Load schedule
             await loadSchedule();

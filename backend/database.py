@@ -61,15 +61,28 @@ def run_migrations():
             print(f"⚠️  Migration warning: {e}")
             db.rollback()
 
-        # Migration 2: Check if nurses table exists
+        # Migration 2: Create nurses table if it doesn't exist
         try:
             result = db.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name='nurses'"))
             table_exists = result.fetchone() is not None
 
             if not table_exists:
                 print("🔄 Running migration: Creating nurses table...")
-                # Table will be created by Base.metadata.create_all in init_db
-                print("✅ Migration will create nurses table")
+                db.execute(text("""
+                    CREATE TABLE nurses (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        user_id INTEGER UNIQUE,
+                        name VARCHAR(100) NOT NULL,
+                        email VARCHAR(100) UNIQUE,
+                        phone VARCHAR(20),
+                        avatar VARCHAR(10),
+                        is_available BOOLEAN DEFAULT 1,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (user_id) REFERENCES users(id)
+                    )
+                """))
+                db.commit()
+                print("✅ Migration completed: nurses table created")
             else:
                 print("✅ nurses table already exists")
         except Exception as e:

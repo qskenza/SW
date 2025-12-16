@@ -87,8 +87,8 @@ class UserRegister(BaseModel):
     username: str
     password: str
     full_name: str
-    student_id: str  # For students: numeric ID, for doctors: license number or generated
-    role: str = "student"  # student or doctor
+    student_id: str  # For students: numeric ID, for doctors/nurses: auto-generated
+    role: str = "student"  # student, doctor, or nurse
     # Student fields
     department: Optional[str] = None
     major: Optional[str] = None
