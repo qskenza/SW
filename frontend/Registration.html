@@ -265,6 +265,11 @@
                         <div class="role-icon">👨‍⚕️</div>
                         <div class="role-title">Doctor</div>
                     </label>
+                    <label class="role-option" for="role-nurse">
+                        <input type="radio" name="role" id="role-nurse" value="nurse">
+                        <div class="role-icon">👩‍⚕️</div>
+                        <div class="role-title">Nurse</div>
+                    </label>
                 </div>
             </div>
 
@@ -507,15 +512,19 @@
             option.addEventListener('click', function() {
                 document.querySelectorAll('.role-option').forEach(opt => opt.classList.remove('selected'));
                 this.classList.add('selected');
-                
+
                 const role = this.querySelector('input[type="radio"]').value;
-                
+
                 if (role === 'student') {
                     document.getElementById('studentFields').style.display = 'block';
                     document.getElementById('doctorFields').style.display = 'none';
-                } else {
+                } else if (role === 'doctor') {
                     document.getElementById('studentFields').style.display = 'none';
                     document.getElementById('doctorFields').style.display = 'block';
+                } else if (role === 'nurse') {
+                    // Nurses don't need student or doctor specific fields
+                    document.getElementById('studentFields').style.display = 'none';
+                    document.getElementById('doctorFields').style.display = 'none';
                 }
             });
         });
@@ -698,11 +707,14 @@
 
                     // Show confirmation
                     setTimeout(() => {
-                        alert(`✅ Account created successfully!\n\nYour AUI email: ${data.user.email}\nRole: ${data.user.role === 'doctor' ? 'Doctor' : 'Student'}\n\nRedirecting to your dashboard...`);
+                        const roleDisplay = data.user.role === 'doctor' ? 'Doctor' : data.user.role === 'nurse' ? 'Nurse' : 'Student';
+                        alert(`✅ Account created successfully!\n\nYour AUI email: ${data.user.email}\nRole: ${roleDisplay}\n\nRedirecting to your dashboard...`);
 
                         // Redirect based on role
                         if (data.user.role === 'doctor') {
                             window.location.href = 'DoctorDashboard.html';
+                        } else if (data.user.role === 'nurse') {
+                            window.location.href = 'NurseDashboard.html';
                         } else {
                             window.location.href = 'MedicalDashboard.html';
                         }
