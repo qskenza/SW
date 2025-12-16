@@ -44,7 +44,7 @@ def run_migrations():
     from sqlalchemy import text
     db = SessionLocal()
     try:
-        # Migration: Add professional_experience column to doctors table
+        # Migration 1: Add professional_experience column to doctors table
         try:
             # Check if column exists
             result = db.execute(text("PRAGMA table_info(doctors)"))
@@ -57,6 +57,21 @@ def run_migrations():
                 print("✅ Migration completed: professional_experience column added")
             else:
                 print("✅ professional_experience column already exists")
+        except Exception as e:
+            print(f"⚠️  Migration warning: {e}")
+            db.rollback()
+
+        # Migration 2: Check if nurses table exists
+        try:
+            result = db.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name='nurses'"))
+            table_exists = result.fetchone() is not None
+
+            if not table_exists:
+                print("🔄 Running migration: Creating nurses table...")
+                # Table will be created by Base.metadata.create_all in init_db
+                print("✅ Migration will create nurses table")
+            else:
+                print("✅ nurses table already exists")
         except Exception as e:
             print(f"⚠️  Migration warning: {e}")
             db.rollback()
