@@ -5,11 +5,27 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, timedelta, date
 import jwt
-# Support both old and new PyJWT versions
+
+# Support all PyJWT versions - create our own exception classes if needed
 try:
-    from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
-except ImportError:
-    from jwt.exceptions import DecodeError as InvalidTokenError, ExpiredSignatureError
+    from jwt import ExpiredSignatureError
+except (ImportError, AttributeError):
+    # Create our own if not available
+    class ExpiredSignatureError(Exception):
+        """Token has expired"""
+        pass
+
+try:
+    from jwt import InvalidTokenError
+except (ImportError, AttributeError):
+    try:
+        from jwt import DecodeError as InvalidTokenError
+    except (ImportError, AttributeError):
+        # Create our own if not available
+        class InvalidTokenError(Exception):
+            """Invalid token error"""
+            pass
+
 import bcrypt
 import os
 from dotenv import load_dotenv
@@ -193,6 +209,11 @@ def get_current_user(
     except ExpiredSignatureError:
         raise HTTPException(401, "Token expired")
     except InvalidTokenError:
+        raise HTTPException(401, "Invalid token")
+    except Exception as e:
+        # Catch any other JWT-related exceptions
+        if 'expired' in str(e).lower():
+            raise HTTPException(401, "Token expired")
         raise HTTPException(401, "Invalid token")
 
 
