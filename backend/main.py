@@ -4,8 +4,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, timedelta, date
-import jwt
-from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+from jose import JWTError, ExpiredSignatureError, jwt
 import bcrypt
 import os
 from dotenv import load_dotenv
@@ -184,7 +183,7 @@ def get_current_user(
 
     except ExpiredSignatureError:
         raise HTTPException(401, "Token expired")
-    except InvalidTokenError:
+    except JWTError:
         raise HTTPException(401, "Invalid token")
 
 
