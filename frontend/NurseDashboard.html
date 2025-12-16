@@ -463,11 +463,27 @@
             </div>
         </div>
 
+        <!-- Doctor Schedules (Read-Only) -->
+        <div class="card" style="margin-top: 2rem;">
+            <h2>👨‍⚕️ Doctor Schedules (View Only)</h2>
+            <div id="doctorSchedules">
+                <div class="loading">Loading doctor schedules...</div>
+            </div>
+        </div>
+
         <!-- All Patients -->
         <div class="card" style="margin-top: 2rem;">
             <h2>👥 All Registered Patients</h2>
             <div id="patientsList">
                 <div class="loading">Loading patients...</div>
+            </div>
+        </div>
+
+        <!-- Appointment Reports -->
+        <div class="card" style="margin-top: 2rem;">
+            <h2>📋 Recent Appointment Reports</h2>
+            <div id="appointmentReports">
+                <div class="loading">Loading reports...</div>
             </div>
         </div>
     </div>
@@ -543,10 +559,13 @@
 
                 if (response.ok) {
                     const nurse = await response.json();
+                    // Display name WITHOUT "Dr." prefix
                     document.getElementById('nurseName').textContent = nurse.name;
-                    document.getElementById('nurseDepartment').textContent = nurse.department || 'Registered Nurse';
+                    // Show "Nurse" role with department
+                    const roleText = nurse.department ? `Nurse - ${nurse.department}` : 'Registered Nurse';
+                    document.getElementById('nurseDepartment').textContent = roleText;
                     document.getElementById('nurseAvatar').textContent = nurse.avatar || 'N';
-                    document.getElementById('welcomeMessage').textContent = `Welcome back, ${nurse.name.split(' ')[0]}!`;
+                    document.getElementById('welcomeMessage').textContent = `Welcome back, Nurse ${nurse.name.split(' ')[0]}!`;
                 }
             } catch (error) {
                 console.error('Error loading nurse profile:', error);
@@ -795,6 +814,135 @@
             }
         }
 
+        // Load doctor schedules (read-only)
+        async function loadDoctorSchedules() {
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_URL}/doctors`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const container = document.getElementById('doctorSchedules');
+
+                if (response.ok) {
+                    const doctors = await response.json();
+
+                    if (doctors.length === 0) {
+                        container.innerHTML = '<div class="no-data">No doctors available</div>';
+                        return;
+                    }
+
+                    container.innerHTML = `
+                        <table class="patients-table">
+                            <thead>
+                                <tr>
+                                    <th>Doctor Name</th>
+                                    <th>Specialty</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${doctors.map(doctor => `
+                                    <tr>
+                                        <td><strong>${doctor.name}</strong></td>
+                                        <td>${doctor.specialty || 'General'}</td>
+                                        <td>${doctor.email}</td>
+                                        <td>${doctor.phone || 'N/A'}</td>
+                                        <td>
+                                            <span class="badge ${doctor.is_available ? 'badge-success' : 'badge-warning'}">
+                                                ${doctor.is_available ? 'Available' : 'Unavailable'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    container.innerHTML = '<div class="error-message">Failed to load doctor schedules</div>';
+                }
+            } catch (error) {
+                console.error('Error loading doctor schedules:', error);
+                document.getElementById('doctorSchedules').innerHTML = '<div class="error-message">Error loading doctor schedules</div>';
+            }
+        }
+
+        // Load appointment reports
+        async function loadAppointmentReports() {
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                // Get recent completed appointments
+                const response = await fetch(`${API_URL}/nurse/appointments/upcoming`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const container = document.getElementById('appointmentReports');
+
+                if (response.ok) {
+                    const appointments = await response.json();
+
+                    // Show last 10 appointments
+                    const recentAppointments = appointments.slice(0, 10);
+
+                    if (recentAppointments.length === 0) {
+                        container.innerHTML = '<div class="no-data">No appointment reports available</div>';
+                        return;
+                    }
+
+                    container.innerHTML = `
+                        <table class="patients-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${recentAppointments.map(apt => `
+                                    <tr>
+                                        <td>${formatDate(apt.date)}</td>
+                                        <td>${formatTime(apt.time)}</td>
+                                        <td>${apt.patient_name} (${apt.patient_id})</td>
+                                        <td>${apt.doctor_name}</td>
+                                        <td>${apt.type}</td>
+                                        <td>
+                                            <span class="badge ${
+                                                apt.status === 'completed' ? 'badge-success' :
+                                                apt.status === 'upcoming' ? 'badge-info' :
+                                                apt.status === 'cancelled' ? 'badge-danger' :
+                                                'badge-warning'
+                                            }">
+                                                ${apt.status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    container.innerHTML = '<div class="error-message">Failed to load appointment reports</div>';
+                }
+            } catch (error) {
+                console.error('Error loading appointment reports:', error);
+                document.getElementById('appointmentReports').innerHTML = '<div class="error-message">Error loading reports</div>';
+            }
+        }
+
         // Initialize dashboard
         async function initDashboard() {
             if (!checkAuth()) return;
@@ -805,7 +953,9 @@
             await loadEmergencyRequests();
             await loadTodayAppointments();
             await loadUpcomingAppointments();
+            await loadDoctorSchedules();
             await loadAllPatients();
+            await loadAppointmentReports();
 
             // Auto-refresh emergency requests and appointments every 30 seconds
             setInterval(() => {
