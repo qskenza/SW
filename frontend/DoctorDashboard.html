@@ -324,6 +324,17 @@
             cursor: not-allowed;
         }
 
+        textarea.form-input {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        #formActions {
+            display: flex;
+        }
+
         /* Schedule Tab */
         .schedule-list {
             display: flex;
@@ -814,6 +825,21 @@
                             <input type="text" class="form-input" value="Campus Health Center" readonly>
                         </div>
                     </div>
+
+                    <div class="form-group" style="margin-top: 1.5rem;">
+                        <label class="form-label">Professional Experience</label>
+                        <textarea class="form-input" id="formProfessionalExperience" rows="6" readonly
+                            placeholder="Describe your professional experience, qualifications, certifications, and areas of expertise..."></textarea>
+                    </div>
+
+                    <div id="formActions" style="display: none; margin-top: 1.5rem; gap: 1rem; justify-content: flex-end;">
+                        <button type="button" class="action-btn cancel-btn" id="cancelEditBtn" style="background: #e0e0e0; color: #333;">
+                            Cancel
+                        </button>
+                        <button type="button" class="action-btn start-btn" id="saveProfileBtn" style="background: #4caf50; color: white;">
+                            Save Changes
+                        </button>
+                    </div>
                 </form>
             </div>
 
@@ -1064,6 +1090,9 @@
             
             // Initialize quick actions
             initializeQuickActions();
+
+            // Initialize edit profile functionality
+            initializeEditProfile();
         });
 
         // ============================================
@@ -1111,33 +1140,35 @@
             const phone = data.phone || 'N/A';
             const rating = data.rating || 0;
             const reviewsCount = data.reviews_count || 0;
-            
+            const professionalExperience = data.professional_experience || '';
+
             // Header
             document.getElementById('headerDoctorName').textContent = fullName;
             document.getElementById('headerDoctorSpecialty').textContent = specialty;
             document.getElementById('headerDoctorAvatar').textContent = initials;
-            
+
             // Welcome message
-            document.getElementById('welcomeMessage').textContent = 
+            document.getElementById('welcomeMessage').textContent =
                 `Welcome back, Dr. ${fullName.split(' ').pop()}. Here's your overview for today.`;
-            
+
             // Profile section
             document.getElementById('profileAvatar').textContent = initials;
             document.getElementById('profileName').textContent = `Dr. ${fullName}`;
-            document.getElementById('profileDetails').textContent = 
+            document.getElementById('profileDetails').textContent =
                 `${specialty} • ID: ${data.student_id || 'N/A'}`;
-            document.getElementById('profileLicense').textContent = 
+            document.getElementById('profileLicense').textContent =
                 `License: ${licenseNumber} • Campus Health Center`;
-            
+
             // Form fields
             document.getElementById('formFullName').value = fullName;
             document.getElementById('formLicenseNumber').value = licenseNumber;
             document.getElementById('formSpecialty').value = specialty;
             document.getElementById('formEmail').value = email;
             document.getElementById('formPhone').value = phone;
-            
+            document.getElementById('formProfessionalExperience').value = professionalExperience;
+
             // Stats
-            document.getElementById('statRating').textContent = 
+            document.getElementById('statRating').textContent =
                 rating > 0 ? `${rating.toFixed(1)}★` : 'New';
         }
 
@@ -1314,6 +1345,109 @@
                             break;
                     }
                 });
+            });
+        }
+
+        // ============================================
+        // EDIT PROFILE FUNCTIONALITY
+        // ============================================
+        function initializeEditProfile() {
+            const editBtn = document.getElementById('editProfileBtn');
+            const saveBtn = document.getElementById('saveProfileBtn');
+            const cancelBtn = document.getElementById('cancelEditBtn');
+            const formActions = document.getElementById('formActions');
+
+            const editableFields = ['formPhone', 'formSpecialty', 'formProfessionalExperience'];
+            let originalValues = {};
+
+            // Edit button click
+            editBtn.addEventListener('click', function() {
+                // Save original values
+                editableFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    originalValues[fieldId] = field.value;
+                    field.removeAttribute('readonly');
+                    field.style.background = 'white';
+                });
+
+                // Show action buttons
+                formActions.style.display = 'flex';
+                editBtn.style.display = 'none';
+            });
+
+            // Cancel button click
+            cancelBtn.addEventListener('click', function() {
+                // Restore original values
+                editableFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    field.value = originalValues[fieldId];
+                    field.setAttribute('readonly', 'readonly');
+                    field.style.background = '#f5f5f5';
+                });
+
+                // Hide action buttons
+                formActions.style.display = 'none';
+                editBtn.style.display = 'inline-flex';
+            });
+
+            // Save button click
+            saveBtn.addEventListener('click', async function() {
+                const phone = document.getElementById('formPhone').value;
+                const specialty = document.getElementById('formSpecialty').value;
+                const professionalExperience = document.getElementById('formProfessionalExperience').value;
+
+                if (!phone || !specialty) {
+                    alert('Phone and Specialty are required fields');
+                    return;
+                }
+
+                // Disable button during save
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Saving...';
+
+                try {
+                    const token = sessionStorage.getItem('token');
+                    const response = await fetch(`${API_URL}/doctor/profile`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            phone: phone,
+                            specialty: specialty,
+                            professional_experience: professionalExperience
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        alert('✅ Profile updated successfully!');
+
+                        // Make fields readonly again
+                        editableFields.forEach(fieldId => {
+                            const field = document.getElementById(fieldId);
+                            field.setAttribute('readonly', 'readonly');
+                            field.style.background = '#f5f5f5';
+                        });
+
+                        // Hide action buttons
+                        formActions.style.display = 'none';
+                        editBtn.style.display = 'inline-flex';
+
+                        // Reload doctor profile to get updated data
+                        await loadDoctorProfile();
+                    } else {
+                        alert(`❌ Error: ${data.detail || 'Failed to update profile'}`);
+                    }
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    alert('❌ Network error. Please try again.');
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Save Changes';
+                }
             });
         }
 

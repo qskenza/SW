@@ -390,7 +390,8 @@ def get_profile(
             response["specialty"] = doctor.specialty
             response["rating"] = doctor.rating
             response["reviews_count"] = doctor.reviews_count
-    
+            response["professional_experience"] = doctor.professional_experience
+
     return response
 
 
@@ -471,6 +472,49 @@ def update_emergency_contact(
 
     db.commit()
     return {"message": "Emergency contact updated"}
+
+
+@app.put("/doctor/profile")
+def update_doctor_profile(
+    updates: dict,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update doctor-specific profile fields"""
+    if current_user.role != "doctor":
+        raise HTTPException(403, "Access denied. Doctors only.")
+
+    doctor = db.query(models.Doctor).filter(
+        models.Doctor.user_id == current_user.id
+    ).first()
+
+    if not doctor:
+        raise HTTPException(404, "Doctor profile not found")
+
+    # Update allowed fields
+    if "phone" in updates and updates["phone"]:
+        doctor.phone = updates["phone"]
+        current_user.phone = updates["phone"]
+
+    if "specialty" in updates and updates["specialty"]:
+        doctor.specialty = updates["specialty"]
+        current_user.major = updates["specialty"]
+
+    if "professional_experience" in updates:
+        doctor.professional_experience = updates["professional_experience"]
+
+    db.commit()
+    db.refresh(doctor)
+
+    return {
+        "message": "Doctor profile updated successfully",
+        "doctor": {
+            "name": doctor.name,
+            "specialty": doctor.specialty,
+            "phone": doctor.phone,
+            "professional_experience": doctor.professional_experience
+        }
+    }
 
 
 # ---------------------------------------------------------
@@ -1055,23 +1099,28 @@ def get_doctor_schedule(
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Get doctor's schedule"""
+    """Get doctor's schedule for today"""
     if current_user.role != "doctor":
         raise HTTPException(403, "Access denied. Doctors only.")
-    
+
     doctor = db.query(models.Doctor).filter(
         models.Doctor.user_id == current_user.id
     ).first()
-    
+
     if not doctor:
         raise HTTPException(404, "Doctor profile not found")
-    
-    # Get all upcoming appointments
+
+    # Get today's date
+    from datetime import date
+    today = date.today()
+
+    # Get today's appointments only
     appointments = db.query(models.Appointment).filter(
         models.Appointment.doctor_id == doctor.id,
+        models.Appointment.appointment_date == today,
         models.Appointment.status == "upcoming"
-    ).order_by(models.Appointment.appointment_date).all()
-    
+    ).order_by(models.Appointment.appointment_time).all()
+
     return {
         "doctor_name": doctor.name,
         "specialty": doctor.specialty,
