@@ -800,37 +800,10 @@
                 <div class="card">
                     <h2 class="card-title">Select Your Doctor</h2>
                     <div class="doctor-selection">
-                        <div class="doctor-card selected" data-doctor="sarah">
-                            <div class="doctor-header">
-                                <div class="doctor-avatar">SC</div>
-                                <div class="doctor-info">
-                                    <h3>Dr. Sarah Chen</h3>
-                                    <p class="doctor-specialty">General Practitioner, Pediatrics</p>
-                                    <div class="doctor-rating">★ 4.8 (127 reviews)</div>
-                                </div>
-                            </div>
-                            <div class="doctor-actions">
-                                <button class="view-profile-btn" onclick="viewDoctorProfile('sarah')">View Profile</button>
-                                <button class="review-doctor-btn" onclick="reviewDoctor('Sarah Chen')">Review Doctor</button>
-                            </div>
-                        </div>
-
-                        <div class="doctor-card" data-doctor="emily">
-                            <div class="doctor-header">
-                                <div class="doctor-avatar">EC</div>
-                                <div class="doctor-info">
-                                    <h3>Dr. Emily Carter</h3>
-                                    <p class="doctor-specialty">Pediatrician</p>
-                                    <div class="doctor-rating">★ 4.9 (89 reviews)</div>
-                                </div>
-                            </div>
-                            <div class="doctor-actions">
-                                <button class="view-profile-btn" onclick="viewDoctorProfile('emily')">View Profile</button>
-                                <button class="review-doctor-btn" onclick="reviewDoctor('Emily Carter')">Review Doctor</button>
-                            </div>
-                        </div>
+                        <!-- Doctors will be loaded dynamically from the API -->
+                        <div style="padding: 20px; text-align: center; color: #666;">Loading doctors...</div>
                     </div>
-                    <button class="change-doctor-btn" onclick="showMoreDoctors()">Change Doctor / View More Doctors</button>
+                    <button class="change-doctor-btn" onclick="showMoreDoctors()" style="display: none;">Change Doctor / View More Doctors</button>
                 </div>
 
                 <!-- Date & Time Selection -->
@@ -981,48 +954,148 @@
         let currentDate = new Date(2025, 12, 8); // December 8 2025 (month is 0-indexed)
         let selectedDate = new Date(2025, 12, 10); // December 10 2025
         let selectedTime = "03:00 PM";
-        let selectedDoctor = "sarah"; // Default to Sarah Chen
-        let selectedDoctorId = 1; // Default to Dr. Sarah Chen (ID 1 in database)
+        let selectedDoctorId = null; // Will be set when doctors are loaded
         let appointmentComment = "";
 
-        // Mapping between frontend doctor keys and database IDs
-        const doctorIdMap = {
-            "sarah": 1,    // Dr. Sarah Chen
-            "emily": 2,    // Dr. Emily Carter
-            "james": 3     // Dr. James Rodriguez
-        };
-
-        // Doctor data
-        const doctors = {
-            "sarah": {
-                name: "Dr. Sarah Chen",
-                avatar: "SC",
-                specialty: "General Practitioner, Pediatrics",
-                rating: "★ 4.8 (127 reviews)",
-                description: "Dr. Sarah Chen is a dedicated General Practitioner with special interest in pediatric care. With over 8 years of experience, she provides comprehensive healthcare services for patients of all ages, with a gentle approach that makes children feel comfortable during visits.",
-                experience: "Prior to joining CareConnect, Dr. Chen worked at City General Hospital's family medicine department. She holds certifications in Advanced Pediatric Life Support and Preventive Medicine. Dr. Chen is passionate about patient education and believes in empowering patients to take an active role in their healthcare journey.",
-                color: "#4caf50"
-            },
-            "emily": {
-                name: "Dr. Emily Carter",
-                avatar: "EC",
-                specialty: "Pediatrician",
-                rating: "★ 4.9 (89 reviews)",
-                description: "Dr. Emily Carter is a board-certified Pediatrician with 10+ years of experience in child healthcare. She specializes in adolescent medicine and preventive care, with a focus on developmental screenings and vaccination protocols. Her patient-centered approach ensures children receive the best possible care.",
-                experience: "Dr. Carter completed her residency at Children's Medical Center and has published research in pediatric immunology. She is fluent in English and French, and is committed to providing culturally sensitive care to diverse patient populations.",
-                color: "#2196f3"
-            }
-        };
+        // Doctor data - will be loaded from API
+        let doctors = {};
+        let doctorsArray = [];
 
         // Initialize the page
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Load doctors first
+            await loadDoctors();
+
             initializeCalendar();
             updateTimeSlots();
-            updateDoctorProfile(selectedDoctor);
+            if (doctorsArray.length > 0) {
+                // Select the first doctor by default
+                const firstDoctor = doctorsArray[0];
+                selectedDoctorId = firstDoctor.id;
+                updateDoctorProfile(firstDoctor);
+            }
             updateSummary();
             initializeStarRating();
             initializeCommentSection();
         });
+
+        // Load doctors from API
+        async function loadDoctors() {
+            try {
+                const response = await fetch('http://localhost:8000/doctors');
+
+                if (!response.ok) {
+                    throw new Error('Failed to load doctors');
+                }
+
+                doctorsArray = await response.json();
+                console.log('Loaded doctors:', doctorsArray);
+
+                // Convert array to object for backward compatibility
+                doctorsArray.forEach((doctor, index) => {
+                    const key = doctor.name.toLowerCase().split(' ')[1] || `doctor${index}`;
+                    doctors[key] = {
+                        id: doctor.id,
+                        name: doctor.name,
+                        avatar: doctor.avatar || doctor.name.substring(0, 2).toUpperCase(),
+                        specialty: doctor.specialty || 'General Practitioner',
+                        rating: `★ ${doctor.rating.toFixed(1)} (${doctor.reviews} reviews)`,
+                        description: `${doctor.name} is a dedicated ${doctor.specialty} with extensive experience in providing quality healthcare.`,
+                        experience: `Professional healthcare provider specializing in ${doctor.specialty}.`,
+                        color: getRandomColor(),
+                        email: doctor.email,
+                        phone: doctor.phone
+                    };
+                });
+
+                // Render doctor cards
+                renderDoctorCards();
+
+            } catch (error) {
+                console.error('Error loading doctors:', error);
+                // Show error message
+                const doctorSelection = document.querySelector('.doctor-selection');
+                if (doctorSelection) {
+                    doctorSelection.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc3545;">Failed to load doctors. Please refresh the page.</div>';
+                }
+            }
+        }
+
+        // Render doctor cards dynamically
+        function renderDoctorCards() {
+            const doctorSelection = document.querySelector('.doctor-selection');
+            if (!doctorSelection) return;
+
+            doctorSelection.innerHTML = '';
+
+            doctorsArray.forEach((doctor, index) => {
+                const doctorCard = document.createElement('div');
+                doctorCard.className = 'doctor-card';
+                if (index === 0) doctorCard.classList.add('selected'); // Select first doctor by default
+                doctorCard.setAttribute('data-doctor-id', doctor.id);
+
+                const avatar = doctor.avatar || doctor.name.substring(0, 2).toUpperCase();
+                const rating = doctor.rating > 0 ? `★ ${doctor.rating.toFixed(1)} (${doctor.reviews} reviews)` : '★ New';
+
+                doctorCard.innerHTML = `
+                    <div class="doctor-header">
+                        <div class="doctor-avatar">${avatar}</div>
+                        <div class="doctor-info">
+                            <h3>${doctor.name}</h3>
+                            <p class="doctor-specialty">${doctor.specialty}</p>
+                            <div class="doctor-rating">${rating}</div>
+                        </div>
+                    </div>
+                    <div class="doctor-actions">
+                        <button class="view-profile-btn" onclick="viewDoctorProfileById(${doctor.id})">View Profile</button>
+                        <button class="review-doctor-btn" onclick="reviewDoctor('${doctor.name}')">Review Doctor</button>
+                    </div>
+                `;
+
+                // Add click event to select doctor
+                doctorCard.addEventListener('click', function() {
+                    document.querySelectorAll('.doctor-card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    selectedDoctorId = doctor.id;
+                    updateDoctorProfile(doctor);
+                    updateTimeSlots();
+                });
+
+                doctorSelection.appendChild(doctorCard);
+            });
+        }
+
+        // Helper function to get random color
+        function getRandomColor() {
+            const colors = ['#4caf50', '#2196f3', '#ff9800', '#9c27b0', '#f44336', '#00bcd4'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // New function to view doctor profile by ID
+        function viewDoctorProfileById(doctorId) {
+            const doctor = doctorsArray.find(d => d.id === doctorId);
+            if (doctor) {
+                // Select the doctor card
+                document.querySelectorAll('.doctor-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                document.querySelector(`.doctor-card[data-doctor-id="${doctorId}"]`).classList.add('selected');
+
+                selectedDoctorId = doctorId;
+                updateDoctorProfile(doctor);
+
+                // Scroll to profile
+                document.getElementById('doctorProfile').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+
+                // Highlight profile
+                highlightDoctorProfile();
+            }
+        }
 
         // Calendar Functions
         function initializeCalendar() {
@@ -1139,90 +1212,98 @@
             console.log('=== updateTimeSlots START ===');
             console.log('selectedDoctorId:', selectedDoctorId);
             console.log('selectedDate:', selectedDate);
-            console.log('typeof getAvailableSlots:', typeof getAvailableSlots);
 
             const timeslotsGrid = document.getElementById('timeslotsGrid');
 
-            // Define all possible time slots
-            const allSlots = [
-                '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM',
-                '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM',
-                '02:00 PM', '02:30 PM', '03:00 PM', '03:30 PM',
-                '04:00 PM', '04:30 PM', '05:00 PM'
-            ];
-
-            let bookedSlots = [];
-
             // Only try to fetch from API if we have a doctor and date selected
-            if (selectedDoctorId && selectedDate) {
-                console.log('Condition met: doctor and date selected');
-                try {
-                    timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center;">Loading available time slots...</div>';
-                    console.log('Loading message set');
-
-                    // Format date to YYYY-MM-DD for API
-                    const formattedDate = selectedDate.toISOString().split('T')[0];
-                    console.log('Formatted date:', formattedDate);
-                    console.log('About to call getAvailableSlots...');
-
-                    // Fetch available slots from API
-                    const slotsData = await getAvailableSlots(selectedDoctorId, formattedDate);
-                    console.log('API call completed. Received slots data:', slotsData);
-
-                    // Get booked slots from API response
-                    if (slotsData && slotsData.booked_slots) {
-                        bookedSlots = slotsData.booked_slots;
-                        console.log('Booked slots extracted:', bookedSlots);
-                    }
-                } catch (error) {
-                    console.error('!!! CAUGHT ERROR in API call:', error);
-                    console.error('Error type:', error.name);
-                    console.error('Error message:', error.message);
-                    console.error('Error stack:', error.stack);
-                    console.warn('Falling back to showing all slots as available');
-                    // Continue with empty bookedSlots array (all slots available)
-                }
-            } else {
+            if (!selectedDoctorId || !selectedDate) {
                 console.log('Condition not met - doctor or date missing');
+                timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Please select a doctor and date to see available time slots.</div>';
+                return;
             }
 
-            console.log('About to render slots...');
-            // Clear and rebuild the time slots grid
-            timeslotsGrid.innerHTML = '';
-            console.log('Grid cleared');
+            try {
+                timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center;">Loading available time slots...</div>';
 
-            allSlots.forEach(time => {
-                const slot = document.createElement('div');
-                slot.className = 'time-slot';
-                slot.textContent = time;
+                // Format date to YYYY-MM-DD for API
+                const formattedDate = selectedDate.toISOString().split('T')[0];
+                console.log('Formatted date:', formattedDate);
 
-                // Check if this slot is booked (unavailable)
-                if (bookedSlots.includes(time)) {
-                    slot.classList.add('unavailable');
+                // Fetch available slots from API
+                const slotsData = await getAvailableSlots(selectedDoctorId, formattedDate);
+                console.log('API call completed. Received slots data:', slotsData);
+
+                // Check if doctor is not available on this day
+                if (slotsData.message) {
+                    timeslotsGrid.innerHTML = `<div style="padding: 20px; text-align: center; color: #ff9800;">${slotsData.message}</div>`;
+                    return;
                 }
 
-                // Check if this is the selected time
-                if (time === selectedTime) {
-                    slot.classList.add('selected');
+                // Get available slots from API (these are already filtered for doctor's working hours)
+                const availableSlots = slotsData.available_slots || [];
+                const bookedSlots = slotsData.booked_slots || [];
+
+                // Combine available and booked slots to show full schedule
+                const allSlots = [...new Set([...availableSlots, ...bookedSlots])].sort();
+
+                console.log('Available slots:', availableSlots.length);
+                console.log('Booked slots:', bookedSlots.length);
+                console.log('Total slots:', allSlots.length);
+
+                // Clear and rebuild the time slots grid
+                timeslotsGrid.innerHTML = '';
+
+                if (allSlots.length === 0) {
+                    timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Doctor has no availability set for this day. Please select another date.</div>';
+                    return;
                 }
 
-                // Add click event for available slots
-                if (!slot.classList.contains('unavailable')) {
-                    slot.addEventListener('click', function() {
-                        selectTime(time);
-                    });
+                allSlots.forEach(time => {
+                    const slot = document.createElement('div');
+                    slot.className = 'time-slot';
+                    slot.textContent = time;
+
+                    // Check if this slot is booked (unavailable)
+                    if (bookedSlots.includes(time)) {
+                        slot.classList.add('unavailable');
+                    }
+
+                    // Check if this is the selected time
+                    if (time === selectedTime) {
+                        slot.classList.add('selected');
+                    }
+
+                    // Add click event for available slots only
+                    if (availableSlots.includes(time)) {
+                        slot.addEventListener('click', function() {
+                            selectTime(time);
+                        });
+                    }
+
+                    timeslotsGrid.appendChild(slot);
+                });
+
+                // Show message if all slots are booked
+                if (availableSlots.length === 0 && bookedSlots.length > 0) {
+                    timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc3545;">All time slots are booked for this date. Please select another date.</div>';
                 }
 
-                timeslotsGrid.appendChild(slot);
-            });
+                // Show working hours info
+                if (slotsData.working_hours) {
+                    const infoDiv = document.createElement('div');
+                    infoDiv.style.cssText = 'padding: 10px; text-align: center; color: #666; font-size: 0.9rem; background: #f8f9fa; border-radius: 5px; margin-top: 10px;';
+                    infoDiv.textContent = `Working hours: ${slotsData.working_hours} | Slot duration: ${slotsData.slot_duration} minutes`;
+                    timeslotsGrid.parentElement.appendChild(infoDiv);
+                }
 
-            console.log('Slots rendered successfully');
-            console.log('Total slots:', allSlots.length, 'Booked:', bookedSlots.length);
+                console.log('Slots rendered successfully');
 
-            // Show message if all slots are booked
-            if (bookedSlots.length === allSlots.length) {
-                timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc3545;">All time slots are booked for this date. Please select another date.</div>';
-                console.log('All slots booked message displayed');
+            } catch (error) {
+                console.error('!!! CAUGHT ERROR in API call:', error);
+                console.error('Error type:', error.name);
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
+                timeslotsGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc3545;">Error loading time slots. Please try again or select a different date.</div>';
             }
 
             console.log('=== updateTimeSlots END ===');
@@ -1262,34 +1343,47 @@
             highlightDoctorProfile();
         }
 
-        function updateDoctorProfile(doctorId) {
-            const doctor = doctors[doctorId];
-            selectedDoctor = doctorId;
-            selectedDoctorId = doctorIdMap[doctorId]; // Set the database ID
+        function updateDoctorProfile(doctor) {
+            // Handle both old format (string key) and new format (doctor object)
+            if (typeof doctor === 'string') {
+                doctor = doctors[doctor];
+            }
+
+            if (!doctor) return;
+
+            selectedDoctorId = doctor.id;
+            const avatar = doctor.avatar || doctor.name.substring(0, 2).toUpperCase();
+            const color = doctor.color || getRandomColor();
+            const description = doctor.description || `${doctor.name} is a dedicated ${doctor.specialty} with extensive experience in providing quality healthcare.`;
+            const experience = doctor.experience || `Professional healthcare provider specializing in ${doctor.specialty}.`;
+            const rating = doctor.rating ? (typeof doctor.rating === 'string' ? doctor.rating : `★ ${doctor.rating.toFixed(1)} (${doctor.reviews} reviews)`) : '★ New';
 
             const profileHTML = `
                 <div class="profile-header">
-                    <div class="profile-avatar" style="background: ${doctor.color}">${doctor.avatar}</div>
+                    <div class="profile-avatar" style="background: ${color}">${avatar}</div>
                     <div class="profile-info">
                         <h2>${doctor.name}</h2>
                         <p class="profile-specialty">${doctor.specialty}</p>
-                        <div class="profile-rating">${doctor.rating}</div>
+                        <div class="profile-rating">${rating}</div>
                     </div>
                 </div>
-                
-                <p class="profile-description">${doctor.description}</p>
+
+                <p class="profile-description">${description}</p>
 
                 <div class="experience-section">
                     <h4>Professional Experience</h4>
-                    <p>${doctor.experience}</p>
+                    <p>${experience}</p>
                 </div>
             `;
-            
+
             document.getElementById('doctorProfile').innerHTML = profileHTML;
-            
+
             // Update summary
             document.getElementById('summaryDoctor').textContent = doctor.name;
             document.getElementById('summarySpecialty').textContent = doctor.specialty.split(',')[0];
+
+            // Update time slots when doctor changes
+            updateTimeSlots();
         }
 
         function highlightDoctorProfile() {
