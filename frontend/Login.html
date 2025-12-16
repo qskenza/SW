@@ -658,6 +658,8 @@
                         // Role-based redirect
                         if (data.user.role === 'doctor') {
                             window.location.href = 'DoctorDashboard.html';
+                        } else if (data.user.role === 'nurse') {
+                            window.location.href = 'NurseDashboard.html';
                         } else {
                             window.location.href = 'MedicalDashboard.html';
                         }

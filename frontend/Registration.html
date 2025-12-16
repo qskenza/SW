@@ -265,6 +265,11 @@
                         <div class="role-icon">👨‍⚕️</div>
                         <div class="role-title">Doctor</div>
                     </label>
+                    <label class="role-option" for="role-nurse">
+                        <input type="radio" name="role" id="role-nurse" value="nurse">
+                        <div class="role-icon">👩‍⚕️</div>
+                        <div class="role-title">Nurse</div>
+                    </label>
                 </div>
             </div>
 
@@ -367,6 +372,46 @@
                         class="form-input" 
                         placeholder="Enter your specialization"
                     >
+                </div>
+            </div>
+
+            <!-- Nurse-Specific Fields -->
+            <div id="nurseFields" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label" for="nursingLicense">Nursing License Number *</label>
+                    <input
+                        type="text"
+                        id="nursingLicense"
+                        class="form-input"
+                        placeholder="e.g., RN-2024-12345"
+                    >
+                    <small style="color: #666;">Your official nursing license number</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="nurseDepartment">Department *</label>
+                    <select id="nurseDepartment" class="form-select">
+                        <option value="">Select Department</option>
+                        <option value="Emergency">Emergency</option>
+                        <option value="Intensive Care">Intensive Care</option>
+                        <option value="Pediatrics">Pediatrics</option>
+                        <option value="Surgery">Surgery</option>
+                        <option value="Maternity">Maternity</option>
+                        <option value="General Ward">General Ward</option>
+                        <option value="Outpatient">Outpatient</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="shift">Preferred Shift</label>
+                    <select id="shift" class="form-select">
+                        <option value="">Select Shift</option>
+                        <option value="morning">Morning (6AM - 2PM)</option>
+                        <option value="afternoon">Afternoon (2PM - 10PM)</option>
+                        <option value="night">Night (10PM - 6AM)</option>
+                        <option value="rotating">Rotating</option>
+                    </select>
                 </div>
             </div>
 
@@ -507,15 +552,21 @@
             option.addEventListener('click', function() {
                 document.querySelectorAll('.role-option').forEach(opt => opt.classList.remove('selected'));
                 this.classList.add('selected');
-                
+
                 const role = this.querySelector('input[type="radio"]').value;
-                
+
                 if (role === 'student') {
                     document.getElementById('studentFields').style.display = 'block';
                     document.getElementById('doctorFields').style.display = 'none';
-                } else {
+                    document.getElementById('nurseFields').style.display = 'none';
+                } else if (role === 'doctor') {
                     document.getElementById('studentFields').style.display = 'none';
                     document.getElementById('doctorFields').style.display = 'block';
+                    document.getElementById('nurseFields').style.display = 'none';
+                } else if (role === 'nurse') {
+                    document.getElementById('studentFields').style.display = 'none';
+                    document.getElementById('doctorFields').style.display = 'none';
+                    document.getElementById('nurseFields').style.display = 'block';
                 }
             });
         });
@@ -637,11 +688,11 @@
                 formData.department = department;
                 formData.major = major;
                 formData.year_level = yearLevel;
-            } else {
+            } else if (role === 'doctor') {
                 // Doctor fields
                 const licenseNumber = document.getElementById('licenseNumber').value.trim();
                 let specialization = document.getElementById('specialization').value;
-                
+
                 // If "Other" is selected, use the custom specialization
                 if (specialization === 'Other') {
                     specialization = document.getElementById('otherSpecialization').value.trim();
@@ -665,6 +716,27 @@
                 formData.student_id = licenseNumber; // Use license as temporary ID
                 formData.license_number = licenseNumber;
                 formData.specialization = specialization;
+            } else if (role === 'nurse') {
+                // Nurse fields
+                const nursingLicense = document.getElementById('nursingLicense').value.trim();
+                const nurseDepartment = document.getElementById('nurseDepartment').value;
+                const shift = document.getElementById('shift').value || null;
+
+                // Validate nurse fields
+                if (!nursingLicense) {
+                    showError('Nursing license number is required');
+                    return;
+                }
+                if (!nurseDepartment) {
+                    showError('Please select a department');
+                    return;
+                }
+
+                // For nurses, student_id will be generated by backend
+                formData.student_id = nursingLicense; // Use license as temporary ID
+                formData.nursing_license = nursingLicense;
+                formData.nurse_department = nurseDepartment;
+                formData.shift = shift;
             }
 
             // Disable submit button

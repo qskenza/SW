@@ -33,6 +33,7 @@ class User(Base):
     emergency_requests = orm_relationship("EmergencyRequest", back_populates="user", cascade="all, delete-orphan")
     emergency_contact = orm_relationship("EmergencyContact", back_populates="user", uselist=False, cascade="all, delete-orphan")
     doctor_profile = orm_relationship("Doctor", back_populates="user", uselist=False)
+    nurse_profile = orm_relationship("Nurse", back_populates="user", uselist=False)
 
 
 class EmergencyContact(Base):
@@ -93,7 +94,7 @@ class Visit(Base):
 
 class Doctor(Base):
     __tablename__ = "doctors"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=True)
     name = Column(String(100), nullable=False)
@@ -106,11 +107,30 @@ class Doctor(Base):
     avatar = Column(String(10))
     is_available = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
-    
+
     # Relationships
     user = orm_relationship("User", back_populates="doctor_profile")
     appointments = orm_relationship("Appointment", back_populates="doctor")
     availability_slots = orm_relationship("DoctorAvailability", back_populates="doctor", cascade="all, delete-orphan")
+
+
+class Nurse(Base):
+    __tablename__ = "nurses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=True)
+    name = Column(String(100), nullable=False)
+    license_number = Column(String(50), unique=True, nullable=True)
+    department = Column(String(100))
+    email = Column(String(100), unique=True)
+    phone = Column(String(20))
+    avatar = Column(String(10))
+    is_available = Column(Boolean, default=True)
+    shift = Column(String(20))  # morning, afternoon, night
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    user = orm_relationship("User", back_populates="nurse_profile")
 
 
 class DoctorAvailability(Base):
