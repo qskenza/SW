@@ -275,6 +275,18 @@
             <div id="appointmentsContainer"><p class="loading-text">Loading appointments...</p></div>
             <button class="book-btn" onclick="window.location.href='AppointmentBooking.html'">Book New Appointment</button>
         </div>
+
+        <div class="dashboard-grid" style="margin-top: 2rem;">
+            <div class="card">
+                <h2 class="card-title">💊 My Prescriptions</h2>
+                <div id="prescriptionsContainer"><p class="loading-text">Loading prescriptions...</p></div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">📋 My Referrals</h2>
+                <div id="referralsContainer"><p class="loading-text">Loading referrals...</p></div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -284,11 +296,13 @@
             const token = sessionStorage.getItem('token');
             if (!token) { window.location.href = 'Login.html'; return; }
             if (sessionStorage.getItem('role') === 'doctor') { window.location.href = 'DoctorDashboard.html'; return; }
-            
+
             await loadStudentProfile();
             await loadMedicalRecords();
             await loadVisitHistory();
             await loadUpcomingAppointments();
+            await loadPrescriptions();
+            await loadReferrals();
         });
 
         async function loadStudentProfile() {
@@ -515,6 +529,102 @@
                 console.error('Error cancelling appointment:', error);
                 alert('❌ Network error. Please try again.');
             }
+        }
+
+        async function loadPrescriptions() {
+            try {
+                const response = await fetch(`${API_URL}/my-prescriptions`, {
+                    headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+                });
+                if (!response.ok) throw new Error('Failed');
+                const prescriptions = await response.json();
+                displayPrescriptions(prescriptions);
+            } catch (e) {
+                document.getElementById('prescriptionsContainer').innerHTML = '<p class="empty-state">No prescriptions found</p>';
+            }
+        }
+
+        function displayPrescriptions(prescriptions) {
+            const container = document.getElementById('prescriptionsContainer');
+            if (!prescriptions || prescriptions.length === 0) {
+                container.innerHTML = '<p class="empty-state">No prescriptions found</p>';
+                return;
+            }
+
+            let html = '';
+            prescriptions.forEach(presc => {
+                const date = presc.created_at ? new Date(presc.created_at).toLocaleDateString() : 'N/A';
+                const statusClass = presc.status === 'active' ? 'active' : 'completed';
+                const statusBadge = presc.status === 'active' ? '🟢 Active' : '⚪ Completed';
+
+                html += `
+                    <div class="entry-item" style="margin-bottom: 1rem; padding: 1rem; background: #f8fff8; border-radius: 8px; border-left: 4px solid #4caf50;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                            <strong style="color: #2e7d32; font-size: 1.1rem;">${presc.medication}</strong>
+                            <span style="font-size: 0.85rem; color: ${presc.status === 'active' ? '#4caf50' : '#999'};">${statusBadge}</span>
+                        </div>
+                        <div style="color: #666; margin-bottom: 0.3rem;"><strong>Dosage:</strong> ${presc.dosage}</div>
+                        <div style="color: #666; margin-bottom: 0.3rem;"><strong>Frequency:</strong> ${presc.frequency}</div>
+                        <div style="color: #666; margin-bottom: 0.3rem;"><strong>Duration:</strong> ${presc.duration}</div>
+                        ${presc.instructions ? `<div style="color: #666; margin-bottom: 0.3rem;"><strong>Instructions:</strong> ${presc.instructions}</div>` : ''}
+                        <div style="color: #999; font-size: 0.85rem; margin-top: 0.5rem;">
+                            Prescribed by <strong>${presc.doctor_name}</strong> on ${date}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        async function loadReferrals() {
+            try {
+                const response = await fetch(`${API_URL}/my-referrals`, {
+                    headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+                });
+                if (!response.ok) throw new Error('Failed');
+                const referrals = await response.json();
+                displayReferrals(referrals);
+            } catch (e) {
+                document.getElementById('referralsContainer').innerHTML = '<p class="empty-state">No referrals found</p>';
+            }
+        }
+
+        function displayReferrals(referrals) {
+            const container = document.getElementById('referralsContainer');
+            if (!referrals || referrals.length === 0) {
+                container.innerHTML = '<p class="empty-state">No referrals found</p>';
+                return;
+            }
+
+            let html = '';
+            referrals.forEach(ref => {
+                const date = ref.created_at ? new Date(ref.created_at).toLocaleDateString() : 'N/A';
+                const priorityColors = {
+                    'routine': '#4caf50',
+                    'urgent': '#ff9800',
+                    'emergency': '#d32f2f'
+                };
+                const priorityColor = priorityColors[ref.priority] || '#4caf50';
+                const statusBadge = ref.status === 'pending' ? '🟡 Pending' : ref.status === 'scheduled' ? '🔵 Scheduled' : '🟢 Completed';
+
+                html += `
+                    <div class="entry-item" style="margin-bottom: 1rem; padding: 1rem; background: #f8fff8; border-radius: 8px; border-left: 4px solid ${priorityColor};">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                            <strong style="color: #2e7d32; font-size: 1.1rem;">${ref.specialist_type}</strong>
+                            <span style="font-size: 0.85rem; color: #666;">${statusBadge}</span>
+                        </div>
+                        <div style="color: #666; margin-bottom: 0.3rem;"><strong>Reason:</strong> ${ref.reason}</div>
+                        <div style="color: #666; margin-bottom: 0.3rem;"><strong>Priority:</strong> <span style="color: ${priorityColor}; font-weight: 600; text-transform: uppercase;">${ref.priority}</span></div>
+                        ${ref.notes ? `<div style="color: #666; margin-bottom: 0.3rem;"><strong>Notes:</strong> ${ref.notes}</div>` : ''}
+                        <div style="color: #999; font-size: 0.85rem; margin-top: 0.5rem;">
+                            Referred by <strong>${ref.doctor_name}</strong> on ${date}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
         }
     </script>
 

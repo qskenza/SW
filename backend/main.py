@@ -2107,6 +2107,61 @@ def add_medical_record_by_doctor(
     }
 
 
+@app.get("/my-prescriptions")
+def get_my_prescriptions(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all prescriptions for the current student"""
+    prescriptions = db.query(models.Prescription).filter(
+        models.Prescription.patient_id == current_user.id
+    ).order_by(models.Prescription.created_at.desc()).all()
+
+    result = []
+    for presc in prescriptions:
+        doctor = db.query(models.Doctor).filter(models.Doctor.id == presc.doctor_id).first()
+        result.append({
+            "id": presc.id,
+            "medication": presc.medication,
+            "dosage": presc.dosage,
+            "frequency": presc.frequency,
+            "duration": presc.duration,
+            "instructions": presc.instructions,
+            "status": presc.status,
+            "doctor_name": doctor.name if doctor else "Unknown",
+            "created_at": presc.created_at.isoformat() if presc.created_at else None
+        })
+
+    return result
+
+
+@app.get("/my-referrals")
+def get_my_referrals(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all referrals for the current student"""
+    referrals = db.query(models.Referral).filter(
+        models.Referral.patient_id == current_user.id
+    ).order_by(models.Referral.created_at.desc()).all()
+
+    result = []
+    for ref in referrals:
+        doctor = db.query(models.Doctor).filter(models.Doctor.id == ref.doctor_id).first()
+        result.append({
+            "id": ref.id,
+            "specialist_type": ref.specialist_type,
+            "reason": ref.reason,
+            "priority": ref.priority,
+            "notes": ref.notes,
+            "status": ref.status,
+            "doctor_name": doctor.name if doctor else "Unknown",
+            "created_at": ref.created_at.isoformat() if ref.created_at else None
+        })
+
+    return result
+
+
 # ---------------------------------------------------------
 # STARTUP EVENT - Initialize Database
 # ---------------------------------------------------------
