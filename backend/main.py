@@ -194,6 +194,33 @@ class ProfessionalExperienceUpdate(BaseModel):
     description: Optional[str] = None
     is_current: Optional[bool] = None
 
+class DoctorProfileUpdate(BaseModel):
+    specialty: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+
+class PrescriptionCreate(BaseModel):
+    patient_id: int
+    medication: str
+    dosage: str
+    frequency: str
+    duration: str
+    instructions: Optional[str] = None
+
+class ReferralCreate(BaseModel):
+    patient_id: int
+    specialist_type: str
+    reason: str
+    priority: str = "routine"
+    notes: Optional[str] = None
+
+class DoctorMedicalRecordCreate(BaseModel):
+    patient_id: int
+    type: str
+    name: str
+    severity: Optional[str] = None
+    description: Optional[str] = None
+
 
 # ---------------------------------------------------------
 # TOKEN & AUTH
@@ -717,6 +744,36 @@ def get_doctors(db: Session = Depends(get_db)):
         }
         for d in doctors
     ]
+
+
+@app.put("/doctor/profile")
+def update_doctor_profile(
+    update_data: DoctorProfileUpdate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update doctor's profile information"""
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    # Update doctor fields
+    if update_data.specialty is not None:
+        doctor.specialty = update_data.specialty
+    if update_data.email is not None:
+        doctor.email = update_data.email
+    if update_data.phone is not None:
+        doctor.phone = update_data.phone
+
+    db.commit()
+    db.refresh(doctor)
+
+    return {
+        "message": "Profile updated successfully",
+        "specialty": doctor.specialty,
+        "email": doctor.email,
+        "phone": doctor.phone
+    }
 
 
 # ---------------------------------------------------------
@@ -1922,6 +1979,132 @@ async def chat_endpoint(request: ChatRequest):
             conversation_id=request.conversation_id or "error",
             mode="error",
         )
+
+
+# ---------------------------------------------------------
+# PRESCRIPTIONS, REFERRALS, MEDICAL RECORDS (DOCTOR)
+# ---------------------------------------------------------
+@app.get("/users/students")
+def get_all_students(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all students for doctor's dropdown menus"""
+    if current_user.role != "doctor":
+        raise HTTPException(status_code=403, detail="Only doctors can access this")
+
+    students = db.query(models.User).filter(models.User.role == "student").all()
+
+    return [
+        {
+            "id": student.id,
+            "full_name": student.full_name,
+            "student_id": student.student_id,
+            "email": student.email
+        }
+        for student in students
+    ]
+
+
+@app.post("/prescriptions")
+def create_prescription(
+    prescription_data: PrescriptionCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new prescription"""
+    if current_user.role != "doctor":
+        raise HTTPException(status_code=403, detail="Only doctors can create prescriptions")
+
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    prescription = models.Prescription(
+        patient_id=prescription_data.patient_id,
+        doctor_id=doctor.id,
+        medication=prescription_data.medication,
+        dosage=prescription_data.dosage,
+        frequency=prescription_data.frequency,
+        duration=prescription_data.duration,
+        instructions=prescription_data.instructions
+    )
+
+    db.add(prescription)
+    db.commit()
+    db.refresh(prescription)
+
+    return {
+        "message": "Prescription created successfully",
+        "id": prescription.id
+    }
+
+
+@app.post("/referrals")
+def create_referral(
+    referral_data: ReferralCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new referral"""
+    if current_user.role != "doctor":
+        raise HTTPException(status_code=403, detail="Only doctors can create referrals")
+
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    referral = models.Referral(
+        patient_id=referral_data.patient_id,
+        doctor_id=doctor.id,
+        specialist_type=referral_data.specialist_type,
+        reason=referral_data.reason,
+        priority=referral_data.priority,
+        notes=referral_data.notes
+    )
+
+    db.add(referral)
+    db.commit()
+    db.refresh(referral)
+
+    return {
+        "message": "Referral created successfully",
+        "id": referral.id
+    }
+
+
+@app.post("/doctor/medical-records")
+def add_medical_record_by_doctor(
+    record_data: DoctorMedicalRecordCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Doctor adds a medical record for a patient"""
+    if current_user.role != "doctor":
+        raise HTTPException(status_code=403, detail="Only doctors can add medical records")
+
+    # Verify patient exists
+    patient = db.query(models.User).filter(models.User.id == record_data.patient_id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    medical_entry = models.MedicalRecord(
+        user_id=record_data.patient_id,
+        type=record_data.type,
+        name=record_data.name,
+        severity=record_data.severity,
+        description=record_data.description,
+        is_active=True
+    )
+
+    db.add(medical_entry)
+    db.commit()
+    db.refresh(medical_entry)
+
+    return {
+        "message": "Medical record added successfully",
+        "id": medical_entry.id
+    }
 
 
 # ---------------------------------------------------------
