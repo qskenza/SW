@@ -93,7 +93,7 @@ class Visit(Base):
 
 class Doctor(Base):
     __tablename__ = "doctors"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=True)
     name = Column(String(100), nullable=False)
@@ -105,8 +105,9 @@ class Doctor(Base):
     reviews_count = Column(Integer, default=0)
     avatar = Column(String(10))
     is_available = Column(Boolean, default=True)
+    professional_experience = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
-    
+
     # Relationships
     user = orm_relationship("User", back_populates="doctor_profile")
     appointments = orm_relationship("Appointment", back_populates="doctor")
