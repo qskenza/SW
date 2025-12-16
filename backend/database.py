@@ -32,9 +32,36 @@ def init_db():
     import models
     models.Base.metadata.create_all(bind=engine)
     print("✅ Database initialized successfully")
-    
+
+    # Run migrations
+    run_migrations()
+
     # Seed initial data
     seed_db()
+
+def run_migrations():
+    """Run database migrations to update schema"""
+    from sqlalchemy import text
+    db = SessionLocal()
+    try:
+        # Migration: Add professional_experience column to doctors table
+        try:
+            # Check if column exists
+            result = db.execute(text("PRAGMA table_info(doctors)"))
+            columns = [row[1] for row in result.fetchall()]
+
+            if 'professional_experience' not in columns:
+                print("🔄 Running migration: Adding professional_experience column to doctors table...")
+                db.execute(text("ALTER TABLE doctors ADD COLUMN professional_experience TEXT"))
+                db.commit()
+                print("✅ Migration completed: professional_experience column added")
+            else:
+                print("✅ professional_experience column already exists")
+        except Exception as e:
+            print(f"⚠️  Migration warning: {e}")
+            db.rollback()
+    finally:
+        db.close()
 
 def seed_db():
     """Seed database with initial data"""
