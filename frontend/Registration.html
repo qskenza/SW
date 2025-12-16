@@ -646,11 +646,11 @@
                 formData.department = department;
                 formData.major = major;
                 formData.year_level = yearLevel;
-            } else {
+            } else if (role === 'doctor') {
                 // Doctor fields
                 const licenseNumber = document.getElementById('licenseNumber').value.trim();
                 let specialization = document.getElementById('specialization').value;
-                
+
                 // If "Other" is selected, use the custom specialization
                 if (specialization === 'Other') {
                     specialization = document.getElementById('otherSpecialization').value.trim();
@@ -674,6 +674,10 @@
                 formData.student_id = licenseNumber; // Use license as temporary ID
                 formData.license_number = licenseNumber;
                 formData.specialization = specialization;
+            } else if (role === 'nurse') {
+                // Nurse fields - nurses don't need student_id, license, or specialization
+                // The backend will generate a nurse ID (N prefix)
+                formData.student_id = 'TEMP_NURSE'; // Temporary placeholder, backend will replace
             }
 
             // Disable submit button
