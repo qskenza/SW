@@ -781,6 +781,7 @@
                 <button class="tab-btn active" data-tab="personal">Profile Information</button>
                 <button class="tab-btn" data-tab="schedule">Today's Schedule</button>
                 <button class="tab-btn" data-tab="availability">Availability</button>
+                <button class="tab-btn" data-tab="experience">Professional Experience</button>
                 <button class="tab-btn" data-tab="quickactions">Quick Actions</button>
             </div>
 
@@ -987,9 +988,76 @@
             }
             </style>
 
+            <div class="tab-content" id="experience-tab">
+                <h3 class="tab-title">Professional Experience</h3>
+
+                <div class="availability-info-box" style="background: #e8f5e8; border-left: 4px solid #4caf50; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;">
+                    <p style="margin: 0; color: #2e7d32;">
+                        <strong>💼 Manage your professional experience:</strong> Add your work history, education, and certifications.
+                        This information will be visible to students viewing your profile.
+                    </p>
+                </div>
+
+                <!-- Current Experience List -->
+                <div id="experienceList" style="margin-bottom: 2rem;">
+                    <div class="loading">Loading your professional experience...</div>
+                </div>
+
+                <!-- Add Experience Form -->
+                <div class="availability-form-card" style="background: #f8fff8; padding: 2rem; border-radius: 12px; border: 2px solid #e8f5e8; margin-top: 2rem;">
+                    <h4 style="color: #2e7d32; margin-bottom: 1.5rem; font-size: 1.2rem;">Add New Experience</h4>
+
+                    <form id="experienceForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Position/Title *</label>
+                                <input type="text" id="expPosition" class="form-input" placeholder="e.g., Senior Cardiologist" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Institution/Organization *</label>
+                                <input type="text" id="expInstitution" class="form-input" placeholder="e.g., Johns Hopkins Hospital" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Start Date *</label>
+                                <input type="date" id="expStartDate" class="form-input" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">End Date</label>
+                                <input type="date" id="expEndDate" class="form-input">
+                                <small style="color: #666;">Leave empty if current position</small>
+                            </div>
+
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="form-label">
+                                    <input type="checkbox" id="expIsCurrent" style="margin-right: 0.5rem;">
+                                    This is my current position
+                                </label>
+                            </div>
+
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="form-label">Description</label>
+                                <textarea id="expDescription" class="form-input" rows="4" placeholder="Describe your responsibilities, achievements, and key activities..."></textarea>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                            <button type="submit" class="add-availability-btn" style="background: #4caf50; color: white; padding: 0.8rem 2rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; flex: 1;">
+                                Add Experience
+                            </button>
+                            <button type="button" id="cancelEditExpBtn" class="add-availability-btn" style="background: #999; color: white; padding: 0.8rem 2rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; flex: 1; display: none;">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <div class="tab-content" id="quickactions-tab">
                 <h3 class="tab-title">Quick Actions</h3>
-                
+
                 <div class="quick-actions-grid">
                     <div class="action-card" data-action="prescription">
                         <div class="action-icon">💊</div>
@@ -1020,7 +1088,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <div id="patientQueueContainer">
                 <div class="loading">
                     <div class="loading-spinner"></div>
@@ -1028,7 +1096,208 @@
                 </div>
             </div>
         </section>
+
+        <!-- Prescription Management -->
+        <section class="queue-section" style="margin-top: 2rem;">
+            <div class="queue-header">
+                <h2 class="section-title">💊 My Prescriptions</h2>
+                <div class="queue-actions">
+                    <button class="queue-btn refresh-btn" onclick="loadDoctorPrescriptions()">
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div id="doctorPrescriptionsContainer">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading prescriptions...</p>
+                </div>
+            </div>
+        </section>
     </div>
+
+    <!-- Prescription Modal -->
+    <div id="prescriptionModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closePrescriptionModal()">&times;</span>
+            <h2>💊 New Prescription</h2>
+            <form id="prescriptionForm">
+                <div class="form-group">
+                    <label class="form-label">Patient *</label>
+                    <select id="prescPatient" class="form-input" required>
+                        <option value="">Select Patient</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Medication Name *</label>
+                    <input type="text" id="prescMedication" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Dosage *</label>
+                    <input type="text" id="prescDosage" class="form-input" placeholder="e.g., 500mg" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Frequency *</label>
+                    <input type="text" id="prescFrequency" class="form-input" placeholder="e.g., Twice daily" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Duration *</label>
+                    <input type="text" id="prescDuration" class="form-input" placeholder="e.g., 7 days" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Instructions</label>
+                    <textarea id="prescInstructions" class="form-input" rows="3" placeholder="Additional instructions for the patient"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Create Prescription</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Referral Modal -->
+    <div id="referralModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeReferralModal()">&times;</span>
+            <h2>📋 Create Referral</h2>
+            <form id="referralForm">
+                <div class="form-group">
+                    <label class="form-label">Patient *</label>
+                    <select id="refPatient" class="form-input" required>
+                        <option value="">Select Patient</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Specialist Type *</label>
+                    <select id="refSpecialist" class="form-input" required>
+                        <option value="">Select Specialist</option>
+                        <option value="Cardiologist">Cardiologist</option>
+                        <option value="Dermatologist">Dermatologist</option>
+                        <option value="Neurologist">Neurologist</option>
+                        <option value="Orthopedic Surgeon">Orthopedic Surgeon</option>
+                        <option value="Psychiatrist">Psychiatrist</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reason for Referral *</label>
+                    <textarea id="refReason" class="form-input" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Priority</label>
+                    <select id="refPriority" class="form-input">
+                        <option value="routine">Routine</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="emergency">Emergency</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Additional Notes</label>
+                    <textarea id="refNotes" class="form-input" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Create Referral</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Medical Record Modal -->
+    <div id="medicalRecordModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeMedicalRecordModal()">&times;</span>
+            <h2>🏥 Add Medical Record</h2>
+            <form id="medicalRecordForm">
+                <div class="form-group">
+                    <label class="form-label">Patient *</label>
+                    <select id="mrPatient" class="form-input" required>
+                        <option value="">Select Patient</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Record Type *</label>
+                    <select id="mrType" class="form-input" required>
+                        <option value="">Select Type</option>
+                        <option value="allergy">Allergy</option>
+                        <option value="medication">Medication</option>
+                        <option value="condition">Condition</option>
+                        <option value="vaccination">Vaccination</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Name *</label>
+                    <input type="text" id="mrName" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Severity</label>
+                    <select id="mrSeverity" class="form-input">
+                        <option value="">Not Applicable</option>
+                        <option value="mild">Mild</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="severe">Severe</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="mrDescription" class="form-input" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Add Record</button>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 3% auto;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            color: #000;
+        }
+
+        .modal h2 {
+            color: #2e7d32;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-primary {
+            background: #4caf50;
+            color: white;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-primary:hover {
+            background: #388e3c;
+        }
+    </style>
 
     <script>
         const API_URL = 'http://localhost:8000';
@@ -1055,13 +1324,16 @@
             
             // Load doctor profile
             await loadDoctorProfile();
-            
+
             // Load schedule
             await loadSchedule();
-            
+
+            // Load prescriptions
+            await loadDoctorPrescriptions();
+
             // Initialize tabs
             initializeTabs();
-            
+
             // Initialize quick actions
             initializeQuickActions();
         });
@@ -1301,20 +1573,102 @@
             document.querySelectorAll('.action-card').forEach(card => {
                 card.addEventListener('click', function() {
                     const action = this.getAttribute('data-action');
-                    
+
                     switch(action) {
                         case 'prescription':
-                            alert('📝 New Prescription\n\nThis feature would open a prescription form.');
+                            openPrescriptionModal();
                             break;
                         case 'referral':
-                            alert('📋 Create Referral\n\nThis feature would open a referral form.');
+                            openReferralModal();
                             break;
                         case 'record':
-                            alert('🏥 Update Medical Record\n\nThis feature would open the medical records editor.');
+                            openMedicalRecordModal();
                             break;
                     }
                 });
             });
+        }
+
+        // ============================================
+        // EDIT PROFILE
+        // ============================================
+        let isEditingProfile = false;
+
+        document.getElementById('editProfileBtn').addEventListener('click', function() {
+            if (!isEditingProfile) {
+                // Enable editing
+                isEditingProfile = true;
+                this.innerHTML = '<span>💾</span> Save Profile';
+                this.style.background = '#4caf50';
+
+                // Make fields editable (except name and license)
+                document.getElementById('formSpecialty').removeAttribute('readonly');
+                document.getElementById('formEmail').removeAttribute('readonly');
+                document.getElementById('formPhone').removeAttribute('readonly');
+
+                // Add visual indication
+                document.getElementById('formSpecialty').style.background = '#fff9c4';
+                document.getElementById('formEmail').style.background = '#fff9c4';
+                document.getElementById('formPhone').style.background = '#fff9c4';
+            } else {
+                // Save changes
+                saveProfileChanges();
+            }
+        });
+
+        async function saveProfileChanges() {
+            const specialty = document.getElementById('formSpecialty').value.trim();
+            const email = document.getElementById('formEmail').value.trim();
+            const phone = document.getElementById('formPhone').value.trim();
+
+            if (!specialty || !email || !phone) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/doctor/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        specialty,
+                        email,
+                        phone
+                    })
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.detail || 'Failed to update profile');
+                }
+
+                alert('✅ Profile updated successfully!');
+
+                // Disable editing
+                isEditingProfile = false;
+                document.getElementById('editProfileBtn').innerHTML = '<span>✏️</span> Edit Profile';
+                document.getElementById('editProfileBtn').style.background = '#2196f3';
+
+                // Make fields readonly again
+                document.getElementById('formSpecialty').setAttribute('readonly', true);
+                document.getElementById('formEmail').setAttribute('readonly', true);
+                document.getElementById('formPhone').setAttribute('readonly', true);
+
+                // Remove visual indication
+                document.getElementById('formSpecialty').style.background = '';
+                document.getElementById('formEmail').style.background = '';
+                document.getElementById('formPhone').style.background = '';
+
+                // Reload profile
+                await loadDoctorProfile();
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`❌ Error: ${error.message}`);
+            }
         }
 
         // ============================================
@@ -1534,6 +1888,504 @@
         document.querySelector('[data-tab="availability"]').addEventListener('click', function() {
             loadDoctorSchedule();
         });
+
+        // ============================================
+        // PROFESSIONAL EXPERIENCE MANAGEMENT
+        // ============================================
+        let editingExperienceId = null;
+
+        // Load professional experience when tab is opened
+        document.querySelector('[data-tab="experience"]').addEventListener('click', function() {
+            loadProfessionalExperience();
+        });
+
+        async function loadProfessionalExperience() {
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/doctor/professional-experience`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load experience');
+
+                const experiences = await response.json();
+                displayExperiences(experiences);
+            } catch (error) {
+                console.error('Error loading experience:', error);
+                document.getElementById('experienceList').innerHTML = '<p style="color: #999;">Failed to load professional experience.</p>';
+            }
+        }
+
+        function displayExperiences(experiences) {
+            const container = document.getElementById('experienceList');
+
+            if (experiences.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No professional experience added yet. Add your first experience below.</p>';
+                return;
+            }
+
+            container.innerHTML = experiences.map(exp => {
+                const startDate = new Date(exp.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+                const endDate = exp.end_date ? new Date(exp.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : 'Present';
+                const currentBadge = exp.is_current ? '<span style="background: #4caf50; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.85rem; margin-left: 0.5rem;">Current</span>' : '';
+
+                return `
+                    <div class="schedule-day-card" style="margin-bottom: 1rem;">
+                        <div class="day-info">
+                            <div class="day-name">${exp.position} ${currentBadge}</div>
+                            <div style="color: #666; margin: 0.5rem 0;">
+                                <strong>${exp.institution}</strong>
+                            </div>
+                            <div style="color: #999; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                ${startDate} - ${endDate}
+                            </div>
+                            ${exp.description ? `<div style="color: #666; margin-top: 0.5rem; font-size: 0.95rem;">${exp.description}</div>` : ''}
+                        </div>
+                        <div class="day-actions">
+                            <button onclick="editExperience(${exp.id})" style="background: #2196f3; color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; margin-right: 0.5rem;">
+                                Edit
+                            </button>
+                            <button onclick="deleteExperience(${exp.id}, '${exp.position}')" style="background: #d32f2f; color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer;">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Handle experience form submission
+        document.getElementById('experienceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const position = document.getElementById('expPosition').value.trim();
+            const institution = document.getElementById('expInstitution').value.trim();
+            const startDate = document.getElementById('expStartDate').value;
+            const endDate = document.getElementById('expEndDate').value;
+            const description = document.getElementById('expDescription').value.trim();
+            const isCurrent = document.getElementById('expIsCurrent').checked;
+
+            if (!position || !institution || !startDate) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const experienceData = {
+                position,
+                institution,
+                start_date: startDate,
+                end_date: endDate || null,
+                description: description || null,
+                is_current: isCurrent
+            };
+
+            try {
+                const token = sessionStorage.getItem('token');
+                const method = editingExperienceId ? 'PUT' : 'POST';
+                const url = editingExperienceId
+                    ? `${API_URL}/doctor/professional-experience/${editingExperienceId}`
+                    : `${API_URL}/doctor/professional-experience`;
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(experienceData)
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.detail || 'Failed to save experience');
+                }
+
+                alert(editingExperienceId ? '✅ Experience updated successfully!' : '✅ Experience added successfully!');
+
+                // Reset form
+                this.reset();
+                editingExperienceId = null;
+                document.getElementById('cancelEditExpBtn').style.display = 'none';
+                document.querySelector('#experienceForm button[type="submit"]').textContent = 'Add Experience';
+
+                // Reload experiences
+                await loadProfessionalExperience();
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`❌ Error: ${error.message}`);
+            }
+        });
+
+        // Handle "is current" checkbox
+        document.getElementById('expIsCurrent').addEventListener('change', function() {
+            const endDateInput = document.getElementById('expEndDate');
+            if (this.checked) {
+                endDateInput.value = '';
+                endDateInput.disabled = true;
+            } else {
+                endDateInput.disabled = false;
+            }
+        });
+
+        // Cancel edit
+        document.getElementById('cancelEditExpBtn').addEventListener('click', function() {
+            document.getElementById('experienceForm').reset();
+            editingExperienceId = null;
+            this.style.display = 'none';
+            document.querySelector('#experienceForm button[type="submit"]').textContent = 'Add Experience';
+        });
+
+        async function editExperience(experienceId) {
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/doctor/professional-experience`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load experience');
+
+                const experiences = await response.json();
+                const experience = experiences.find(exp => exp.id === experienceId);
+
+                if (!experience) throw new Error('Experience not found');
+
+                // Fill form
+                document.getElementById('expPosition').value = experience.position;
+                document.getElementById('expInstitution').value = experience.institution;
+                document.getElementById('expStartDate').value = experience.start_date;
+                document.getElementById('expEndDate').value = experience.end_date || '';
+                document.getElementById('expDescription').value = experience.description || '';
+                document.getElementById('expIsCurrent').checked = experience.is_current;
+
+                if (experience.is_current) {
+                    document.getElementById('expEndDate').disabled = true;
+                }
+
+                editingExperienceId = experienceId;
+                document.getElementById('cancelEditExpBtn').style.display = 'block';
+                document.querySelector('#experienceForm button[type="submit"]').textContent = 'Update Experience';
+
+                // Scroll to form
+                document.querySelector('#experienceForm').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Failed to load experience for editing');
+            }
+        }
+
+        async function deleteExperience(experienceId, position) {
+            if (!confirm(`Are you sure you want to delete "${position}"?`)) {
+                return;
+            }
+
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/doctor/professional-experience/${experienceId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.detail || 'Failed to delete');
+                }
+
+                alert('✅ Experience deleted successfully!');
+                await loadProfessionalExperience();
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // ============================================
+        // QUICK ACTIONS MODALS
+        // ============================================
+        let patients = [];
+
+        // Load patients for dropdowns
+        async function loadPatients() {
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/users/students`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    patients = await response.json();
+                    populatePatientDropdowns();
+                }
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+
+        function populatePatientDropdowns() {
+            const selects = ['prescPatient', 'refPatient', 'mrPatient'];
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '<option value="">Select Patient</option>';
+                patients.forEach(patient => {
+                    const option = document.createElement('option');
+                    option.value = patient.id;
+                    option.textContent = `${patient.full_name} (${patient.student_id})`;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        // Prescription Modal
+        function openPrescriptionModal() {
+            loadPatients();
+            document.getElementById('prescriptionModal').style.display = 'block';
+        }
+
+        function closePrescriptionModal() {
+            document.getElementById('prescriptionModal').style.display = 'none';
+            document.getElementById('prescriptionForm').reset();
+        }
+
+        document.getElementById('prescriptionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                patient_id: parseInt(document.getElementById('prescPatient').value),
+                medication: document.getElementById('prescMedication').value.trim(),
+                dosage: document.getElementById('prescDosage').value.trim(),
+                frequency: document.getElementById('prescFrequency').value.trim(),
+                duration: document.getElementById('prescDuration').value.trim(),
+                instructions: document.getElementById('prescInstructions').value.trim()
+            };
+
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/prescriptions`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.detail || 'Failed to create prescription');
+                }
+
+                alert('✅ Prescription created successfully!');
+                closePrescriptionModal();
+                await loadDoctorPrescriptions(); // Reload prescriptions list
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`❌ Error: ${error.message}`);
+            }
+        });
+
+        // Referral Modal
+        function openReferralModal() {
+            loadPatients();
+            document.getElementById('referralModal').style.display = 'block';
+        }
+
+        function closeReferralModal() {
+            document.getElementById('referralModal').style.display = 'none';
+            document.getElementById('referralForm').reset();
+        }
+
+        document.getElementById('referralForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                patient_id: parseInt(document.getElementById('refPatient').value),
+                specialist_type: document.getElementById('refSpecialist').value,
+                reason: document.getElementById('refReason').value.trim(),
+                priority: document.getElementById('refPriority').value,
+                notes: document.getElementById('refNotes').value.trim()
+            };
+
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/referrals`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.detail || 'Failed to create referral');
+                }
+
+                alert('✅ Referral created successfully!');
+                closeReferralModal();
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`❌ Error: ${error.message}`);
+            }
+        });
+
+        // Medical Record Modal
+        function openMedicalRecordModal() {
+            loadPatients();
+            document.getElementById('medicalRecordModal').style.display = 'block';
+        }
+
+        function closeMedicalRecordModal() {
+            document.getElementById('medicalRecordModal').style.display = 'none';
+            document.getElementById('medicalRecordForm').reset();
+        }
+
+        document.getElementById('medicalRecordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                patient_id: parseInt(document.getElementById('mrPatient').value),
+                type: document.getElementById('mrType').value,
+                name: document.getElementById('mrName').value.trim(),
+                severity: document.getElementById('mrSeverity').value || null,
+                description: document.getElementById('mrDescription').value.trim() || null
+            };
+
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/doctor/medical-records`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.detail || 'Failed to add medical record');
+                }
+
+                alert('✅ Medical record added successfully!');
+                closeMedicalRecordModal();
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`❌ Error: ${error.message}`);
+            }
+        });
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = ['prescriptionModal', 'referralModal', 'medicalRecordModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        };
+
+        // ============================================
+        // PRESCRIPTION MANAGEMENT
+        // ============================================
+        async function loadDoctorPrescriptions() {
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/doctor/prescriptions`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load prescriptions');
+
+                const prescriptions = await response.json();
+                displayDoctorPrescriptions(prescriptions);
+            } catch (error) {
+                console.error('Error loading prescriptions:', error);
+                document.getElementById('doctorPrescriptionsContainer').innerHTML =
+                    '<p style="color: #999; text-align: center; padding: 2rem;">Failed to load prescriptions.</p>';
+            }
+        }
+
+        function displayDoctorPrescriptions(prescriptions) {
+            const container = document.getElementById('doctorPrescriptionsContainer');
+
+            if (!prescriptions || prescriptions.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No prescriptions created yet.</p>';
+                return;
+            }
+
+            let html = '<div style="display: grid; gap: 1rem;">';
+
+            prescriptions.forEach(presc => {
+                const date = presc.created_at ? new Date(presc.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                }) : 'N/A';
+                const statusColor = presc.status === 'active' ? '#4caf50' : '#999';
+                const statusBadge = presc.status === 'active' ? '🟢 Active' : '⚪ Completed';
+
+                html += `
+                    <div class="schedule-day-card">
+                        <div class="day-info">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                <div class="day-name" style="flex: 1;">
+                                    💊 ${presc.medication}
+                                    <span style="background: ${statusColor}; color: white; padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.75rem; margin-left: 0.5rem;">${statusBadge}</span>
+                                </div>
+                            </div>
+                            <div style="color: #666; margin-bottom: 0.3rem;">
+                                <strong>Patient:</strong> ${presc.patient_name} (${presc.patient_id})
+                            </div>
+                            <div style="color: #666; margin-bottom: 0.3rem;">
+                                <strong>Dosage:</strong> ${presc.dosage} | <strong>Frequency:</strong> ${presc.frequency}
+                            </div>
+                            <div style="color: #666; margin-bottom: 0.3rem;">
+                                <strong>Duration:</strong> ${presc.duration}
+                            </div>
+                            ${presc.instructions ? `<div style="color: #666; margin-bottom: 0.3rem;"><strong>Instructions:</strong> ${presc.instructions}</div>` : ''}
+                            <div style="color: #999; font-size: 0.85rem; margin-top: 0.5rem;">
+                                Prescribed on ${date}
+                            </div>
+                        </div>
+                        <div class="day-actions">
+                            <button onclick="deletePrescription(${presc.id}, '${presc.medication}', '${presc.patient_name}')"
+                                    style="background: #d32f2f; color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer;">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        async function deletePrescription(prescriptionId, medication, patientName) {
+            if (!confirm(`Are you sure you want to delete the prescription for "${medication}" prescribed to ${patientName}?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/prescriptions/${prescriptionId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.detail || 'Failed to delete prescription');
+                }
+
+                alert('✅ Prescription deleted successfully!');
+                await loadDoctorPrescriptions(); // Reload the list
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
     </script>
 </body>
 </html>

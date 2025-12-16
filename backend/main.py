@@ -178,6 +178,49 @@ class DoctorAvailabilityUpdate(BaseModel):
     slot_duration: Optional[int] = None
     is_active: Optional[bool] = None
 
+class ProfessionalExperienceCreate(BaseModel):
+    position: str
+    institution: str
+    start_date: str  # Format: "YYYY-MM-DD"
+    end_date: Optional[str] = None  # Format: "YYYY-MM-DD", None if current
+    description: Optional[str] = None
+    is_current: bool = False
+
+class ProfessionalExperienceUpdate(BaseModel):
+    position: Optional[str] = None
+    institution: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    description: Optional[str] = None
+    is_current: Optional[bool] = None
+
+class DoctorProfileUpdate(BaseModel):
+    specialty: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+
+class PrescriptionCreate(BaseModel):
+    patient_id: int
+    medication: str
+    dosage: str
+    frequency: str
+    duration: str
+    instructions: Optional[str] = None
+
+class ReferralCreate(BaseModel):
+    patient_id: int
+    specialist_type: str
+    reason: str
+    priority: str = "routine"
+    notes: Optional[str] = None
+
+class DoctorMedicalRecordCreate(BaseModel):
+    patient_id: int
+    type: str
+    name: str
+    severity: Optional[str] = None
+    description: Optional[str] = None
+
 
 # ---------------------------------------------------------
 # TOKEN & AUTH
@@ -684,9 +727,8 @@ def get_all_visits(
 # ---------------------------------------------------------
 @app.get("/doctors")
 def get_doctors(db: Session = Depends(get_db)):
-    doctors = db.query(models.Doctor).filter(
-        models.Doctor.is_available == True
-    ).all()
+    # Get ALL registered doctors, not just available ones
+    doctors = db.query(models.Doctor).all()
 
     return [
         {
@@ -697,10 +739,221 @@ def get_doctors(db: Session = Depends(get_db)):
             "reviews": d.reviews_count,
             "avatar": d.avatar,
             "email": d.email,
-            "phone": d.phone
+            "phone": d.phone,
+            "is_available": d.is_available
         }
         for d in doctors
     ]
+
+
+@app.put("/doctor/profile")
+def update_doctor_profile(
+    update_data: DoctorProfileUpdate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update doctor's profile information"""
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    # Update doctor fields
+    if update_data.specialty is not None:
+        doctor.specialty = update_data.specialty
+    if update_data.email is not None:
+        doctor.email = update_data.email
+    if update_data.phone is not None:
+        doctor.phone = update_data.phone
+
+    db.commit()
+    db.refresh(doctor)
+
+    return {
+        "message": "Profile updated successfully",
+        "specialty": doctor.specialty,
+        "email": doctor.email,
+        "phone": doctor.phone
+    }
+
+
+# ---------------------------------------------------------
+# PROFESSIONAL EXPERIENCE
+# ---------------------------------------------------------
+@app.get("/doctor/professional-experience")
+def get_my_professional_experience(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get current doctor's professional experience"""
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    experiences = db.query(models.ProfessionalExperience).filter(
+        models.ProfessionalExperience.doctor_id == doctor.id
+    ).order_by(models.ProfessionalExperience.is_current.desc(), models.ProfessionalExperience.start_date.desc()).all()
+
+    return [
+        {
+            "id": exp.id,
+            "position": exp.position,
+            "institution": exp.institution,
+            "start_date": exp.start_date.isoformat() if exp.start_date else None,
+            "end_date": exp.end_date.isoformat() if exp.end_date else None,
+            "description": exp.description,
+            "is_current": exp.is_current
+        }
+        for exp in experiences
+    ]
+
+
+@app.get("/doctors/{doctor_id}/professional-experience")
+def get_doctor_professional_experience(doctor_id: int, db: Session = Depends(get_db)):
+    """Get professional experience for a specific doctor (public endpoint for students)"""
+    doctor = db.query(models.Doctor).filter(models.Doctor.id == doctor_id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+
+    experiences = db.query(models.ProfessionalExperience).filter(
+        models.ProfessionalExperience.doctor_id == doctor_id
+    ).order_by(models.ProfessionalExperience.is_current.desc(), models.ProfessionalExperience.start_date.desc()).all()
+
+    return [
+        {
+            "id": exp.id,
+            "position": exp.position,
+            "institution": exp.institution,
+            "start_date": exp.start_date.isoformat() if exp.start_date else None,
+            "end_date": exp.end_date.isoformat() if exp.end_date else None,
+            "description": exp.description,
+            "is_current": exp.is_current
+        }
+        for exp in experiences
+    ]
+
+
+@app.post("/doctor/professional-experience")
+def create_professional_experience(
+    experience_data: ProfessionalExperienceCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new professional experience entry"""
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    # Parse dates
+    try:
+        start_date = datetime.strptime(experience_data.start_date, "%Y-%m-%d").date()
+        end_date = datetime.strptime(experience_data.end_date, "%Y-%m-%d").date() if experience_data.end_date else None
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+
+    experience = models.ProfessionalExperience(
+        doctor_id=doctor.id,
+        position=experience_data.position,
+        institution=experience_data.institution,
+        start_date=start_date,
+        end_date=end_date,
+        description=experience_data.description,
+        is_current=experience_data.is_current
+    )
+
+    db.add(experience)
+    db.commit()
+    db.refresh(experience)
+
+    return {
+        "message": "Professional experience added successfully",
+        "id": experience.id,
+        "position": experience.position,
+        "institution": experience.institution,
+        "start_date": experience.start_date.isoformat(),
+        "end_date": experience.end_date.isoformat() if experience.end_date else None,
+        "description": experience.description,
+        "is_current": experience.is_current
+    }
+
+
+@app.put("/doctor/professional-experience/{experience_id}")
+def update_professional_experience(
+    experience_id: int,
+    experience_data: ProfessionalExperienceUpdate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update a professional experience entry"""
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    experience = db.query(models.ProfessionalExperience).filter(
+        models.ProfessionalExperience.id == experience_id,
+        models.ProfessionalExperience.doctor_id == doctor.id
+    ).first()
+
+    if not experience:
+        raise HTTPException(status_code=404, detail="Professional experience not found")
+
+    # Update fields
+    if experience_data.position is not None:
+        experience.position = experience_data.position
+    if experience_data.institution is not None:
+        experience.institution = experience_data.institution
+    if experience_data.start_date is not None:
+        try:
+            experience.start_date = datetime.strptime(experience_data.start_date, "%Y-%m-%d").date()
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid start_date format. Use YYYY-MM-DD")
+    if experience_data.end_date is not None:
+        try:
+            experience.end_date = datetime.strptime(experience_data.end_date, "%Y-%m-%d").date()
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid end_date format. Use YYYY-MM-DD")
+    if experience_data.description is not None:
+        experience.description = experience_data.description
+    if experience_data.is_current is not None:
+        experience.is_current = experience_data.is_current
+
+    db.commit()
+    db.refresh(experience)
+
+    return {
+        "message": "Professional experience updated successfully",
+        "id": experience.id,
+        "position": experience.position,
+        "institution": experience.institution,
+        "start_date": experience.start_date.isoformat(),
+        "end_date": experience.end_date.isoformat() if experience.end_date else None,
+        "description": experience.description,
+        "is_current": experience.is_current
+    }
+
+
+@app.delete("/doctor/professional-experience/{experience_id}")
+def delete_professional_experience(
+    experience_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a professional experience entry"""
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    experience = db.query(models.ProfessionalExperience).filter(
+        models.ProfessionalExperience.id == experience_id,
+        models.ProfessionalExperience.doctor_id == doctor.id
+    ).first()
+
+    if not experience:
+        raise HTTPException(status_code=404, detail="Professional experience not found")
+
+    db.delete(experience)
+    db.commit()
+
+    return {"message": "Professional experience deleted successfully"}
 
 
 # ---------------------------------------------------------
@@ -1726,6 +1979,251 @@ async def chat_endpoint(request: ChatRequest):
             conversation_id=request.conversation_id or "error",
             mode="error",
         )
+
+
+# ---------------------------------------------------------
+# PRESCRIPTIONS, REFERRALS, MEDICAL RECORDS (DOCTOR)
+# ---------------------------------------------------------
+@app.get("/users/students")
+def get_all_students(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all students for doctor's dropdown menus"""
+    if current_user.role != "doctor":
+        raise HTTPException(status_code=403, detail="Only doctors can access this")
+
+    students = db.query(models.User).filter(models.User.role == "student").all()
+
+    return [
+        {
+            "id": student.id,
+            "full_name": student.full_name,
+            "student_id": student.student_id,
+            "email": student.email
+        }
+        for student in students
+    ]
+
+
+@app.post("/prescriptions")
+def create_prescription(
+    prescription_data: PrescriptionCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new prescription"""
+    if current_user.role != "doctor":
+        raise HTTPException(status_code=403, detail="Only doctors can create prescriptions")
+
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    prescription = models.Prescription(
+        patient_id=prescription_data.patient_id,
+        doctor_id=doctor.id,
+        medication=prescription_data.medication,
+        dosage=prescription_data.dosage,
+        frequency=prescription_data.frequency,
+        duration=prescription_data.duration,
+        instructions=prescription_data.instructions
+    )
+
+    db.add(prescription)
+    db.commit()
+    db.refresh(prescription)
+
+    return {
+        "message": "Prescription created successfully",
+        "id": prescription.id
+    }
+
+
+@app.get("/doctor/prescriptions")
+def get_doctor_prescriptions(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all prescriptions created by the current doctor"""
+    if current_user.role != "doctor":
+        raise HTTPException(status_code=403, detail="Only doctors can access this")
+
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    prescriptions = db.query(models.Prescription).filter(
+        models.Prescription.doctor_id == doctor.id
+    ).order_by(models.Prescription.created_at.desc()).all()
+
+    result = []
+    for presc in prescriptions:
+        patient = db.query(models.User).filter(models.User.id == presc.patient_id).first()
+        result.append({
+            "id": presc.id,
+            "medication": presc.medication,
+            "dosage": presc.dosage,
+            "frequency": presc.frequency,
+            "duration": presc.duration,
+            "instructions": presc.instructions,
+            "status": presc.status,
+            "patient_name": patient.full_name if patient else "Unknown",
+            "patient_id": patient.student_id if patient else "Unknown",
+            "created_at": presc.created_at.isoformat() if presc.created_at else None
+        })
+
+    return result
+
+
+@app.delete("/prescriptions/{prescription_id}")
+def delete_prescription(
+    prescription_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a prescription - only the prescribing doctor can delete"""
+    if current_user.role != "doctor":
+        raise HTTPException(status_code=403, detail="Only doctors can delete prescriptions")
+
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    prescription = db.query(models.Prescription).filter(
+        models.Prescription.id == prescription_id,
+        models.Prescription.doctor_id == doctor.id  # Only allow deletion by prescribing doctor
+    ).first()
+
+    if not prescription:
+        raise HTTPException(status_code=404, detail="Prescription not found or you don't have permission to delete it")
+
+    db.delete(prescription)
+    db.commit()
+
+    return {"message": "Prescription deleted successfully"}
+
+
+@app.post("/referrals")
+def create_referral(
+    referral_data: ReferralCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new referral"""
+    if current_user.role != "doctor":
+        raise HTTPException(status_code=403, detail="Only doctors can create referrals")
+
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_user.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+
+    referral = models.Referral(
+        patient_id=referral_data.patient_id,
+        doctor_id=doctor.id,
+        specialist_type=referral_data.specialist_type,
+        reason=referral_data.reason,
+        priority=referral_data.priority,
+        notes=referral_data.notes
+    )
+
+    db.add(referral)
+    db.commit()
+    db.refresh(referral)
+
+    return {
+        "message": "Referral created successfully",
+        "id": referral.id
+    }
+
+
+@app.post("/doctor/medical-records")
+def add_medical_record_by_doctor(
+    record_data: DoctorMedicalRecordCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Doctor adds a medical record for a patient"""
+    if current_user.role != "doctor":
+        raise HTTPException(status_code=403, detail="Only doctors can add medical records")
+
+    # Verify patient exists
+    patient = db.query(models.User).filter(models.User.id == record_data.patient_id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    medical_entry = models.MedicalRecord(
+        user_id=record_data.patient_id,
+        type=record_data.type,
+        name=record_data.name,
+        severity=record_data.severity,
+        description=record_data.description,
+        is_active=True
+    )
+
+    db.add(medical_entry)
+    db.commit()
+    db.refresh(medical_entry)
+
+    return {
+        "message": "Medical record added successfully",
+        "id": medical_entry.id
+    }
+
+
+@app.get("/my-prescriptions")
+def get_my_prescriptions(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all prescriptions for the current student"""
+    prescriptions = db.query(models.Prescription).filter(
+        models.Prescription.patient_id == current_user.id
+    ).order_by(models.Prescription.created_at.desc()).all()
+
+    result = []
+    for presc in prescriptions:
+        doctor = db.query(models.Doctor).filter(models.Doctor.id == presc.doctor_id).first()
+        result.append({
+            "id": presc.id,
+            "medication": presc.medication,
+            "dosage": presc.dosage,
+            "frequency": presc.frequency,
+            "duration": presc.duration,
+            "instructions": presc.instructions,
+            "status": presc.status,
+            "doctor_name": doctor.name if doctor else "Unknown",
+            "created_at": presc.created_at.isoformat() if presc.created_at else None
+        })
+
+    return result
+
+
+@app.get("/my-referrals")
+def get_my_referrals(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all referrals for the current student"""
+    referrals = db.query(models.Referral).filter(
+        models.Referral.patient_id == current_user.id
+    ).order_by(models.Referral.created_at.desc()).all()
+
+    result = []
+    for ref in referrals:
+        doctor = db.query(models.Doctor).filter(models.Doctor.id == ref.doctor_id).first()
+        result.append({
+            "id": ref.id,
+            "specialist_type": ref.specialist_type,
+            "reason": ref.reason,
+            "priority": ref.priority,
+            "notes": ref.notes,
+            "status": ref.status,
+            "doctor_name": doctor.name if doctor else "Unknown",
+            "created_at": ref.created_at.isoformat() if ref.created_at else None
+        })
+
+    return result
 
 
 # ---------------------------------------------------------

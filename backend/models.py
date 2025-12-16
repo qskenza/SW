@@ -112,6 +112,7 @@ class Doctor(Base):
     user = orm_relationship("User", back_populates="doctor_profile")
     appointments = orm_relationship("Appointment", back_populates="doctor")
     availability_slots = orm_relationship("DoctorAvailability", back_populates="doctor", cascade="all, delete-orphan")
+    professional_experiences = orm_relationship("ProfessionalExperience", back_populates="doctor", cascade="all, delete-orphan")
 
 
 class Nurse(Base):
@@ -131,6 +132,25 @@ class Nurse(Base):
 
     # Relationships
     user = orm_relationship("User", back_populates="nurse_profile")
+
+
+class ProfessionalExperience(Base):
+    """Doctor's professional experience and work history"""
+    __tablename__ = "professional_experience"
+
+    id = Column(Integer, primary_key=True, index=True)
+    doctor_id = Column(Integer, ForeignKey("doctors.id"), nullable=False)
+    position = Column(String(200), nullable=False)  # e.g., "Senior Cardiologist"
+    institution = Column(String(200), nullable=False)  # e.g., "Johns Hopkins Hospital"
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=True)  # NULL if current position
+    description = Column(Text)  # Detailed description of responsibilities
+    is_current = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    doctor = orm_relationship("Doctor", back_populates="professional_experiences")
 
 
 class DoctorAvailability(Base):
@@ -174,7 +194,7 @@ class Appointment(Base):
 
 class EmergencyRequest(Base):
     __tablename__ = "emergency_requests"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     type = Column(String(50))
@@ -186,6 +206,47 @@ class EmergencyRequest(Base):
     priority = Column(String(20), default="high")
     created_at = Column(DateTime, default=datetime.utcnow)
     resolved_at = Column(DateTime)
-    
+
     # Relationships
     user = orm_relationship("User", back_populates="emergency_requests")
+
+
+class Prescription(Base):
+    """Prescriptions issued by doctors to patients"""
+    __tablename__ = "prescriptions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    doctor_id = Column(Integer, ForeignKey("doctors.id"), nullable=False)
+    medication = Column(String(200), nullable=False)
+    dosage = Column(String(100), nullable=False)
+    frequency = Column(String(100), nullable=False)
+    duration = Column(String(100), nullable=False)
+    instructions = Column(Text)
+    status = Column(String(20), default="active")  # active, completed, cancelled
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    patient = orm_relationship("User", foreign_keys=[patient_id])
+    doctor = orm_relationship("Doctor")
+
+
+class Referral(Base):
+    """Referrals to specialists created by doctors"""
+    __tablename__ = "referrals"
+
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    doctor_id = Column(Integer, ForeignKey("doctors.id"), nullable=False)
+    specialist_type = Column(String(100), nullable=False)
+    reason = Column(Text, nullable=False)
+    priority = Column(String(20), default="routine")  # routine, urgent, emergency
+    notes = Column(Text)
+    status = Column(String(20), default="pending")  # pending, scheduled, completed
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    patient = orm_relationship("User", foreign_keys=[patient_id])
+    doctor = orm_relationship("Doctor")

@@ -972,7 +972,7 @@
                 // Select the first doctor by default
                 const firstDoctor = doctorsArray[0];
                 selectedDoctorId = firstDoctor.id;
-                updateDoctorProfile(firstDoctor);
+                await updateDoctorProfile(firstDoctor);
             }
             updateSummary();
             initializeStarRating();
@@ -1053,13 +1053,13 @@
                 `;
 
                 // Add click event to select doctor
-                doctorCard.addEventListener('click', function() {
+                doctorCard.addEventListener('click', async function() {
                     document.querySelectorAll('.doctor-card').forEach(card => {
                         card.classList.remove('selected');
                     });
                     this.classList.add('selected');
                     selectedDoctorId = doctor.id;
-                    updateDoctorProfile(doctor);
+                    await updateDoctorProfile(doctor);
                     updateTimeSlots();
                 });
 
@@ -1074,7 +1074,7 @@
         }
 
         // New function to view doctor profile by ID
-        function viewDoctorProfileById(doctorId) {
+        async function viewDoctorProfileById(doctorId) {
             const doctor = doctorsArray.find(d => d.id === doctorId);
             if (doctor) {
                 // Select the doctor card
@@ -1084,7 +1084,7 @@
                 document.querySelector(`.doctor-card[data-doctor-id="${doctorId}"]`).classList.add('selected');
 
                 selectedDoctorId = doctorId;
-                updateDoctorProfile(doctor);
+                await updateDoctorProfile(doctor);
 
                 // Scroll to profile
                 document.getElementById('doctorProfile').scrollIntoView({
@@ -1323,27 +1323,27 @@
         }
 
         // Doctor Selection Functions
-        function viewDoctorProfile(doctorId) {
+        async function viewDoctorProfile(doctorId) {
             // Select the doctor card
             document.querySelectorAll('.doctor-card').forEach(card => {
                 card.classList.remove('selected');
             });
             document.querySelector(`.doctor-card[data-doctor="${doctorId}"]`).classList.add('selected');
-            
+
             // Update doctor profile
-            updateDoctorProfile(doctorId);
-            
+            await updateDoctorProfile(doctorId);
+
             // Scroll to profile
-            document.getElementById('doctorProfile').scrollIntoView({ 
+            document.getElementById('doctorProfile').scrollIntoView({
                 behavior: 'smooth',
                 block: 'start'
             });
-            
+
             // Highlight profile
             highlightDoctorProfile();
         }
 
-        function updateDoctorProfile(doctor) {
+        async function updateDoctorProfile(doctor) {
             // Handle both old format (string key) and new format (doctor object)
             if (typeof doctor === 'string') {
                 doctor = doctors[doctor];
@@ -1355,8 +1355,46 @@
             const avatar = doctor.avatar || doctor.name.substring(0, 2).toUpperCase();
             const color = doctor.color || getRandomColor();
             const description = doctor.description || `${doctor.name} is a dedicated ${doctor.specialty} with extensive experience in providing quality healthcare.`;
-            const experience = doctor.experience || `Professional healthcare provider specializing in ${doctor.specialty}.`;
             const rating = doctor.rating ? (typeof doctor.rating === 'string' ? doctor.rating : `★ ${doctor.rating.toFixed(1)} (${doctor.reviews} reviews)`) : '★ New';
+
+            // Fetch professional experience
+            let experienceHTML = '<p style="color: #999;">Loading professional experience...</p>';
+
+            try {
+                const response = await fetch(`${API_URL}/doctors/${doctor.id}/professional-experience`);
+                if (response.ok) {
+                    const experiences = await response.json();
+                    if (experiences.length > 0) {
+                        experienceHTML = experiences.map(exp => {
+                            const startDate = new Date(exp.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+                            const endDate = exp.end_date ? new Date(exp.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : 'Present';
+                            const currentBadge = exp.is_current ? '<span style="background: #4caf50; color: white; padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.8rem; margin-left: 0.5rem;">Current</span>' : '';
+
+                            return `
+                                <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8fff8; border-radius: 8px; border-left: 3px solid #4caf50;">
+                                    <div style="font-weight: 600; color: #2e7d32; font-size: 1.05rem; margin-bottom: 0.3rem;">
+                                        ${exp.position} ${currentBadge}
+                                    </div>
+                                    <div style="color: #666; font-weight: 500; margin-bottom: 0.3rem;">
+                                        ${exp.institution}
+                                    </div>
+                                    <div style="color: #999; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                        ${startDate} - ${endDate}
+                                    </div>
+                                    ${exp.description ? `<div style="color: #555; font-size: 0.95rem; line-height: 1.4;">${exp.description}</div>` : ''}
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        experienceHTML = `<p style="color: #999;">Professional healthcare provider specializing in ${doctor.specialty}.</p>`;
+                    }
+                } else {
+                    experienceHTML = `<p style="color: #999;">Professional healthcare provider specializing in ${doctor.specialty}.</p>`;
+                }
+            } catch (error) {
+                console.error('Error loading professional experience:', error);
+                experienceHTML = `<p style="color: #999;">Professional healthcare provider specializing in ${doctor.specialty}.</p>`;
+            }
 
             const profileHTML = `
                 <div class="profile-header">
@@ -1372,7 +1410,7 @@
 
                 <div class="experience-section">
                     <h4>Professional Experience</h4>
-                    <p>${experience}</p>
+                    ${experienceHTML}
                 </div>
             `;
 
