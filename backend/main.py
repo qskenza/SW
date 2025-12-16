@@ -88,8 +88,8 @@ class UserRegister(BaseModel):
     username: str
     password: str
     full_name: str
-    student_id: str  # For students: numeric ID, for doctors: license number or generated
-    role: str = "student"  # student or doctor
+    student_id: str  # For students: numeric ID, for doctors/nurses: generated
+    role: str = "student"  # student, doctor, or nurse
     # Student fields
     department: Optional[str] = None
     major: Optional[str] = None
@@ -97,6 +97,10 @@ class UserRegister(BaseModel):
     # Doctor fields
     license_number: Optional[str] = None
     specialization: Optional[str] = None
+    # Nurse fields
+    nursing_license: Optional[str] = None
+    nurse_department: Optional[str] = None
+    shift: Optional[str] = None
     # Common fields
     phone: Optional[str] = None
     date_of_birth: Optional[str] = None
@@ -236,8 +240,17 @@ def register(user: UserRegister, db: Session = Depends(get_db)):
         ).first()
         if existing_doctor:
             raise HTTPException(400, "License number already registered")
+    elif user.role == "nurse":
+        if not user.nursing_license or not user.nurse_department:
+            raise HTTPException(400, "Nursing license and Department required for nurses")
+        # Check if nursing license already exists
+        existing_nurse = db.query(models.Nurse).filter(
+            models.Nurse.license_number == user.nursing_license
+        ).first()
+        if existing_nurse:
+            raise HTTPException(400, "Nursing license number already registered")
     else:
-        raise HTTPException(400, "Invalid role. Must be 'student' or 'doctor'")
+        raise HTTPException(400, "Invalid role. Must be 'student', 'doctor', or 'nurse'")
 
     # Generate AUI email
     email = generate_aui_email(user.full_name)
@@ -250,12 +263,17 @@ def register(user: UserRegister, db: Session = Depends(get_db)):
         email = f"{name_parts[0]}{counter}@{name_parts[1]}"
         counter += 1
 
-    # Generate student_id for doctors if not provided properly
+    # Generate student_id for doctors and nurses if not provided properly
     if user.role == "doctor":
         # Use a numeric ID for doctors based on timestamp
         import time
         doctor_id = str(int(time.time()))[-7:]  # Last 7 digits of timestamp
         student_id = f"D{doctor_id}"
+    elif user.role == "nurse":
+        # Use a numeric ID for nurses based on timestamp
+        import time
+        nurse_id = str(int(time.time()))[-7:]  # Last 7 digits of timestamp
+        student_id = f"N{nurse_id}"
     else:
         student_id = user.student_id
 
@@ -268,7 +286,7 @@ def register(user: UserRegister, db: Session = Depends(get_db)):
         student_id=student_id,
         institution="Al Akhawayn University",
         department=user.department if user.role == "student" else None,
-        major=user.major if user.role == "student" else user.specialization,
+        major=user.major if user.role == "student" else (user.specialization if user.role == "doctor" else None),
         academic_year="2025/2026",
         phone=user.phone,
         date_of_birth=datetime.strptime(user.date_of_birth, "%Y-%m-%d").date()
@@ -286,7 +304,7 @@ def register(user: UserRegister, db: Session = Depends(get_db)):
         # Generate avatar initials
         name_parts = user.full_name.split()
         avatar = ''.join([n[0].upper() for n in name_parts[:2]]) if len(name_parts) >= 2 else user.full_name[:2].upper()
-        
+
         doctor = models.Doctor(
             user_id=db_user.id,
             name=user.full_name,
@@ -300,6 +318,25 @@ def register(user: UserRegister, db: Session = Depends(get_db)):
             is_available=True
         )
         db.add(doctor)
+
+    # If nurse, create nurse entry linked to user
+    elif user.role == "nurse":
+        # Generate avatar initials
+        name_parts = user.full_name.split()
+        avatar = ''.join([n[0].upper() for n in name_parts[:2]]) if len(name_parts) >= 2 else user.full_name[:2].upper()
+
+        nurse = models.Nurse(
+            user_id=db_user.id,
+            name=user.full_name,
+            license_number=user.nursing_license,
+            department=user.nurse_department,
+            email=email,
+            phone=user.phone,
+            avatar=avatar,
+            shift=user.shift,
+            is_available=True
+        )
+        db.add(nurse)
 
     db.commit()
     db.refresh(db_user)
@@ -1389,6 +1426,237 @@ def get_doctor_availability_summary(
         "doctor_name": doctor.name,
         "schedule": schedule
     }
+
+
+# ---------------------------------------------------------
+# NURSE DASHBOARD ENDPOINTS
+# ---------------------------------------------------------
+@app.get("/nurse/profile")
+def get_nurse_profile(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get nurse profile information"""
+    if current_user.role != "nurse":
+        raise HTTPException(403, "Access denied. Nurses only.")
+
+    nurse = db.query(models.Nurse).filter(
+        models.Nurse.user_id == current_user.id
+    ).first()
+
+    if not nurse:
+        raise HTTPException(404, "Nurse profile not found")
+
+    return {
+        "id": nurse.id,
+        "name": nurse.name,
+        "email": nurse.email,
+        "phone": nurse.phone,
+        "license_number": nurse.license_number,
+        "department": nurse.department,
+        "shift": nurse.shift,
+        "avatar": nurse.avatar,
+        "is_available": nurse.is_available,
+        "user_id": nurse.user_id
+    }
+
+
+@app.get("/nurse/patients/today")
+def get_nurse_patients_today(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get all patients with appointments today"""
+    if current_user.role != "nurse":
+        raise HTTPException(403, "Access denied. Nurses only.")
+
+    today = datetime.now().date()
+
+    # Get all appointments for today
+    appointments = db.query(models.Appointment).filter(
+        models.Appointment.appointment_date == today,
+        models.Appointment.status.in_(["upcoming", "in_progress"])
+    ).order_by(models.Appointment.appointment_time).all()
+
+    return [
+        {
+            "id": a.id,
+            "patient_name": a.user.full_name if a.user else "Unknown",
+            "patient_id": a.user.student_id if a.user else "N/A",
+            "doctor_name": a.doctor.name if a.doctor else "Unknown",
+            "time": a.appointment_time,
+            "type": a.type,
+            "location": a.location,
+            "status": a.status,
+            "notes": a.notes
+        }
+        for a in appointments
+    ]
+
+
+@app.get("/nurse/patients/all")
+def get_all_patients(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get all registered patients (students)"""
+    if current_user.role != "nurse":
+        raise HTTPException(403, "Access denied. Nurses only.")
+
+    # Get all users with role "student"
+    patients = db.query(models.User).filter(
+        models.User.role == "student",
+        models.User.is_active == True
+    ).order_by(models.User.full_name).all()
+
+    return [
+        {
+            "id": p.id,
+            "full_name": p.full_name,
+            "student_id": p.student_id,
+            "email": p.email,
+            "phone": p.phone,
+            "department": p.department,
+            "major": p.major,
+            "year_level": p.year_level
+        }
+        for p in patients
+    ]
+
+
+@app.get("/nurse/appointments/upcoming")
+def get_upcoming_appointments_nurse(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get all upcoming appointments"""
+    if current_user.role != "nurse":
+        raise HTTPException(403, "Access denied. Nurses only.")
+
+    # Get all upcoming appointments
+    appointments = db.query(models.Appointment).filter(
+        models.Appointment.status == "upcoming",
+        models.Appointment.appointment_date >= datetime.now().date()
+    ).order_by(
+        models.Appointment.appointment_date,
+        models.Appointment.appointment_time
+    ).limit(50).all()
+
+    return [
+        {
+            "id": a.id,
+            "patient_name": a.user.full_name if a.user else "Unknown",
+            "patient_id": a.user.student_id if a.user else "N/A",
+            "doctor_name": a.doctor.name if a.doctor else "Unknown",
+            "date": a.appointment_date.isoformat(),
+            "time": a.appointment_time,
+            "type": a.type,
+            "location": a.location,
+            "status": a.status
+        }
+        for a in appointments
+    ]
+
+
+@app.get("/nurse/emergency-requests")
+def get_emergency_requests(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get all active emergency requests"""
+    if current_user.role != "nurse":
+        raise HTTPException(403, "Access denied. Nurses only.")
+
+    # Get active emergency requests
+    emergency_requests = db.query(models.EmergencyRequest).filter(
+        models.EmergencyRequest.status == "active"
+    ).order_by(
+        models.EmergencyRequest.priority.desc(),
+        models.EmergencyRequest.created_at.desc()
+    ).all()
+
+    return [
+        {
+            "id": e.id,
+            "patient_name": e.user.full_name if e.user else "Unknown",
+            "patient_id": e.user.student_id if e.user else "N/A",
+            "type": e.type,
+            "description": e.description,
+            "location": e.location,
+            "priority": e.priority,
+            "created_at": e.created_at.isoformat(),
+            "status": e.status
+        }
+        for e in emergency_requests
+    ]
+
+
+@app.put("/nurse/emergency-requests/{request_id}/resolve")
+def resolve_emergency_request(
+    request_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Mark an emergency request as resolved"""
+    if current_user.role != "nurse":
+        raise HTTPException(403, "Access denied. Nurses only.")
+
+    emergency_request = db.query(models.EmergencyRequest).filter(
+        models.EmergencyRequest.id == request_id
+    ).first()
+
+    if not emergency_request:
+        raise HTTPException(404, "Emergency request not found")
+
+    emergency_request.status = "resolved"
+    emergency_request.resolved_at = datetime.utcnow()
+
+    db.commit()
+    db.refresh(emergency_request)
+
+    return {"message": "Emergency request resolved successfully"}
+
+
+@app.get("/nurse/stats")
+def get_nurse_stats(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get statistics for nurse dashboard"""
+    if current_user.role != "nurse":
+        raise HTTPException(403, "Access denied. Nurses only.")
+
+    today = datetime.now().date()
+
+    # Count today's appointments
+    today_appointments = db.query(models.Appointment).filter(
+        models.Appointment.appointment_date == today
+    ).count()
+
+    # Count active emergency requests
+    active_emergencies = db.query(models.EmergencyRequest).filter(
+        models.EmergencyRequest.status == "active"
+    ).count()
+
+    # Count total patients
+    total_patients = db.query(models.User).filter(
+        models.User.role == "student",
+        models.User.is_active == True
+    ).count()
+
+    # Count upcoming appointments
+    upcoming_appointments = db.query(models.Appointment).filter(
+        models.Appointment.status == "upcoming",
+        models.Appointment.appointment_date >= today
+    ).count()
+
+    return {
+        "today_appointments": today_appointments,
+        "active_emergencies": active_emergencies,
+        "total_patients": total_patients,
+        "upcoming_appointments": upcoming_appointments
+    }
+
 
 # ---------------------------------------------------------
 # CHATBOT ENDPOINTS

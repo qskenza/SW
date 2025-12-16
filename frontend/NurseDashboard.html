@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareConnect - Nurse Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e8f3ff 100%);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .main-header {
+            background: white;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1565c0;
+        }
+
+        .nurse-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nurse-avatar {
+            width: 45px;
+            height: 45px;
+            background: #1565c0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .nurse-details {
+            text-align: right;
+        }
+
+        .nurse-name {
+            font-weight: 600;
+            color: #1565c0;
+        }
+
+        .nurse-role {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #b71c1c;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+            color: white;
+            padding: 2rem;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(21,101,192,0.3);
+        }
+
+        .welcome-section h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            opacity: 0.9;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            background: white;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+            padding: 1.5rem 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #1565c0;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .stat-divider {
+            width: 1px;
+            background: #e8f3ff;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .card h2 {
+            color: #1565c0;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e8f3ff;
+        }
+
+        /* Emergency Requests */
+        .emergency-card {
+            grid-column: 1 / -1;
+        }
+
+        .emergency-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .emergency-item {
+            background: #fff3e0;
+            border-left: 4px solid #ff6f00;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .emergency-item.high-priority {
+            background: #ffebee;
+            border-left-color: #d32f2f;
+        }
+
+        .emergency-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .emergency-patient {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .emergency-time {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .emergency-description {
+            color: #555;
+            margin: 0.5rem 0;
+        }
+
+        .emergency-location {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .resolve-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: background 0.3s;
+        }
+
+        .resolve-btn:hover {
+            background: #388e3c;
+        }
+
+        /* Appointments */
+        .appointment-item {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid #1565c0;
+        }
+
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .patient-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .appointment-time {
+            color: #1565c0;
+            font-weight: 600;
+        }
+
+        .appointment-details {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Patients Table */
+        .patients-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .patients-table th,
+        .patients-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e8f3ff;
+        }
+
+        .patients-table th {
+            background: #e8f3ff;
+            color: #1565c0;
+            font-weight: 600;
+        }
+
+        .patients-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        /* Error Message */
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid #c62828;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #e8f3ff;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #1565c0;
+            border-bottom-color: #1565c0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-warning {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .badge-danger {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge-info {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">CareConnect</div>
+            <div class="nurse-info">
+                <div class="nurse-avatar" id="nurseAvatar">N</div>
+                <div class="nurse-details">
+                    <div class="nurse-name" id="nurseName">Loading...</div>
+                    <div class="nurse-role" id="nurseDepartment">Registered Nurse</div>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <h1 id="welcomeMessage">Welcome back!</h1>
+        <p>Here's your overview for today.</p>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar" id="statsBar">
+        <div class="stat-item">
+            <div class="stat-number" id="todayAppointments">-</div>
+            <div class="stat-label">Today's Appointments</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" id="activeEmergencies">-</div>
+            <div class="stat-label">Active Emergencies</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" id="totalPatients">-</div>
+            <div class="stat-label">Total Patients</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" id="upcomingAppointments">-</div>
+            <div class="stat-label">Upcoming Appointments</div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Emergency Requests -->
+        <div class="card emergency-card">
+            <h2>🚨 Active Emergency Requests</h2>
+            <div id="emergencyRequests" class="emergency-list">
+                <div class="loading">Loading emergency requests...</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Today's Appointments -->
+            <div class="card">
+                <h2>📅 Today's Appointments</h2>
+                <div id="todayAppointmentsList">
+                    <div class="loading">Loading appointments...</div>
+                </div>
+            </div>
+
+            <!-- Upcoming Appointments -->
+            <div class="card">
+                <h2>📆 Upcoming Appointments</h2>
+                <div id="upcomingAppointmentsList">
+                    <div class="loading">Loading appointments...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- All Patients -->
+        <div class="card" style="margin-top: 2rem;">
+            <h2>👥 All Registered Patients</h2>
+            <div id="patientsList">
+                <div class="loading">Loading patients...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+
+        // Check authentication
+        function checkAuth() {
+            const token = sessionStorage.getItem('token');
+            const role = sessionStorage.getItem('role');
+
+            if (!token) {
+                window.location.href = 'Login.html';
+                return null;
+            }
+
+            if (role !== 'nurse') {
+                alert('Access denied. This page is for nurses only.');
+                sessionStorage.clear();
+                window.location.href = 'Login.html';
+                return null;
+            }
+
+            return token;
+        }
+
+        // Logout function
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'Login.html';
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        // Format time
+        function formatTime(timeString) {
+            return timeString || 'Not specified';
+        }
+
+        // Get time ago
+        function getTimeAgo(dateString) {
+            const now = new Date();
+            const date = new Date(dateString);
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins} min ago`;
+
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+
+            const diffDays = Math.floor(diffHours / 24);
+            return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+        }
+
+        // Load nurse profile
+        async function loadNurseProfile() {
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_URL}/nurse/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const nurse = await response.json();
+                    document.getElementById('nurseName').textContent = nurse.name;
+                    document.getElementById('nurseDepartment').textContent = nurse.department || 'Registered Nurse';
+                    document.getElementById('nurseAvatar').textContent = nurse.avatar || 'N';
+                    document.getElementById('welcomeMessage').textContent = `Welcome back, ${nurse.name.split(' ')[0]}!`;
+                }
+            } catch (error) {
+                console.error('Error loading nurse profile:', error);
+            }
+        }
+
+        // Load statistics
+        async function loadStats() {
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_URL}/nurse/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const stats = await response.json();
+                    document.getElementById('todayAppointments').textContent = stats.today_appointments || 0;
+                    document.getElementById('activeEmergencies').textContent = stats.active_emergencies || 0;
+                    document.getElementById('totalPatients').textContent = stats.total_patients || 0;
+                    document.getElementById('upcomingAppointments').textContent = stats.upcoming_appointments || 0;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Load emergency requests
+        async function loadEmergencyRequests() {
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_URL}/nurse/emergency-requests`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const container = document.getElementById('emergencyRequests');
+
+                if (response.ok) {
+                    const emergencies = await response.json();
+
+                    if (emergencies.length === 0) {
+                        container.innerHTML = '<div class="no-data">No active emergency requests</div>';
+                        return;
+                    }
+
+                    container.innerHTML = emergencies.map(emergency => `
+                        <div class="emergency-item ${emergency.priority === 'high' ? 'high-priority' : ''}">
+                            <div class="emergency-header">
+                                <span class="emergency-patient">${emergency.patient_name} (${emergency.patient_id})</span>
+                                <span class="emergency-time">${getTimeAgo(emergency.created_at)}</span>
+                            </div>
+                            <div class="emergency-description"><strong>${emergency.type || 'Emergency'}</strong>: ${emergency.description}</div>
+                            <div class="emergency-location">📍 ${emergency.location || 'Location not specified'}</div>
+                            <button class="resolve-btn" onclick="resolveEmergency(${emergency.id})">Mark as Resolved</button>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="error-message">Failed to load emergency requests</div>';
+                }
+            } catch (error) {
+                console.error('Error loading emergency requests:', error);
+                document.getElementById('emergencyRequests').innerHTML = '<div class="error-message">Error loading emergency requests</div>';
+            }
+        }
+
+        // Resolve emergency
+        async function resolveEmergency(requestId) {
+            const token = checkAuth();
+            if (!token) return;
+
+            if (!confirm('Are you sure you want to mark this emergency as resolved?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/nurse/emergency-requests/${requestId}/resolve`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Emergency request marked as resolved');
+                    loadEmergencyRequests();
+                    loadStats();
+                } else {
+                    alert('Failed to resolve emergency request');
+                }
+            } catch (error) {
+                console.error('Error resolving emergency:', error);
+                alert('Error resolving emergency request');
+            }
+        }
+
+        // Load today's appointments
+        async function loadTodayAppointments() {
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_URL}/nurse/patients/today`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const container = document.getElementById('todayAppointmentsList');
+
+                if (response.ok) {
+                    const appointments = await response.json();
+
+                    if (appointments.length === 0) {
+                        container.innerHTML = '<div class="no-data">No appointments today</div>';
+                        return;
+                    }
+
+                    container.innerHTML = appointments.map(apt => `
+                        <div class="appointment-item">
+                            <div class="appointment-header">
+                                <span class="patient-name">${apt.patient_name}</span>
+                                <span class="appointment-time">${formatTime(apt.time)}</span>
+                            </div>
+                            <div class="appointment-details">
+                                <div>Doctor: ${apt.doctor_name}</div>
+                                <div>Type: ${apt.type}</div>
+                                ${apt.location ? `<div>Location: ${apt.location}</div>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="error-message">Failed to load appointments</div>';
+                }
+            } catch (error) {
+                console.error('Error loading today\'s appointments:', error);
+                document.getElementById('todayAppointmentsList').innerHTML = '<div class="error-message">Error loading appointments</div>';
+            }
+        }
+
+        // Load upcoming appointments
+        async function loadUpcomingAppointments() {
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_URL}/nurse/appointments/upcoming`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const container = document.getElementById('upcomingAppointmentsList');
+
+                if (response.ok) {
+                    const appointments = await response.json();
+
+                    // Show only next 5 upcoming
+                    const upcomingOnly = appointments.slice(0, 5);
+
+                    if (upcomingOnly.length === 0) {
+                        container.innerHTML = '<div class="no-data">No upcoming appointments</div>';
+                        return;
+                    }
+
+                    container.innerHTML = upcomingOnly.map(apt => `
+                        <div class="appointment-item">
+                            <div class="appointment-header">
+                                <span class="patient-name">${apt.patient_name}</span>
+                                <span class="appointment-time">${formatTime(apt.time)}</span>
+                            </div>
+                            <div class="appointment-details">
+                                <div>${formatDate(apt.date)}</div>
+                                <div>Doctor: ${apt.doctor_name}</div>
+                                <div>Type: ${apt.type}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="error-message">Failed to load appointments</div>';
+                }
+            } catch (error) {
+                console.error('Error loading upcoming appointments:', error);
+                document.getElementById('upcomingAppointmentsList').innerHTML = '<div class="error-message">Error loading appointments</div>';
+            }
+        }
+
+        // Load all patients
+        async function loadAllPatients() {
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_URL}/nurse/patients/all`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const container = document.getElementById('patientsList');
+
+                if (response.ok) {
+                    const patients = await response.json();
+
+                    if (patients.length === 0) {
+                        container.innerHTML = '<div class="no-data">No registered patients</div>';
+                        return;
+                    }
+
+                    container.innerHTML = `
+                        <table class="patients-table">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Department</th>
+                                    <th>Major</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${patients.map(patient => `
+                                    <tr>
+                                        <td>${patient.student_id}</td>
+                                        <td>${patient.full_name}</td>
+                                        <td>${patient.email}</td>
+                                        <td>${patient.phone || 'N/A'}</td>
+                                        <td>${patient.department || 'N/A'}</td>
+                                        <td>${patient.major || 'N/A'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    container.innerHTML = '<div class="error-message">Failed to load patients</div>';
+                }
+            } catch (error) {
+                console.error('Error loading patients:', error);
+                document.getElementById('patientsList').innerHTML = '<div class="error-message">Error loading patients</div>';
+            }
+        }
+
+        // Initialize dashboard
+        async function initDashboard() {
+            if (!checkAuth()) return;
+
+            // Load all data
+            await loadNurseProfile();
+            await loadStats();
+            await loadEmergencyRequests();
+            await loadTodayAppointments();
+            await loadUpcomingAppointments();
+            await loadAllPatients();
+
+            // Auto-refresh emergency requests and appointments every 30 seconds
+            setInterval(() => {
+                loadEmergencyRequests();
+                loadTodayAppointments();
+                loadStats();
+            }, 30000);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>
