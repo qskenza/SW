@@ -6,7 +6,7 @@ from typing import Optional, List
 from datetime import datetime, timedelta, date
 import jwt
 
-# Support all PyJWT versions - create our own exception classes if needed
+# Support all PyJWT versions 
 try:
     from jwt import ExpiredSignatureError
 except (ImportError, AttributeError):
