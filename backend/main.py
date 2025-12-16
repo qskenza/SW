@@ -5,7 +5,11 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, timedelta, date
 import jwt
-from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+# Support both old and new PyJWT versions
+try:
+    from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+except ImportError:
+    from jwt.exceptions import DecodeError as InvalidTokenError, ExpiredSignatureError
 import bcrypt
 import os
 from dotenv import load_dotenv
